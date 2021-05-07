@@ -79,10 +79,11 @@ private[indexer] final class RecoveringIndexer(
             logger.info("Restarting Indexer Server")
             val newSubscription = subscribe()
             if (subscription.compareAndSet(oldSubscription, newSubscription)) {
-              resubscribeOnFailure(newSubscription)
               newSubscription.asFuture.map { _ =>
                 logger.info("Restarted Indexer Server")
               }
+              resubscribeOnFailure(newSubscription)
+              Future.unit
             } else { // we must have stopped the server during the restart
               logger.info("Indexer Server was stopped; cancelling the restart")
               newSubscription.release().flatMap { _ =>
