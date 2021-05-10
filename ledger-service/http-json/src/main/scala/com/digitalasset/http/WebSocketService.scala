@@ -8,7 +8,7 @@ import akka.http.scaladsl.model.ws.{BinaryMessage, Message, TextMessage}
 import akka.stream.scaladsl.{Flow, Sink, Source}
 import akka.stream.Materializer
 import com.daml.http.EndpointsCompanion._
-import com.daml.http.domain.{JwtPayload, SearchForeverRequest}
+import com.daml.http.domain.{JwtPayload, SearchForeverRequest, StartingOffset}
 import com.daml.http.json.{DomainJsonDecoder, JsonProtocol, SprayJson}
 import JsonProtocol.LfValueDatabaseCodec
 import com.daml.http.LedgerClientJwt.Terminates
@@ -51,7 +51,7 @@ object WebSocketService {
   private final case class StreamPredicate[+Positive](
       resolved: Set[domain.TemplateId.RequiredPkg],
       unresolved: Set[domain.TemplateId.OptionalPkg],
-      fn: domain.ActiveContract[LfV] => Option[Positive],
+      fn: (domain.ActiveContract[LfV], Option[domain.Offset]) => Option[Positive],
       dbQuery: (OneAnd[Set, domain.Party], dbbackend.ContractDao) => ConnectionIO[
         _ <: Vector[(domain.ActiveContract[JsValue], Positive)]
       ],
@@ -171,6 +171,9 @@ object WebSocketService {
     ): StreamPredicate[Positive]
 
     def renderCreatedMetadata(p: Positive): Map[String, JsValue]
+
+    def requestOffset(request: A): Option[domain.StartingOffset]
+
   }
 
   implicit val SearchForeverRequestWithStreamQuery: StreamQueryReader[domain.SearchForeverRequest] =
@@ -198,6 +201,8 @@ object WebSocketService {
         import scalaz.syntax.foldable._
         import util.Collections._
 
+        val indexedOffsets = request.queries.map(_.offset).toVector
+
         val (resolved, unresolved, q) = request.queries.zipWithIndex
           .foldMap { case (gacr, ix) =>
             val (resolved, unresolved) =
@@ -205,10 +210,18 @@ object WebSocketService {
             val q: CompiledQueries = prepareFilters(resolved, gacr.query, lookupType)
             (resolved, unresolved, q transform ((_, p) => NonEmptyList((p, ix))))
           }
-        def fn(a: domain.ActiveContract[LfV]): Option[Positive] =
+        def fn(a: domain.ActiveContract[LfV], o: Option[domain.Offset]): Option[Positive] = {
           q.get(a.templateId).flatMap { preds =>
-            preds.collect(Function unlift { case ((_, p), ix) => p(a.payload) option ix })
+            preds.collect(Function unlift { case ((_, p), ix) =>
+              val matchesPredicate = p(a.payload)
+              val matchesOffset = indexedOffsets(ix).flatMap(q => o.map((_, q))).fold(true) {
+                case (o, q) => domain.Offset.ordering.greaterThan(o, q)
+              }
+              (matchesPredicate && matchesOffset).option(ix)
+            })
           }
+        }
+
         def dbQueriesPlan(implicit
             sjd: dbbackend.SupportedJdbcDriver
         ): (Seq[(domain.TemplateId.RequiredPkg, doobie.Fragment)], Map[Int, Int]) = {
@@ -250,6 +263,18 @@ object WebSocketService {
           import spray.json._, JsonProtocol._
           "matchedQueries" -> p.toJson
         }
+
+      override def requestOffset(request: SearchForeverRequest): Option[StartingOffset] =
+        request.queries.toList.view
+          .map(_.offset)
+          .fold(none[domain.Offset]) {
+            case (Some(o1), Some(o2)) => Some(domain.Offset.ordering.min(o1, o2))
+            case (o1, None) if o1.isDefined => o1
+            case (None, o2) if o2.isDefined => o2
+            case _ => None
+          }
+          .map(StartingOffset.apply)
+
     }
 
   implicit val EnrichedContractKeyWithStreamQuery
@@ -312,7 +337,7 @@ object WebSocketService {
               case None => acc.updated(el._1, HashSet(el._2))
             }
         )
-      val fn: domain.ActiveContract[LfV] => Option[Positive] = { a =>
+      val fn: (domain.ActiveContract[LfV], Option[domain.Offset]) => Option[Positive] = { (a, _) =>
         a.key match {
           case None => None
           case Some(k) => if (q.getOrElse(a.templateId, HashSet()).contains(k)) Some(()) else None
@@ -339,6 +364,11 @@ object WebSocketService {
     }
 
     override def renderCreatedMetadata(p: Unit) = Map.empty
+
+    override def requestOffset(
+        request: NonEmptyList[domain.ContractKeyStreamRequest[Cid, LfV]]
+    ): Option[StartingOffset] = None
+
   }
 
   private[this] def keyEquality(k: LfV)(implicit
@@ -481,6 +511,16 @@ class WebSocketService(
     val StreamPredicate(resolved, unresolved, fn, dbQuery) =
       Q.predicate(request, resolveTemplateId, lookupType)
 
+    val requestOffset = Q.requestOffset(request)
+
+    val startingOffset =
+      (offPrefix, requestOffset) match {
+        case (Some(a), Some(b)) => Some(domain.StartingOffset.ordering.min(a, b))
+        case (a, None) if a.isDefined => a
+        case (None, b) if b.isDefined => b
+        case _ => None
+      }
+
     if (resolved.nonEmpty) {
       def prefilter: Future[
         (
@@ -492,7 +532,7 @@ class WebSocketService(
         )
       ] =
         contractsService.daoAndFetch
-          .filter(_ => offPrefix.isEmpty)
+          .filter(_ => startingOffset.isEmpty)
           .cata(
             { case (dao, fetch) =>
               val tx = for {
@@ -505,7 +545,7 @@ class WebSocketService(
               )
               dao.transact(tx).unsafeToFuture()
             },
-            Future.successful((Source.empty, offPrefix)),
+            Future.successful((Source.empty, startingOffset)),
           )
 
       Source
@@ -605,7 +645,7 @@ class WebSocketService(
     TextMessage(jsVal.compactPrint)
 
   private def convertFilterContracts[Pos](
-      fn: domain.ActiveContract[LfV] => Option[Pos]
+      fn: (domain.ActiveContract[LfV], Option[domain.Offset]) => Option[Pos]
   ): Flow[ContractStreamStep.LAV1, StepAndErrors[Pos, JsValue], NotUsed] =
     Flow
       .fromFunction { step: ContractStreamStep.LAV1 =>
@@ -624,7 +664,7 @@ class WebSocketService(
           errors ++ aerrors,
           dstep mapInserts { inserts: Vector[domain.ActiveContract[LfV]] =>
             inserts.flatMap { ac =>
-              fn(ac).map((ac, _)).toList
+              fn(ac, dstep.bookmark.flatMap(_.toOption)).map((ac, _)).toList
             }
           },
         )
