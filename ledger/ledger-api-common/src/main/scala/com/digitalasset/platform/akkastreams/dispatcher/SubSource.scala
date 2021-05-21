@@ -36,7 +36,7 @@ object SubSource {
     override def subSource(
         startExclusive: Index,
         endInclusive: Index,
-    ): Source[(Index, T), NotUsed] = {
+    ): Source[(Index, T), NotUsed] =
       Source
         .unfoldAsync[Index, (Index, T)](readSuccessor(startExclusive)) { index =>
           if (Ordering[Index].gt(index, endInclusive)) Future.successful(None)
@@ -47,7 +47,6 @@ object SubSource {
             }(DirectExecutionContext)
           }
         }
-    }
   }
 
   /** Applicable when the persistence layer supports efficient range queries.

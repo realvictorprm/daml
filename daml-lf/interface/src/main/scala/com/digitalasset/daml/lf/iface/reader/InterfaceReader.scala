@@ -174,11 +174,10 @@ object InterfaceReader {
       name: QualifiedName,
       tyVars: ImmArraySeq[Ast.TypeVarName],
       variant: Ast.DataVariant,
-  ) = {
+  ) =
     for {
       cons <- fieldsOrCons(name, variant.variants)
     } yield name -> iface.InterfaceType.Normal(DefDataType(tyVars, Variant(cons)))
-  }
 
   private[reader] def enum(
       name: QualifiedName,

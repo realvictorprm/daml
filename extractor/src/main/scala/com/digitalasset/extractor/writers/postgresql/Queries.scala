@@ -64,13 +64,12 @@ object Queries {
 
   val checkStateTableExists: Fragment = isTableExists("state")
 
-  def getState(key: String): Fragment = {
+  def getState(key: String): Fragment =
     sql"""
       SELECT value FROM state WHERE key = ${key} LIMIT 1
     """
-  }
 
-  def setState(key: String, value: String): Fragment = {
+  def setState(key: String, value: String): Fragment =
     sql"""
       INSERT INTO
         state (key, value)
@@ -79,30 +78,26 @@ object Queries {
       ON CONFLICT (key) DO UPDATE
         SET value = excluded.value
     """
-  }
 
-  def deleteState(key: String): Fragment = {
+  def deleteState(key: String): Fragment =
     sql"""
         DELETE FROM state WHERE key = ${key} LIMIT 1
     """
-  }
 
   val transactionsIndex: Fragment = createIndex("transaction", NonEmptyList("workflow_id"))
 
-  def insertTransaction(t: TransactionTree): Fragment = {
+  def insertTransaction(t: TransactionTree): Fragment =
     sql"""
        INSERT INTO
          transaction
          (transaction_id, workflow_id, effective_at, ledger_offset)
          VALUES (${t.transactionId}, ${t.workflowId}, ${t.effectiveAt}, ${t.offset})
     """
-  }
 
-  def lastOffset: Fragment = {
+  def lastOffset: Fragment =
     sql"""
        SELECT ledger_offset FROM transaction ORDER BY seq DESC LIMIT 1
     """
-  }
 
   def dropTableIfExists(table: String): Fragment = Fragment.const(s"DROP TABLE IF EXISTS ${table}")
 
@@ -134,7 +129,7 @@ object Queries {
           )
       """
 
-  def insertExercise(event: ExercisedEvent, transactionId: String, isRoot: Boolean): Fragment = {
+  def insertExercise(event: ExercisedEvent, transactionId: String, isRoot: Boolean): Fragment =
     sql"""
         INSERT INTO exercise
         VALUES (
@@ -152,7 +147,6 @@ object Queries {
           ${toJsonString(event.childEventIds)}::jsonb
         )
       """
-  }
 
   object SingleTable {
     val dropContractsTable: Fragment = dropTableIfExists("contract")
@@ -272,15 +266,14 @@ object Queries {
       (base +: valueFragments :+ Fragment.const(")")).suml
     }
 
-    private def toFragmentNullable(valueSum: LedgerValue): Fragment = {
+    private def toFragmentNullable(valueSum: LedgerValue): Fragment =
       valueSum match {
         case V.ValueOptional(None) => Fragment.const("NULL")
         case V.ValueOptional(Some(innerVal)) => toFragment(innerVal)
         case _ => toFragment(valueSum)
       }
-    }
 
-    private def toFragment(valueSum: LedgerValue): Fragment = {
+    private def toFragment(valueSum: LedgerValue): Fragment =
       valueSum match {
         case V.ValueBool(value) =>
           Fragment.const(if (value) "TRUE" else "FALSE")
@@ -314,6 +307,5 @@ object Queries {
         case V.ValueGenMap(entries) =>
           fr0"${toJsonString(entries)}::jsonb"
       }
-    }
   }
 }

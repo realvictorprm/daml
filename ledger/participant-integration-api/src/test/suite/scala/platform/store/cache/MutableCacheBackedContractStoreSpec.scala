@@ -297,9 +297,7 @@ class MutableCacheBackedContractStoreSpec
         _ <- store.lookupActiveContract(Set(bob), cId_2)
         _ <- store.lookupActiveContract(Set(bob), cId_3)
         maxLedgerTime <- store.lookupMaximumLedgerTime(Set(cId_2, cId_3, cId_4))
-      } yield {
-        maxLedgerTime shouldBe Some(t4)
-      }
+      } yield maxLedgerTime shouldBe Some(t4)
     }
 
     "fail if one of the contract ids doesn't have an associated active contract" in {

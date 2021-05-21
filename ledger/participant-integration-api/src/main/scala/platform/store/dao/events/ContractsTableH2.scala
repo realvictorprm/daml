@@ -68,17 +68,15 @@ object ContractsTableH2 extends ContractsTable {
     val divulgedInserts =
       for {
         DivulgedContract(contractId, contractInst) <- info.divulgedContracts.iterator
-      } yield {
-        insertContract(
-          contractId = contractId,
-          templateId = contractInst.template,
-          createArgument = serialized.createArguments(contractId),
-          ledgerEffectiveTime = None,
-          stakeholders = Set.empty,
-          key = None,
-          createArgumentCompression = serialized.createArgumentsCompression,
-        )
-      }
+      } yield insertContract(
+        contractId = contractId,
+        templateId = contractInst.template,
+        createArgument = serialized.createArguments(contractId),
+        ledgerEffectiveTime = None,
+        stakeholders = Set.empty,
+        key = None,
+        createArgumentCompression = serialized.createArgumentsCompression,
+      )
     val inserts = localInserts.toVector ++ divulgedInserts.toVector
     new InsertContractsExecutable(batch(insertContractQuery, inserts))
   }

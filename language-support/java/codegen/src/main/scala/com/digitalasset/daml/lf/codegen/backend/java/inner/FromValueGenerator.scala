@@ -68,7 +68,7 @@ private[inner] object FromValueGenerator extends StrictLogging {
   private def accessors =
     Iterator.from(0).map(i => CodeBlock.of("fields$$.get($L).getValue()", Integer.valueOf(i)))
 
-  def variantCheck(constructorName: String, inputVar: String, outputVar: String): CodeBlock = {
+  def variantCheck(constructorName: String, inputVar: String, outputVar: String): CodeBlock =
     CodeBlock
       .builder()
       .addStatement(
@@ -86,7 +86,6 @@ private[inner] object FromValueGenerator extends StrictLogging {
       )
       .addStatement("$T $L = variant$$.getValue()", classOf[javaapi.data.Value], outputVar)
       .build()
-  }
 
   def generateFieldExtractor(
       fieldType: Type,

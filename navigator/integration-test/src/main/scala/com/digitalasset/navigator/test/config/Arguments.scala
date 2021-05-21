@@ -53,7 +53,7 @@ object Arguments extends LazyLogging {
 
     }
 
-  def parse(arguments: Array[String]): Option[Arguments] = {
+  def parse(arguments: Array[String]): Option[Arguments] =
     argumentParser.parse(arguments, Arguments()) match {
       case None => None
       case Some(args) =>
@@ -63,7 +63,6 @@ object Arguments extends LazyLogging {
           Some(args)
         }
     }
-  }
 
   def showUsage(): Unit =
     argumentParser.displayToOut(argumentParser.usage)

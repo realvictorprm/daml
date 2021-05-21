@@ -16,9 +16,8 @@ object Util {
       value0: Value[ContractId],
       version: TransactionVersion,
   ): Either[String, Value[ContractId]] =
-    try {
-      Right(assertNormalizeValue(value0, version))
-    } catch {
+    try Right(assertNormalizeValue(value0, version))
+    catch {
       case e: IllegalArgumentException => Left(e.getMessage)
     }
 

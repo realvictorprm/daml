@@ -66,7 +66,7 @@ class DatabaseActions extends LazyLogging {
     .transact(xa)
     .unsafeRunSync()
 
-  def schema(): Try[String] = {
+  def schema(): Try[String] =
     Try(
       Queries
         .schema()
@@ -77,7 +77,6 @@ class DatabaseActions extends LazyLogging {
         .flatMap(_.toList)
         .mkString("\n")
     )
-  }
 
   private def exec: PreparedStatementIO[SqlQueryResult] = {
 

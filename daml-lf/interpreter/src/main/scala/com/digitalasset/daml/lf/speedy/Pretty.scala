@@ -214,7 +214,7 @@ private[lf] object Pretty {
         text(s"Tried to allocate a party that already exists: $party")
     })
 
-  private def prettyFailedAuthorization(id: NodeId, failure: FailedAuthorization): String = {
+  private def prettyFailedAuthorization(id: NodeId, failure: FailedAuthorization): String =
     failure match {
       case nc: FailedAuthorization.NoControllers =>
         s"node $id (${nc.templateId}) has no controllers"
@@ -233,7 +233,6 @@ private[lf] object Pretty {
       case mns: FailedAuthorization.MaintainersNotSubsetOfSignatories =>
         s"node $id (${mns.templateId}) has maintainers ${mns.maintainers} which are not a subset of the signatories ${mns.signatories}"
     }
-  }
 
   def prettyValueRef(ref: ValueRef): Doc =
     text(ref.qualifiedName.toString + "@" + ref.packageId)
@@ -356,14 +355,13 @@ private[lf] object Pretty {
     )
   }
 
-  def prettyOptVersion(opt: Option[TransactionVersion]) = {
+  def prettyOptVersion(opt: Option[TransactionVersion]) =
     opt match {
       case Some(v) =>
         text("version:") & str(v.protoValue)
       case None =>
         text("no-version")
     }
-  }
 
   def prettyEventId(n: EventId): Doc =
     text(n.toLedgerString)

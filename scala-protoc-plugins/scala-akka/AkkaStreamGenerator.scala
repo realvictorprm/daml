@@ -25,7 +25,7 @@ object AkkaStreamCompilerPlugin {
 
 class AkkaStreamGenerator(val params: GeneratorParams, files: Seq[FileDescriptor])
     extends DescriptorImplicits(params, files) {
-  def generateServiceFiles(file: FileDescriptor): collection.Seq[CodeGeneratorResponse.File] = {
+  def generateServiceFiles(file: FileDescriptor): collection.Seq[CodeGeneratorResponse.File] =
     file.getServices.asScala.flatMap { service =>
       val p = new AkkaGrpcServicePrinter(service, params)
       p.printService(FunctionalPrinter()).fold[List[CodeGeneratorResponse.File]](Nil) { p =>
@@ -36,7 +36,6 @@ class AkkaStreamGenerator(val params: GeneratorParams, files: Seq[FileDescriptor
         List(b.build)
       }
     }
-  }
 }
 
 object AkkaStreamGenerator extends ProtocCodeGenerator {
@@ -46,7 +45,7 @@ object AkkaStreamGenerator extends ProtocCodeGenerator {
     val request = CodeGeneratorRequest.parseFrom(req, registry)
     handleCodeGeneratorRequest(request).toByteArray
   }
-  def parseParameters(params: String): Either[String, GeneratorParams] = {
+  def parseParameters(params: String): Either[String, GeneratorParams] =
     params
       .split(",")
       .map(_.trim)
@@ -62,7 +61,6 @@ object AkkaStreamGenerator extends ProtocCodeGenerator {
         case (Right(_), p) => Left(s"Unrecognized parameter: '$p'")
         case (x, _) => x
       }
-  }
 
   def handleCodeGeneratorRequest(request: CodeGeneratorRequest): CodeGeneratorResponse = {
     val b = CodeGeneratorResponse.newBuilder

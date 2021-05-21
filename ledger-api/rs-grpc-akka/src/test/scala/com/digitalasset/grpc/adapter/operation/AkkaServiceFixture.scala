@@ -37,7 +37,6 @@ object AkkaServiceFixture {
 
   implicit private val esf: ExecutionSequencerFactory = TestExecutionSequencerFactory.instance
 
-  def getResource(address: Option[SocketAddress]): AkkaStreamGrpcServerResource = {
+  def getResource(address: Option[SocketAddress]): AkkaStreamGrpcServerResource =
     AkkaStreamGrpcServerResource(implicit m => List(new AkkaImplementation()), "server", address)
-  }
 }

@@ -14,13 +14,12 @@ trait CustomMatchers {
   class SqlTimestampMoreOrLessEquals(expected: Timestamp, tolerance: Duration)
       extends Matcher[Timestamp]
       with Matchers {
-    def apply(left: Timestamp) = {
+    def apply(left: Timestamp) =
       MatchResult(
         left.getTime === (expected.getTime +- tolerance.toMillis),
         s"""Timestamp $left was not within ${tolerance} to "$expected"""",
         s"""Timestamp $left was within ${tolerance} to "$expected"""",
       )
-    }
   }
 
   def beWithin5Minutes(expected: Timestamp) = new SqlTimestampMoreOrLessEquals(expected, 5.minutes)

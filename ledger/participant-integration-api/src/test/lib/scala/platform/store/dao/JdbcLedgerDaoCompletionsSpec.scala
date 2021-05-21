@@ -121,9 +121,7 @@ private[dao] trait JdbcLedgerDaoCompletionsSpec extends OptionValues with LoneEl
       response <- ledgerDao.completions
         .getCommandCompletions(from, to, applicationId = "WRONG", parties)
         .runWith(Sink.seq)
-    } yield {
-      response shouldBe Seq.empty
-    }
+    } yield response shouldBe Seq.empty
   }
 
   it should "not return completions if the parties do not match" in {
@@ -182,9 +180,8 @@ private[dao] trait JdbcLedgerDaoCompletionsSpec extends OptionValues with LoneEl
     } yield {
       responses should have length reasons.length.toLong
       val returnedCodes = responses.flatMap(_.completions.map(_.status.get.code))
-      for ((reason, code) <- reasons.zip(returnedCodes)) {
+      for ((reason, code) <- reasons.zip(returnedCodes))
         code shouldBe participantRejectionReasonToErrorCode(reason).value
-      }
       succeed
     }
   }

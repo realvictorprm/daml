@@ -99,7 +99,7 @@ private[codegen] object HierarchicalOutput {
           }
 
           val errorsImportsAndFile =
-            try { (subErrs, -\/(generate())) }
+            try (subErrs, -\/(generate()))
             catch {
               case e: UnsupportedDamlTypeException =>
                 (subErrs :+ s"$errorMsg because: ${e.getLocalizedMessage}", \/-(subFiles))

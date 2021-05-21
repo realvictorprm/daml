@@ -19,9 +19,8 @@ object ProtobufByteStrings {
     protobuf.ByteString.readFrom(inputStream)
   }
 
-  def toSource(a: protobuf.ByteString): Source[akka.util.ByteString, NotUsed] = {
+  def toSource(a: protobuf.ByteString): Source[akka.util.ByteString, NotUsed] =
     Source.fromIterator(() =>
       a.asReadOnlyByteBufferList().iterator.asScala.map(x => akka.util.ByteString(x))
     )
-  }
 }

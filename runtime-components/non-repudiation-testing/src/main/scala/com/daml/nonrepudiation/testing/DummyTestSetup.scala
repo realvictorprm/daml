@@ -34,7 +34,7 @@ object DummyTestSetup {
         .addService(DummyCommandService.bind(executionContext))
         .addService(ProtoReflectionService.newInstance())
 
-    def apply(useNetworkStack: Boolean, serviceExecutionContext: ExecutionContext): Builders = {
+    def apply(useNetworkStack: Boolean, serviceExecutionContext: ExecutionContext): Builders =
       if (useNetworkStack) {
         val participantPort: Int = FreePort.find().value
         val participantAddress: SocketAddress =
@@ -64,7 +64,6 @@ object DummyTestSetup {
           InProcessChannelBuilder.forName(proxyName),
         )
       }
-    }
 
   }
 

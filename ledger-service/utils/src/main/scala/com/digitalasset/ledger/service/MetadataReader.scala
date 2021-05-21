@@ -39,14 +39,12 @@ object MetadataReader {
 
   private def decodePackageStoreFromDar(
       dar: Dar[(Ref.PackageId, DamlLf.ArchivePayload)]
-  ): Error \/ LfMetadata = {
-
+  ): Error \/ LfMetadata =
     dar.all
       .traverse { a =>
         decodeInterfaceFromArchive(a).map(x => a._1 -> x): Error \/ (Ref.PackageId, iface.Interface)
       }
       .map(_.toMap)
-  }
 
   private def decodeInterfaceFromArchive(
       a: (Ref.PackageId, DamlLf.ArchivePayload)

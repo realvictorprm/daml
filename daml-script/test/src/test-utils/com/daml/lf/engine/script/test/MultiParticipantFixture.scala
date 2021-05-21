@@ -42,9 +42,8 @@ trait MultiParticipantFixture
 
   }
 
-  private def readPortfile(f: Path): Port = {
+  private def readPortfile(f: Path): Port =
     Port(Integer.parseInt(Files.readAllLines(f).stream.collect(Collectors.joining("\n"))))
-  }
 
   private val participantId1 = v1.ParticipantId.assertFromString("participant1")
   private val participant1 = ParticipantConfig(

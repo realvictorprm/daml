@@ -150,28 +150,25 @@ trait AbstractTriggerServiceTest
     httpRequestFollow(req)
   }
 
-  def responseBodyToString(resp: HttpResponse): Future[String] = {
+  def responseBodyToString(resp: HttpResponse): Future[String] =
     resp.entity.dataBytes.runFold(ByteString(""))(_ ++ _).map(_.utf8String)
-  }
 
   // Check the response was successful and extract the "result" field.
-  def parseResult(resp: HttpResponse): Future[JsValue] = {
+  def parseResult(resp: HttpResponse): Future[JsValue] =
     for {
       body <- responseBodyToString(resp)
       _ <- assert(resp.status.isSuccess)
       JsObject(fields) = body.parseJson
       Some(result) = fields.get("result")
     } yield result
-  }
 
-  def parseTriggerId(resp: HttpResponse): Future[UUID] = {
+  def parseTriggerId(resp: HttpResponse): Future[UUID] =
     for {
       JsObject(fields) <- parseResult(resp)
       Some(JsString(triggerId)) = fields.get("triggerId")
     } yield UUID.fromString(triggerId)
-  }
 
-  def parseTriggerIds(resp: HttpResponse): Future[Vector[UUID]] = {
+  def parseTriggerIds(resp: HttpResponse): Future[Vector[UUID]] =
     for {
       JsObject(fields) <- parseResult(resp)
       Some(JsArray(ids)) = fields.get("triggerIds")
@@ -180,7 +177,6 @@ trait AbstractTriggerServiceTest
         case _ => fail("""Non-string element of "triggerIds" field""")
       }
     } yield triggerIds
-  }
 
   def getActiveContracts(
       client: LedgerClient,

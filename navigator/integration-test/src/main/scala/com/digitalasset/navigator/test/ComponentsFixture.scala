@@ -41,7 +41,7 @@ class ComponentsFixture(
     content
   }
 
-  def startup(): Try[Unit] = {
+  def startup(): Try[Unit] =
     if (args.startComponents) {
       logger.info("Starting the sandbox and the Navigator")
       for {
@@ -52,14 +52,13 @@ class ComponentsFixture(
           HeadNavigator.runAsync(args.navConfPAth, args.navigatorDir, navigatorPort, sandboxPort)
         )
         _ = killProcs.updateAndGet(s => navigator :: s)
-      } yield { () }
+      } yield ()
     } else {
       Success(())
     }
-  }
 
   private def retry[R](action: => R, maxRetries: Int, delayMillis: Int): Try[R] = {
-    def retry0(count: Int): Try[R] = {
+    def retry0(count: Int): Try[R] =
       Try(action) match {
         case Success(r) => Success(r)
         case Failure(e) =>
@@ -74,7 +73,6 @@ class ComponentsFixture(
             retry0(count + 1)
           }
       }
-    }
 
     retry0(0)
   }
@@ -85,10 +83,10 @@ class ComponentsFixture(
   }
 
   def shutdown(): Unit = {
-    killProcs.getAndUpdate(procs => {
-      procs.foreach(killAction => Try { killAction(()) })
+    killProcs.getAndUpdate { procs =>
+      procs.foreach(killAction => Try(killAction(())))
       List.empty
-    })
+    }
     ()
   }
 }

@@ -170,7 +170,7 @@ class Context(val contextId: Context.ContextId, languageVersion: LanguageVersion
   def interpretScenario(
       pkgId: String,
       name: String,
-  ): Option[(ScenarioLedger, Speedy.Machine, Either[SError, SValue])] = {
+  ): Option[(ScenarioLedger, Speedy.Machine, Either[SError, SValue])] =
     buildMachine(
       Identifier(PackageId.assertFromString(pkgId), QualifiedName.assertFromString(name))
     ).map { machine =>
@@ -181,7 +181,6 @@ class Context(val contextId: Context.ContextId, languageVersion: LanguageVersion
           (ledger, machine, Left(err))
       }
     }
-  }
 
   def interpretScript(
       pkgId: String,
@@ -217,9 +216,8 @@ class Context(val contextId: Context.ContextId, languageVersion: LanguageVersion
       // We copy tracelogs after every submit but on failures we need
       // to copy the tracelog from the partial transaction as well since we
       // don’t reach the end of the submit.
-      for ((msg, optLoc) <- ledgerClient.tracelogIterator) {
+      for ((msg, optLoc) <- ledgerClient.tracelogIterator)
         clientMachine.traceLog.add(msg, optLoc)
-      }
       Success(
         Some((ledgerClient.scenarioRunner.ledger, (clientMachine, ledgerClient.machine), Left(e)))
       )

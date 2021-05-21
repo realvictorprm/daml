@@ -125,13 +125,12 @@ object InMemoryLedgerWriter {
     private def transformStateReader(
         keySerializationStrategy: StateKeySerializationStrategy,
         cache: Cache[DamlStateKey, DamlStateValue],
-    )(stateReader: LedgerStateReader): DamlLedgerStateReader = {
+    )(stateReader: LedgerStateReader): DamlLedgerStateReader =
       CachingStateReader(
         cache,
         ImmutablesOnlyCacheUpdatePolicy,
         SerializingStateReader(keySerializationStrategy)(stateReader),
       )
-    }
   }
 
   private def needStaticTimeModeFor(timeProvider: TimeProvider): Boolean =

@@ -141,21 +141,15 @@ object Envelope {
   private def compress(payload: ByteString): ByteString = {
     val out = ByteString.newOutput
     val gzipOut = new GZIPOutputStream(out)
-    try {
-      gzipOut.write(payload.toByteArray)
-    } finally {
-      gzipOut.close()
-    }
+    try gzipOut.write(payload.toByteArray)
+    finally gzipOut.close()
     out.toByteString
   }
 
   private def decompress(payload: ByteString): ByteString = {
     val gzipIn = new GZIPInputStream(payload.newInput)
-    try {
-      ByteString.readFrom(gzipIn)
-    } finally {
-      gzipIn.close()
-    }
+    try ByteString.readFrom(gzipIn)
+    finally gzipIn.close()
   }
 
   private def parseMessageSafe[T](callParser: () => T): Either[String, T] =

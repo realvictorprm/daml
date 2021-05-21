@@ -11,9 +11,8 @@ class SizeCappedMapTest extends AnyWordSpec with BeforeAndAfterEach with Matcher
 
   private var sut: SizeCappedMap[Long, Long] = _
 
-  override protected def beforeEach(): Unit = {
+  override protected def beforeEach(): Unit =
     sut = new SizeCappedMap[Long, Long](1, 2)
-  }
 
   "ExpiringMap" when {
 

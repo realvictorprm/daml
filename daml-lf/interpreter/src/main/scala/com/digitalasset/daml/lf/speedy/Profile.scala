@@ -67,7 +67,7 @@ object Profile {
   private[speedy] def unmangleLenient(str: String): String = {
     val builder = new StringBuilder(str.length)
     var i = 0
-    while (i < str.length) {
+    while (i < str.length)
       if (str(i) == '$' && i + 1 < str.length) {
         str(i + 1) match {
           case '$' =>
@@ -101,7 +101,6 @@ object Profile {
         builder.append(str(i))
         i += 1
       }
-    }
     builder.toString
   }
 

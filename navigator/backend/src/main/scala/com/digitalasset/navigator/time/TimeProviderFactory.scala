@@ -26,13 +26,13 @@ object TimeProviderFactory {
       case TimeProviderType.Static =>
         ledgerTime.map(t => TimeProviderWithType(t, TimeProviderType.Static))
       case TimeProviderType.Simulated =>
-        ledgerTime.map(lt => {
+        ledgerTime.map { lt =>
           val utc: TimeProvider = TimeProvider.UTC
           val diff = Duration.between(lt.getCurrentTime, utc.getCurrentTime)
           TimeProviderWithType(
             TimeProvider.MappedTimeProvider(utc, i => i minus diff),
             TimeProviderType.Simulated,
           )
-        })
+        }
     }
 }

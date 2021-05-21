@@ -43,7 +43,7 @@ object ParallelIndexerFactory {
       tailingRateLimitPerSecond: Int,
       batchWithinMillis: Long,
       metrics: Metrics,
-  )(implicit loggingContext: LoggingContext): ResourceOwner[Indexer] = {
+  )(implicit loggingContext: LoggingContext): ResourceOwner[Indexer] =
     for {
       inputMapperExecutor <- asyncPool(
         inputMappingParallelism,
@@ -111,7 +111,6 @@ object ParallelIndexerFactory {
 
       toIndexer(subscribe)(mat)
     }
-  }
 
   /** Batch wraps around a T-typed batch, enriching it with processing relevant information.
     *
@@ -257,7 +256,7 @@ object ParallelIndexerFactory {
       new ResourceOwner[IndexFeedHandle] {
         override def acquire()(implicit
             context: ResourceContext
-        ): resources.Resource[ResourceContext, IndexFeedHandle] = {
+        ): resources.Resource[ResourceContext, IndexFeedHandle] =
           Resource {
             ingestionPipeOn(readService).map { pipe =>
               val (killSwitch, completionFuture) = pipe
@@ -272,7 +271,6 @@ object ParallelIndexerFactory {
               ()
             }
           }
-        }
       }
 
   class SubscriptionIndexFeedHandle(

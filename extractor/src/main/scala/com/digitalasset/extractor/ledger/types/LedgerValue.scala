@@ -54,20 +54,18 @@ object LedgerValue {
     }
   }
 
-  private def convertList(apiList: api.value.List) = {
+  private def convertList(apiList: api.value.List) =
     for {
       values <- apiList.elements.toList.traverse(_.convert)
     } yield V.ValueList(FrontStack(values))
-  }
 
-  private def convertVariant(apiVariant: api.value.Variant) = {
+  private def convertVariant(apiVariant: api.value.Variant) =
     for {
       tycon <- apiVariant.variantId traverse convertIdentifier map (_.flatten)
       ctor <- Ref.Name.fromString(apiVariant.constructor).disjunction
       apiValue <- variantValueLens(apiVariant)
       value <- apiValue.convert
     } yield V.ValueVariant(tycon, ctor, value)
-  }
 
   private def convertEnum(apiEnum: api.value.Enum) =
     for {
@@ -75,12 +73,11 @@ object LedgerValue {
       ctor <- Ref.Name.fromString(apiEnum.constructor).disjunction
     } yield V.ValueEnum(tyCon, ctor)
 
-  private def convertRecord(apiRecord: api.value.Record) = {
+  private def convertRecord(apiRecord: api.value.Record) =
     for {
       tycon <- apiRecord.recordId traverse convertIdentifier map (_.flatten)
       fields <- ImmArray(apiRecord.fields).traverse(_.convert)
     } yield V.ValueRecord(tycon, fields)
-  }
 
   private def convertOptional(apiOptional: api.value.Optional) =
     apiOptional.value traverse (_.convert) map (V.ValueOptional(_))

@@ -53,7 +53,7 @@ final class RetryStrategy private (
     if (attempts.exists(_ <= 0)) {
       Future.failed(new ZeroAttemptsException)
     } else {
-      def go(attempt: Int, wait: Duration): Future[A] = {
+      def go(attempt: Int, wait: Duration): Future[A] =
         run(attempt, wait)
           .recoverWith {
             case NonFatal(throwable) if attempts.exists(attempt >= _) =>
@@ -63,7 +63,6 @@ final class RetryStrategy private (
             case NonFatal(throwable) =>
               Future.failed(throwable)
           }
-      }
 
       go(1, clip(firstWaitTime))
     }

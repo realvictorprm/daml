@@ -24,7 +24,7 @@ class IndexedSpec extends AsyncWordSpec with Matchers with Inside with MockitoSu
     "mapFuture over value" in {
       val indexed = Indexed(50, 0L)
       indexed
-        .mapFuture(v => Future { v + 1 })
+        .mapFuture(v => Future(v + 1))
         .map { newIndexed =>
           newIndexed.index should be(0L)
           newIndexed.value should be(51)
@@ -34,7 +34,7 @@ class IndexedSpec extends AsyncWordSpec with Matchers with Inside with MockitoSu
     "fromSeq works" in {
       val seq = Seq(1, 2, 3)
       val indexedSeq = Indexed.fromSeq(seq)
-      indexedSeq should have size (3)
+      indexedSeq should have size 3
       seq.zipWithIndex.foreach { case (x, i) =>
         indexedSeq(i).value should be(x)
         indexedSeq(i).index should be(i)

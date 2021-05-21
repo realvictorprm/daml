@@ -23,12 +23,11 @@ abstract class InsertOrdMapCompanion extends MapFactory[InsertOrdMap] { this: In
 
   protected def canBuildFrom[A, B]: Factory[A, B] = ()
 
-  def from[K, V](it: IterableOnce[(K, V)]): InsertOrdMap[K, V] = {
+  def from[K, V](it: IterableOnce[(K, V)]): InsertOrdMap[K, V] =
     it match {
       case m: InsertOrdMap[K, V] => m
       case _ => (newBuilder[K, V] ++= it).result()
     }
-  }
 
   def newBuilder[K, V]: ReusableBuilder[(K, V), InsertOrdMap[K, V]] =
     new InsertOrdMapBuilder[K, V]
@@ -36,9 +35,8 @@ abstract class InsertOrdMapCompanion extends MapFactory[InsertOrdMap] { this: In
   private final class InsertOrdMapBuilder[K, V]
       extends ReusableBuilder[(K, V), InsertOrdMap[K, V]] {
     var m: InsertOrdMap[K, V] = empty;
-    override def clear(): Unit = {
+    override def clear(): Unit =
       m = empty;
-    }
     override def result(): InsertOrdMap[K, V] = m
     override def addOne(elem: (K, V)): this.type = {
       m += elem

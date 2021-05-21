@@ -96,16 +96,13 @@ object LedgerClient {
   def apply(
       channel: Channel,
       config: LedgerClientConfiguration,
-  )(implicit ec: ExecutionContext, esf: ExecutionSequencerFactory): Future[LedgerClient] = {
+  )(implicit ec: ExecutionContext, esf: ExecutionSequencerFactory): Future[LedgerClient] =
     for {
       ledgerId <- new LedgerIdentityClient(
         stub(LedgerIdentityServiceGrpc.stub(channel), config.token)
       )
         .satisfies(config.ledgerIdRequirement)
-    } yield {
-      new LedgerClient(channel, config, ledgerId)
-    }
-  }
+    } yield new LedgerClient(channel, config, ledgerId)
 
   private[client] def stub[A <: AbstractStub[A]](stub: A, token: Option[String]): A =
     token.fold(stub)(LedgerCallCredentials.authenticatingStub(stub, _))

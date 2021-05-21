@@ -32,9 +32,7 @@ final class GrpcHealthServiceSpec
 
       for {
         response <- service.check(HealthCheckRequest())
-      } yield {
-        response should be(servingResponse)
-      }
+      } yield response should be(servingResponse)
     }
 
     "report SERVING if there is one healthy check" in {
@@ -42,9 +40,7 @@ final class GrpcHealthServiceSpec
 
       for {
         response <- service.check(HealthCheckRequest())
-      } yield {
-        response should be(servingResponse)
-      }
+      } yield response should be(servingResponse)
     }
 
     "report NOT_SERVING if there is one unhealthy check" in {
@@ -52,9 +48,7 @@ final class GrpcHealthServiceSpec
 
       for {
         response <- service.check(HealthCheckRequest())
-      } yield {
-        response should be(notServingResponse)
-      }
+      } yield response should be(notServingResponse)
     }
 
     "report SERVING if all checks are healthy" in {
@@ -68,9 +62,7 @@ final class GrpcHealthServiceSpec
 
       for {
         response <- service.check(HealthCheckRequest())
-      } yield {
-        response should be(servingResponse)
-      }
+      } yield response should be(servingResponse)
     }
 
     "report NOT_SERVING if a single check is unhealthy" in {
@@ -84,9 +76,7 @@ final class GrpcHealthServiceSpec
 
       for {
         response <- service.check(HealthCheckRequest())
-      } yield {
-        response should be(notServingResponse)
-      }
+      } yield response should be(notServingResponse)
     }
 
     "report SERVING when querying a single, healthy component" in {
@@ -94,9 +84,7 @@ final class GrpcHealthServiceSpec
 
       for {
         response <- service.check(HealthCheckRequest("component"))
-      } yield {
-        response should be(servingResponse)
-      }
+      } yield response should be(servingResponse)
     }
 
     "report NOT_SERVING when querying a single, unhealthy component" in {
@@ -104,9 +92,7 @@ final class GrpcHealthServiceSpec
 
       for {
         response <- service.check(HealthCheckRequest("component"))
-      } yield {
-        response should be(notServingResponse)
-      }
+      } yield response should be(notServingResponse)
     }
 
     "report SERVING when querying a healthy component alongside other, unhealthy components" in {
@@ -120,9 +106,7 @@ final class GrpcHealthServiceSpec
 
       for {
         response <- service.check(HealthCheckRequest("component B"))
-      } yield {
-        response should be(servingResponse)
-      }
+      } yield response should be(servingResponse)
     }
 
     "report NOT_SERVING when querying an unhealthy component alongside other, healthy components" in {
@@ -136,9 +120,7 @@ final class GrpcHealthServiceSpec
 
       for {
         response <- service.check(HealthCheckRequest("component A"))
-      } yield {
-        response should be(notServingResponse)
-      }
+      } yield response should be(notServingResponse)
     }
 
     "observe changes in health" in {
@@ -274,13 +256,11 @@ final class GrpcHealthServiceSpec
 
     for {
       throwable <- service.check(HealthCheckRequest("another component")).failed
-    } yield {
-      throwable match {
-        case GrpcException.NOT_FOUND() =>
-          succeed
-        case _ =>
-          fail("Expected a NOT_FOUND error.")
-      }
+    } yield throwable match {
+      case GrpcException.NOT_FOUND() =>
+        succeed
+      case _ =>
+        fail("Expected a NOT_FOUND error.")
     }
   }
 
@@ -293,13 +273,11 @@ final class GrpcHealthServiceSpec
 
     for {
       throwable <- responseObserver.completionFuture.failed
-    } yield {
-      throwable match {
-        case GrpcException.NOT_FOUND() =>
-          succeed
-        case _ =>
-          fail("Expected a NOT_FOUND error.")
-      }
+    } yield throwable match {
+      case GrpcException.NOT_FOUND() =>
+        succeed
+      case _ =>
+        fail("Expected a NOT_FOUND error.")
     }
   }
 }

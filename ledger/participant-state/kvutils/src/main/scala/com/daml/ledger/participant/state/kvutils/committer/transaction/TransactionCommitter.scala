@@ -101,7 +101,7 @@ private[kvutils] class TransactionCommitter(
     def apply(
         commitContext: CommitContext,
         transactionEntry: DamlTransactionEntrySummary,
-    )(implicit loggingContext: LoggingContext): StepResult[DamlTransactionEntrySummary] = {
+    )(implicit loggingContext: LoggingContext): StepResult[DamlTransactionEntrySummary] =
       commitContext.recordTime
         .map { recordTime =>
           val dedupKey = commandDedupKey(transactionEntry.submitterInfo)
@@ -121,7 +121,6 @@ private[kvutils] class TransactionCommitter(
           }
         }
         .getOrElse(StepContinue(transactionEntry))
-    }
   }
 
   // Checks that the submission time of the command is after the
@@ -257,7 +256,7 @@ private[kvutils] class TransactionCommitter(
         commitContext: CommitContext,
         transactionEntry: DamlTransactionEntrySummary,
     )(implicit loggingContext: LoggingContext): StepResult[DamlTransactionEntrySummary] =
-      metrics.daml.kvutils.committer.transaction.interpretTimer.time(() => {
+      metrics.daml.kvutils.committer.transaction.interpretTimer.time { () =>
         // Pull all keys from referenced contracts. We require this for 'fetchByKey' calls
         // which are not evidenced in the transaction itself and hence the contract key state is
         // not included in the inputs.
@@ -270,32 +269,31 @@ private[kvutils] class TransactionCommitter(
                 .stateKeyToContractId(key)
           }
 
-        try {
-          engine
-            .validate(
-              transactionEntry.submitters.toSet,
-              SubmittedTransaction(transactionEntry.transaction),
-              transactionEntry.ledgerEffectiveTime,
-              commitContext.participantId,
-              transactionEntry.submissionTime,
-              transactionEntry.submissionSeed,
-            )
-            .consume(
-              lookupContract(transactionEntry, commitContext),
-              lookupPackage(commitContext),
-              lookupKey(commitContext, knownKeys),
-              // No check for key visibility during validation
-              _ => VisibleByKey.Visible,
-            )
-            .fold(
-              err =>
-                reject[DamlTransactionEntrySummary](
-                  commitContext.recordTime,
-                  buildRejectionLogEntry(transactionEntry, rejectionReasonForValidationError(err)),
-                ),
-              _ => StepContinue[DamlTransactionEntrySummary](transactionEntry),
-            )
-        } catch {
+        try engine
+          .validate(
+            transactionEntry.submitters.toSet,
+            SubmittedTransaction(transactionEntry.transaction),
+            transactionEntry.ledgerEffectiveTime,
+            commitContext.participantId,
+            transactionEntry.submissionTime,
+            transactionEntry.submissionSeed,
+          )
+          .consume(
+            lookupContract(transactionEntry, commitContext),
+            lookupPackage(commitContext),
+            lookupKey(commitContext, knownKeys),
+            // No check for key visibility during validation
+            _ => VisibleByKey.Visible,
+          )
+          .fold(
+            err =>
+              reject[DamlTransactionEntrySummary](
+                commitContext.recordTime,
+                buildRejectionLogEntry(transactionEntry, rejectionReasonForValidationError(err)),
+              ),
+            _ => StepContinue[DamlTransactionEntrySummary](transactionEntry),
+          )
+        catch {
           case err: Err.MissingInputState =>
             logger.warn(
               "Model conformance validation failed due to a missing input state (most likely due to invalid state on the participant)."
@@ -305,7 +303,7 @@ private[kvutils] class TransactionCommitter(
               buildRejectionLogEntry(transactionEntry, RejectionReason.Disputed(err.getMessage)),
             )
         }
-      })
+      }
   }
 
   private[transaction] def rejectionReasonForValidationError(
@@ -652,9 +650,8 @@ private[kvutils] class TransactionCommitter(
           case DamlStateValue.ValueCase.ARCHIVE =>
             // NOTE(JM): Engine only looks up packages once, compiles and caches,
             // provided that the engine instance is persisted.
-            try {
-              Some(Decode.decodeArchive(value.getArchive)._2)
-            } catch {
+            try Some(Decode.decodeArchive(value.getArchive)._2)
+            catch {
               case ParseError(err) =>
                 logger.warn("Decoding the archive failed.")
                 throw Err.DecodeError("Archive", err)

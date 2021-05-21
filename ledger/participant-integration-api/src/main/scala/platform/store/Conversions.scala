@@ -41,7 +41,7 @@ private[platform] object OracleArrayConversions {
   abstract sealed class ArrayToStatement[T](oracleTypeName: String)
       extends ToStatement[Array[T]]
       with NotNullGuard {
-    override def set(s: PreparedStatement, index: Int, v: Array[T]): Unit = {
+    override def set(s: PreparedStatement, index: Int, v: Array[T]): Unit =
       if (v == (null: AnyRef)) {
         s.setNull(index, JDBCType.ARRAY.getVendorTypeNumber, oracleTypeName)
       } else {
@@ -51,7 +51,6 @@ private[platform] object OracleArrayConversions {
           JDBCType.ARRAY.getVendorTypeNumber,
         )
       }
-    }
   }
 
   implicit object ByteArrayArrayToStatement
@@ -69,18 +68,17 @@ private[platform] object OracleArrayConversions {
       extends ArrayToStatement[java.lang.Boolean]("BOOLEAN_ARRAY")
 
   implicit object InstantArrayToStatement extends ToStatement[Array[Instant]] {
-    override def set(s: PreparedStatement, index: Int, v: Array[Instant]): Unit = {
+    override def set(s: PreparedStatement, index: Int, v: Array[Instant]): Unit =
       s.setObject(
         index,
         unwrapConnection(s).createARRAY("TIMESTAMP_ARRAY", v.map(java.sql.Timestamp.from)),
         JDBCType.ARRAY.getVendorTypeNumber,
       )
-    }
   }
 
   @SuppressWarnings(Array("org.wartremover.warts.ArrayEquals"))
   implicit object StringOptionArrayArrayToStatement extends ToStatement[Option[Array[String]]] {
-    override def set(s: PreparedStatement, index: Int, stringOpts: Option[Array[String]]): Unit = {
+    override def set(s: PreparedStatement, index: Int, stringOpts: Option[Array[String]]): Unit =
       stringOpts match {
         case None => s.setNull(index, JDBCType.ARRAY.getVendorTypeNumber, "VARCHAR_ARRAY")
         case Some(arr) =>
@@ -91,7 +89,6 @@ private[platform] object OracleArrayConversions {
             JDBCType.ARRAY.getVendorTypeNumber,
           )
       }
-    }
   }
 
   object IntToSmallIntConversions {
@@ -109,7 +106,7 @@ private[platform] object OracleArrayConversions {
     }
   }
 
-  private def unwrapConnection[T](s: PreparedStatement): OracleConnection = {
+  private def unwrapConnection[T](s: PreparedStatement): OracleConnection =
     s.getConnection match {
       case hikari: HikariProxyConnection =>
         hikari.unwrap(classOf[OracleConnection])
@@ -120,7 +117,6 @@ private[platform] object OracleArrayConversions {
           s"Unsupported connection type for creating Oracle integer array: ${c.getClass.getSimpleName}"
         )
     }
-  }
 }
 
 private[platform] object JdbcArrayConversions {

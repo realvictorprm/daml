@@ -71,13 +71,12 @@ final class ApiParticipantPruningService private (
 
   private def validateRequest(
       request: PruneRequest
-  )(implicit logCtx: LoggingContext): Future[Offset] = {
+  )(implicit logCtx: LoggingContext): Future[Offset] =
     (for {
       pruneUpToString <- checkOffsetIsSpecified(request.pruneUpTo)
       pruneUpTo <- checkOffsetIsHexadecimal(pruneUpToString)
     } yield (pruneUpTo, pruneUpToString))
       .fold(Future.failed, o => checkOffsetIsBeforeLedgerEnd(o._1, o._2))
-  }
 
   private def pruneWriteService(pruneUpTo: Offset, submissionId: SubmissionId)(implicit
       logCtx: LoggingContext

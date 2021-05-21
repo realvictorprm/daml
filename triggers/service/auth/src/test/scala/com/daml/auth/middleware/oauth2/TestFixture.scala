@@ -57,9 +57,8 @@ trait TestFixture
   lazy protected val middlewarePortFile: File = suiteResource.value.authMiddlewarePortFile
   lazy protected val middlewareBinding: ServerBinding = suiteResource.value.authMiddlewareBinding
   lazy protected val middlewareClient: Client = suiteResource.value.authMiddlewareClient
-  lazy protected val middlewareClientBinding: ServerBinding = {
+  lazy protected val middlewareClientBinding: ServerBinding =
     suiteResource.value.authMiddlewareClientBinding
-  }
   lazy protected val middlewareClientCallbackUri: Uri = {
     val host = middlewareClientBinding.localAddress
     Uri()

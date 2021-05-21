@@ -12,15 +12,13 @@ class AlwaysCacheUpdatePolicySpec extends AnyWordSpec with Matchers {
 
   "cache update policy" should {
     "allow caching of all types of keys" in {
-      for (stateKey <- TestHelper.allDamlStateKeyTypes) {
+      for (stateKey <- TestHelper.allDamlStateKeyTypes)
         policy.shouldCacheOnWrite(stateKey) shouldBe true
-      }
     }
 
     "allow caching of all read values" in {
-      for (stateKey <- TestHelper.allDamlStateKeyTypes) {
+      for (stateKey <- TestHelper.allDamlStateKeyTypes)
         policy.shouldCacheOnRead(stateKey) shouldBe true
-      }
     }
   }
 }

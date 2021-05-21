@@ -107,7 +107,7 @@ class CommandTrackerFlowTest
       for {
         state <- stateRef.get().future
         res <- state.queue.offer(elem)
-      } yield (res)
+      } yield res
 
     def breakCompletionsStream(): Future[Unit] =
       stateRef
@@ -483,9 +483,7 @@ class CommandTrackerFlowTest
           _ <- breakUntilOffsetArrives()
           _ <- checkOffset(checkPointOffset)
           _ <- sendCommand("2")
-        } yield {
-          succeed
-        }
+        } yield succeed
       }
 
     }

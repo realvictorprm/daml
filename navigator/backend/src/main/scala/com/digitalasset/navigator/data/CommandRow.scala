@@ -28,7 +28,7 @@ final case class CommandRow(
     argumentValue: Option[String],
 ) {
 
-  def toCommand(types: PackageRegistry): Try[Command] = {
+  def toCommand(types: PackageRegistry): Try[Command] =
     subclassType match {
       case "CreateCommand" =>
         (for {
@@ -40,16 +40,14 @@ final case class CommandRow(
               .jsValueToApiValue(recArgJson.parseJson, tid, types.damlLfDefDataType _)
           )
           recArg <- Try(anyArg.asInstanceOf[ApiRecord])
-        } yield {
-          CreateCommand(
-            ApiTypes.CommandId(id),
-            index,
-            ApiTypes.WorkflowId(workflowId),
-            Instant.parse(platformTime),
-            tid,
-            recArg,
-          )
-        }).recoverWith { case e: Throwable =>
+        } yield CreateCommand(
+          ApiTypes.CommandId(id),
+          index,
+          ApiTypes.WorkflowId(workflowId),
+          Instant.parse(platformTime),
+          tid,
+          recArg,
+        )).recoverWith { case e: Throwable =>
           Failure(
             DeserializationFailed(s"Failed to deserialize CreateCommand from row: $this. Error: $e")
           )
@@ -64,18 +62,16 @@ final case class CommandRow(
           _ <- Try(t.choices.find(_.name.unwrap == ch).get)
           argJson <- Try(argumentValue.get)
           arg <- Try(ApiCodecVerbose.jsValueToApiValue(argJson.parseJson))
-        } yield {
-          ExerciseCommand(
-            ApiTypes.CommandId(id),
-            index,
-            ApiTypes.WorkflowId(workflowId),
-            Instant.parse(platformTime),
-            ApiTypes.ContractId(cId),
-            tid,
-            ApiTypes.Choice(ch),
-            arg,
-          )
-        }).recoverWith { case e: Throwable =>
+        } yield ExerciseCommand(
+          ApiTypes.CommandId(id),
+          index,
+          ApiTypes.WorkflowId(workflowId),
+          Instant.parse(platformTime),
+          ApiTypes.ContractId(cId),
+          tid,
+          ApiTypes.Choice(ch),
+          arg,
+        )).recoverWith { case e: Throwable =>
           Failure(
             DeserializationFailed(
               s"Failed to deserialize ExerciseCommand from row: $this. Error: $e"
@@ -84,12 +80,11 @@ final case class CommandRow(
         }
       case _ => Failure(DeserializationFailed(s"unknown subclass type for Command: $subclassType"))
     }
-  }
 }
 
 object CommandRow {
 
-  def fromCommand(c: Command): CommandRow = {
+  def fromCommand(c: Command): CommandRow =
     c match {
       case c: CreateCommand =>
         CommandRow(
@@ -118,5 +113,4 @@ object CommandRow {
           Some(ApiCodecVerbose.apiValueToJsValue(e.argument).compactPrint),
         )
     }
-  }
 }

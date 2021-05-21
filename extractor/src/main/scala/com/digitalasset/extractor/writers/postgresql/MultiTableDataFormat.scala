@@ -37,9 +37,8 @@ class MultiTableDataFormat(
   // schema name for contract tables when not using separate schemas per package
   private val singleSchemaName = "template"
 
-  def init(): ConnectionIO[Unit] = {
+  def init(): ConnectionIO[Unit] =
     createSchema(singleSchemaName).update.run.void
-  }
 
   def handleTemplate(
       state: MultiTableState,
@@ -119,7 +118,7 @@ class MultiTableDataFormat(
       state: MultiTableState,
       packageStore: PackageStore,
       currentTemplate: TemplateInfo,
-  ): Option[TableName] = {
+  ): Option[TableName] =
     if (mergeIdentical) {
       val knownTemplateIds = state.templateToTable.keySet
 
@@ -146,12 +145,11 @@ class MultiTableDataFormat(
     } else {
       None
     }
-  }
 
   def handlePackageId(
       state: MultiTableState,
       packageId: String,
-  ): (MultiTableState, ConnectionIO[Unit]) = {
+  ): (MultiTableState, ConnectionIO[Unit]) =
     if (schemaPerPackage) {
       val baseName = "package_" + packageId.take(40)
       val schemaName = uniqueName(state.packageIdToNameSpace.values.toSet, baseName)
@@ -165,13 +163,12 @@ class MultiTableDataFormat(
     } else {
       (state, connection.pure(()))
     }
-  }
 
   def handleExercisedEvent(
       state: MultiTableState,
       transaction: TransactionTree,
       event: ExercisedEvent,
-  ): RefreshPackages \/ ConnectionIO[Unit] = {
+  ): RefreshPackages \/ ConnectionIO[Unit] =
     for {
       table <- state.templateToTable.get(event.templateId).\/>(RefreshPackages(event.templateId))
     } yield {
@@ -195,13 +192,12 @@ class MultiTableDataFormat(
 
       update *> insert
     }
-  }
 
   def handleCreatedEvent(
       state: MultiTableState,
       transaction: TransactionTree,
       event: CreatedEvent,
-  ): RefreshPackages \/ ConnectionIO[Unit] = {
+  ): RefreshPackages \/ ConnectionIO[Unit] =
     for {
       table <- state.templateToTable.get(event.templateId).\/>(RefreshPackages(event.templateId))
     } yield {
@@ -214,7 +210,6 @@ class MultiTableDataFormat(
 
       insertQuery.update.run.void
     }
-  }
 
   private def createIOForTable(
       tableName: String,

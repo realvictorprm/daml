@@ -13,12 +13,11 @@ private class PromiseTask[A](value: => Future[A]) extends TimerTask with Promise
 
   private val p = Promise[A]()
 
-  override def run(): Unit = {
+  override def run(): Unit =
     p.completeWith {
       try value
       catch { case NonFatal(t) => Future.failed(t) }
     }
-  }
 
   override def future: Future[A] = p.future
 

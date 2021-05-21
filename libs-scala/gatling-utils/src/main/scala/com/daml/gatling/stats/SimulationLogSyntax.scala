@@ -16,14 +16,13 @@ object SimulationLogSyntax {
     /** Will write a summary.csv given a Gatling result directory.
       * @param targetDirectory the directory where the summary.csv will be created.
       */
-    def writeSummaryCsv(targetDirectory: Path): Unit = {
+    def writeSummaryCsv(targetDirectory: Path): Unit =
       discard {
         Files.write(
           targetDirectory.resolve("summary.csv"),
           log.toCsvString.getBytes(StandardCharsets.UTF_8),
         )
       }
-    }
 
     def writeSummaryText(targetDirectory: Path): String = {
       val summary = formatTextReport(log.requests)

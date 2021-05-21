@@ -13,7 +13,7 @@ import io.grpc.Metadata
   * Note: This AuthService is meant to be used for testing purposes only.
   */
 final class AuthServiceStatic(claims: PartialFunction[String, ClaimSet]) extends AuthService {
-  override def decodeMetadata(headers: Metadata): CompletionStage[ClaimSet] = {
+  override def decodeMetadata(headers: Metadata): CompletionStage[ClaimSet] =
     if (headers.containsKey(AUTHORIZATION_KEY)) {
       val authorizationValue = headers.get(AUTHORIZATION_KEY).stripPrefix("Bearer ")
       CompletableFuture.completedFuture(
@@ -22,7 +22,6 @@ final class AuthServiceStatic(claims: PartialFunction[String, ClaimSet]) extends
     } else {
       CompletableFuture.completedFuture(ClaimSet.Unauthenticated)
     }
-  }
 }
 
 object AuthServiceStatic {

@@ -119,9 +119,8 @@ object Queries {
       ORDER BY tbl_name, type DESC, name
     """
 
-  def query(query: String): Fragment = {
+  def query(query: String): Fragment =
     Fragment.const(query)
-  }
 
   def insertEvent(row: EventRow): Fragment =
     sql"""

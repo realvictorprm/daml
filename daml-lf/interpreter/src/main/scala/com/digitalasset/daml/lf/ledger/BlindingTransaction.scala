@@ -38,7 +38,7 @@ object BlindingTransaction {
       )
     }
 
-    def divulgeCoidTo(witnesses: Set[Party], acoid: ContractId): BlindState = {
+    def divulgeCoidTo(witnesses: Set[Party], acoid: ContractId): BlindState =
       if (witnesses.nonEmpty) {
         copy(
           divulgences = divulgences
@@ -47,7 +47,6 @@ object BlindingTransaction {
       } else {
         this
       }
-    }
 
   }
 

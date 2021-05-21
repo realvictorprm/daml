@@ -13,10 +13,9 @@ object DecodeUtil {
       created <- event.event.created: Option[CreatedEvent]
     } yield created
 
-  def decodeArchivedEvent(transaction: Transaction): Option[ArchivedEvent] = {
+  def decodeArchivedEvent(transaction: Transaction): Option[ArchivedEvent] =
     for {
       event <- transaction.events.headOption: Option[Event]
       archived <- event.event.archived: Option[ArchivedEvent]
     } yield archived
-  }
 }

@@ -27,23 +27,21 @@ private[reflection] final class ServiceDescriptorInfoObserver(
     promise.future
   }
 
-  override def onNext(response: ServerReflectionResponse): Unit = {
+  override def onNext(response: ServerReflectionResponse): Unit =
     if (response.hasListServicesResponse) {
       servicesLeft.set(response.getListServicesResponse.getServiceCount)
-      for (service <- response.getListServicesResponse.getServiceList.asScala) {
+      for (service <- response.getListServicesResponse.getServiceList.asScala)
         serverReflectionStream.onNext(ServerReflectionRequests.fileContaining(service.getName))
-      }
     } else if (response.hasFileDescriptorResponse) {
       for (bytes <- response.getFileDescriptorResponse.getFileDescriptorProtoList.asScala) {
         val fileDescriptorProto = FileDescriptorProto.parseFrom(bytes)
-        for (service <- fileDescriptorProto.getServiceList.asScala) {
+        for (service <- fileDescriptorProto.getServiceList.asScala)
           builder +=
             ServiceDescriptorInfo(
               packageName = fileDescriptorProto.getPackage,
               serviceName = service.getName,
               methods = service.getMethodList.asScala,
             )
-        }
       }
       if (servicesLeft.decrementAndGet() < 1) {
         serverReflectionStream.onCompleted()
@@ -56,7 +54,6 @@ private[reflection] final class ServiceDescriptorInfoObserver(
         .asRuntimeException()
       serverReflectionStream.onError(throwable)
     }
-  }
 
   override def onError(throwable: Throwable): Unit = {
     val _ = promise.tryFailure(throwable)

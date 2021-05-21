@@ -15,8 +15,6 @@ object BuildInfo {
       try {
         val reader = new BufferedReader(new InputStreamReader(is))
         reader.lines.iterator.asScala.mkString.trim
-      } finally {
-        is.close()
-      }
+      } finally is.close()
     }
 }

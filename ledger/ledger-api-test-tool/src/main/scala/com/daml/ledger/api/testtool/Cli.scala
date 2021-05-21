@@ -203,10 +203,10 @@ object Cli {
 
     opt[Unit]("version")
       .optional()
-      .action((_, _) => {
+      .action { (_, _) =>
         println(BuildInfo.Version)
         sys.exit(0)
-      })
+      }
       .text("Prints the version on stdout and exit.")
 
     opt[FiniteDuration]("ledger-clock-granularity")(

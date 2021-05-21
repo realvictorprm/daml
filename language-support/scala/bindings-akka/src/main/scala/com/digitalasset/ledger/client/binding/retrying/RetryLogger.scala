@@ -18,31 +18,28 @@ import com.typesafe.scalalogging.LazyLogging
 
 object RetryLogger extends LazyLogging {
 
-  def logFatal(request: SubmitRequest, status: Status, nrOfRetries: Int): Unit = {
+  def logFatal(request: SubmitRequest, status: Status, nrOfRetries: Int): Unit =
     logger.warn(
       s"Encountered fatal error when submitting command after $nrOfRetries retries, therefore retry halted: " +
         format(request, status)
     )
-  }
 
   def logStopRetrying(
       request: SubmitRequest,
       status: Status,
       nrOfRetries: Int,
       firstSubmissionTime: Instant,
-  ): Unit = {
+  ): Unit =
     logger.warn(
       s"Retrying of command stopped after $nrOfRetries retries. Attempting since $firstSubmissionTime: " +
         format(request, status)
     )
-  }
 
-  def logNonFatal(request: SubmitRequest, status: Status, nrOfRetries: Int): Unit = {
+  def logNonFatal(request: SubmitRequest, status: Status, nrOfRetries: Int): Unit =
     logger.warn(
       s"Encountered non-fatal error when submitting command after $nrOfRetries retries, therefore will retry: " +
         format(request, status)
     )
-  }
 
   private def format(request: SubmitRequest, status: Status): String = {
     val effectiveActAs = request.commands.map(c => CommandsValidator.effectiveSubmitters(c).actAs)

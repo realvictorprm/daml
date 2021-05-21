@@ -302,8 +302,7 @@ object HttpService {
 
     // scheduleWithFixedDelay will wait for the previous task to complete before triggering the next one
     // that is exactly why the task calls Await.result on the Future
-    asys.scheduler.scheduleWithFixedDelay(pollInterval, pollInterval)(() => {
-
+    asys.scheduler.scheduleWithFixedDelay(pollInterval, pollInterval) { () =>
       val f: Future[PackageService.Error \/ Unit] = packageService.reload
 
       f.onComplete {
@@ -312,13 +311,11 @@ object HttpService {
         case scala.util.Success(\/-(_)) =>
       }
 
-      try {
-        discard { Await.result(f, maxWait) }
-      } catch {
+      try discard(Await.result(f, maxWait)) catch {
         case e: scala.concurrent.TimeoutException =>
           logger.error(s"Package reload timed out after: $maxWait", e)
       }
-    })
+    }
   }
 
   private def ledgerClient(

@@ -119,7 +119,7 @@ class ApiCodecCompressed[Cid](val encodeDecimalAsString: Boolean, val encodeInt6
       value: JsValue,
       prim: Model.DamlLfTypePrim,
       defs: Model.DamlLfTypeLookup,
-  ): V[Cid] = {
+  ): V[Cid] =
     (prim.typ, value).match2 {
       case Model.DamlLfPrimType.Int64 => {
         case JsString(v) => V.ValueInt64(assertDE(v.parseLong.leftMap(_.getMessage).toEither))
@@ -182,7 +182,6 @@ class ApiCodecCompressed[Cid](val encodeDecimalAsString: Boolean, val encodeInt6
         }
 
     }(fallback = deserializationError(s"Can't read ${value.prettyPrint} as $prim"))
-  }
 
   private[this] def nestsOptional(prim: iface.TypePrim): Boolean =
     prim match {
@@ -215,7 +214,7 @@ class ApiCodecCompressed[Cid](val encodeDecimalAsString: Boolean, val encodeInt6
       id: DamlLfIdentifier,
       dt: Model.DamlLfDataType,
       defs: Model.DamlLfTypeLookup,
-  ): V[Cid] = {
+  ): V[Cid] =
     (dt, value).match2 {
       case Model.DamlLfRecord(fields) => {
         case JsObject(v) =>
@@ -284,14 +283,13 @@ class ApiCodecCompressed[Cid](val encodeDecimalAsString: Boolean, val encodeInt6
           )
       }
     }(fallback = deserializationError(s"Can't read ${value.prettyPrint} as $dt"))
-  }
 
   /** Deserialize a value, given the type */
   def jsValueToApiValue(
       value: JsValue,
       typ: Model.DamlLfType,
       defs: Model.DamlLfTypeLookup,
-  ): V[Cid] = {
+  ): V[Cid] =
     typ match {
       case prim: Model.DamlLfTypePrim =>
         jsValueToApiPrimitive(value, prim, defs)
@@ -313,7 +311,6 @@ class ApiCodecCompressed[Cid](val encodeDecimalAsString: Boolean, val encodeInt6
       case Model.DamlLfTypeVar(_) =>
         deserializationError(s"Can't read ${value.prettyPrint} as DamlLfTypeVar")
     }
-  }
 
   /** Deserialize a value, given the ID of the corresponding closed type */
   def jsValueToApiValue(

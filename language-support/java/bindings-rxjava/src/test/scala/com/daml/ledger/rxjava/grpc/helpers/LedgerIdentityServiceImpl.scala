@@ -21,9 +21,8 @@ final class LedgerIdentityServiceImpl(ledgerId: String)
 
   override def getLedgerIdentity(
       request: GetLedgerIdentityRequest
-  ): Future[GetLedgerIdentityResponse] = {
+  ): Future[GetLedgerIdentityResponse] =
     Future.successful(GetLedgerIdentityResponse(ledgerId))
-  }
 }
 
 object LedgerIdentityServiceImpl {

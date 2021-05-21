@@ -140,10 +140,10 @@ object LedgerApiTestTool {
 
     Thread
       .currentThread()
-      .setUncaughtExceptionHandler((_, exception) => {
+      .setUncaughtExceptionHandler { (_, exception) =>
         logger.error(uncaughtExceptionErrorMessage, exception)
         sys.exit(1)
-      })
+      }
 
     val defaultCases = defaultTests.flatMap(_.tests)
     val allCases = defaultCases ++ Tests.optional.flatMap(_.tests) ++ Tests.retired.flatMap(_.tests)
@@ -203,7 +203,7 @@ object LedgerApiTestTool {
       config: Config,
       cases: Vector[LedgerTestCase],
       concurrentTestRuns: Int,
-  )(implicit executionContext: ExecutionContext): Future[LedgerTestCasesRunner] = {
+  )(implicit executionContext: ExecutionContext): Future[LedgerTestCasesRunner] =
     initializeParticipantChannels(config.participants, config.tlsConfig).asFuture.map(
       participants =>
         new LedgerTestCasesRunner(
@@ -217,7 +217,6 @@ object LedgerApiTestTool {
           identifierSuffix = identifierSuffix,
         )
     )
-  }
 
   private def initializeParticipantChannel(
       host: String,
@@ -242,9 +241,7 @@ object LedgerApiTestTool {
       tlsConfig: Option[TlsConfiguration],
   )(implicit executionContext: ExecutionContext): Resource[Vector[Channel]] = {
     val participantChannelOwners =
-      for ((host, port) <- participants) yield {
-        initializeParticipantChannel(host, port, tlsConfig)
-      }
+      for ((host, port) <- participants) yield initializeParticipantChannel(host, port, tlsConfig)
     Resource.sequence(participantChannelOwners.map(_.acquire()))
   }
 

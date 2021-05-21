@@ -18,15 +18,13 @@ class LogbackThresholdFilterWithExclusion extends ThresholdFilter {
 
   def getExcludeLogger: String = this.excludeLogger
 
-  override def decide(event: ILoggingEvent): FilterReply = {
+  override def decide(event: ILoggingEvent): FilterReply =
     if (!this.isStarted) FilterReply.NEUTRAL
     else if (event.getLoggerName.startsWith(excludeLogger)) FilterReply.NEUTRAL
     else super.decide(event)
-  }
 
-  override def start(): Unit = {
+  override def start(): Unit =
     if (this.excludeLogger != null) {
       super.start()
     }
-  }
 }

@@ -19,13 +19,12 @@ final class TypedValueExtractor(signatures: PartialFunction[PackageId, PackageSi
       version: TransactionVersion,
       versioned: => ValueOuterClass.VersionedValue,
       unversioned: => ValueOuterClass.Value,
-  ) = {
+  ) =
     if (version < TransactionVersion.minNoVersionValue) {
       Versioned(version, versioned.getValue)
     } else {
       Versioned(version, unversioned)
     }
-  }
 
   def fromTransaction(transaction: EncodedTransaction): Iterator[EncodedValueWithType] =
     transaction.getNodesList.iterator.asScala.flatMap { node =>
@@ -37,7 +36,7 @@ final class TypedValueExtractor(signatures: PartialFunction[PackageId, PackageSi
           val (packageId, qualifiedName) = {
             import scala.Ordering.Implicits.infixOrderingOps
             TransactionCoder.decodeVersion(node.getVersion) match {
-              case Right(ver) if (ver >= TransactionVersion.V12) =>
+              case Right(ver) if ver >= TransactionVersion.V12 =>
                 validateIdentifier(create.getTemplateId)
               case Right(_) =>
                 validateIdentifier(create.getContractInstance.getTemplateId)

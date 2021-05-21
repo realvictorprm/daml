@@ -30,7 +30,7 @@ object KeyUtils {
   /** Reads an RSA public key from a X509 encoded file.
     * These usually have the .crt file extension.
     */
-  def readRSAPublicKeyFromCrt(file: File): Try[RSAPublicKey] = {
+  def readRSAPublicKeyFromCrt(file: File): Try[RSAPublicKey] =
     bracket(Try(new FileInputStream(file)))(is => Try(is.close())).flatMap { istream =>
       Try(
         CertificateFactory
@@ -40,12 +40,11 @@ object KeyUtils {
           .asInstanceOf[RSAPublicKey]
       )
     }
-  }
 
   /** Reads an EC public key from a X509 encoded file.
     * These usually have the .crt file extension.
     */
-  def readECPublicKeyFromCrt(file: File): Try[ECPublicKey] = {
+  def readECPublicKeyFromCrt(file: File): Try[ECPublicKey] =
     bracket(Try(new FileInputStream(file)))(is => Try(is.close())).flatMap { istream =>
       Try(
         CertificateFactory
@@ -55,7 +54,6 @@ object KeyUtils {
           .asInstanceOf[ECPublicKey]
       )
     }
-  }
 
   /** Reads a RSA private key from a PEM/PKCS#8 file.
     * These usually have the .pem file extension.

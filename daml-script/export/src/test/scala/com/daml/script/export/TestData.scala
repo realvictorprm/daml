@@ -31,7 +31,7 @@ object TestData {
       submitters: Seq[Party] = defaultParties,
       contractKey: Option[Value] = None,
   ) extends Event {
-    def toCreatedEvent(eventId: String): CreatedEvent = {
+    def toCreatedEvent(eventId: String): CreatedEvent =
       CreatedEvent(
         eventId = eventId,
         templateId = Some(defaultTemplateId),
@@ -41,7 +41,6 @@ object TestData {
           Some(Record(recordId = Some(defaultTemplateId), fields = createArguments)),
         contractKey = contractKey,
       )
-    }
   }
   sealed case class Exercised(
       contractId: ContractId,
@@ -53,14 +52,12 @@ object TestData {
   ) extends Event
 
   sealed case class ACS(contracts: Seq[Created]) {
-    def toCreatedEvents: Seq[CreatedEvent] = {
+    def toCreatedEvents: Seq[CreatedEvent] =
       contracts.zipWithIndex.map { case (created, i) =>
         created.toCreatedEvent(s"create$i")
       }
-    }
-    def toACS: Map[ContractId, CreatedEvent] = {
+    def toACS: Map[ContractId, CreatedEvent] =
       this.toCreatedEvents.map(ev => (ContractId(ev.contractId), ev)).toMap
-    }
   }
 
   sealed case class Tree(
@@ -136,8 +133,7 @@ object TestData {
       val (cmds, tree) = this.toCommands
       SimpleCommand.fromCommands(cmds, tree).get
     }
-    def toSubmit: Submit = {
+    def toSubmit: Submit =
       Submit.fromTree(this.toTransactionTree)
-    }
   }
 }

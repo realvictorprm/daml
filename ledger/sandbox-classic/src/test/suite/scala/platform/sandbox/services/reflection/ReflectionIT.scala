@@ -35,10 +35,8 @@ final class ReflectionIT
         val expectedServiceCount: Int = 17
         for {
           response <- execRequest(listServices)
-        } yield {
-          withClue("ServiceCount: ") {
-            response.getListServicesResponse.getServiceCount shouldEqual expectedServiceCount
-          }
+        } yield withClue("ServiceCount: ") {
+          response.getListServicesResponse.getServiceCount shouldEqual expectedServiceCount
         }
       }
 
@@ -53,13 +51,12 @@ final class ReflectionIT
           for {
             r <- symbolResponses
             p <- r.getFileDescriptorResponse.getFileDescriptorProtoList.asScala
-          } {
-            // We filter for this string due to an exotic bug in the bazel-grpc setup, see grpc-definitions/BUILD.bazel.
-            assert(
-              !p.toStringUtf8.contains("bazel-out"),
-              s"filedescriptor ${p.toStringUtf8} contains string 'bazel-out'. This means grpc reflection will not work.",
-            )
           }
+          // We filter for this string due to an exotic bug in the bazel-grpc setup, see grpc-definitions/BUILD.bazel.
+          assert(
+            !p.toStringUtf8.contains("bazel-out"),
+            s"filedescriptor ${p.toStringUtf8} contains string 'bazel-out'. This means grpc reflection will not work.",
+          )
           forAll(symbolResponses) { r =>
             r.hasErrorResponse should be(false)
           }

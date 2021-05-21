@@ -50,12 +50,10 @@ class TransactionServiceIT extends LedgerTestSuite {
     val fromAndToBegin = request.update(_.begin := ledger.begin, _.end := ledger.begin)
     for {
       transactions <- ledger.flatTransactions(fromAndToBegin)
-    } yield {
-      assert(
-        transactions.isEmpty,
-        s"Received a non-empty stream with ${transactions.size} transactions in it.",
-      )
-    }
+    } yield assert(
+      transactions.isEmpty,
+      s"Received a non-empty stream with ${transactions.size} transactions in it.",
+    )
   })
 
   test(
@@ -67,12 +65,10 @@ class TransactionServiceIT extends LedgerTestSuite {
     val fromAndToBegin = request.update(_.begin := ledger.begin, _.end := ledger.begin)
     for {
       transactions <- ledger.transactionTrees(fromAndToBegin)
-    } yield {
-      assert(
-        transactions.isEmpty,
-        s"Received a non-empty stream with ${transactions.size} transactions in it.",
-      )
-    }
+    } yield assert(
+      transactions.isEmpty,
+      s"Received a non-empty stream with ${transactions.size} transactions in it.",
+    )
   })
 
   test(
@@ -85,12 +81,10 @@ class TransactionServiceIT extends LedgerTestSuite {
       request = ledger.getTransactionsRequest(Seq(party))
       endToEnd = request.update(_.begin := ledger.end, _.end := ledger.end)
       transactions <- ledger.flatTransactions(endToEnd)
-    } yield {
-      assert(
-        transactions.isEmpty,
-        s"No transactions were expected but ${transactions.size} were read",
-      )
-    }
+    } yield assert(
+      transactions.isEmpty,
+      s"No transactions were expected but ${transactions.size} were read",
+    )
   })
 
   test(
@@ -104,9 +98,7 @@ class TransactionServiceIT extends LedgerTestSuite {
       request = ledger.getTransactionsRequest(Seq(party))
       beyondEnd = request.update(_.begin := futureOffset, _.optionalEnd := None)
       failure <- ledger.flatTransactions(beyondEnd).mustFail("subscribing past the ledger end")
-    } yield {
-      assertGrpcError(failure, Status.Code.OUT_OF_RANGE, "is after ledger end")
-    }
+    } yield assertGrpcError(failure, Status.Code.OUT_OF_RANGE, "is after ledger end")
   })
 
   test(
@@ -120,9 +112,7 @@ class TransactionServiceIT extends LedgerTestSuite {
       request = ledger.getTransactionsRequest(Seq(party))
       beyondEnd = request.update(_.begin := futureOffset, _.optionalEnd := None)
       failure <- ledger.transactionTrees(beyondEnd).mustFail("subscribing past the ledger end")
-    } yield {
-      assertGrpcError(failure, Status.Code.OUT_OF_RANGE, "is after ledger end")
-    }
+    } yield assertGrpcError(failure, Status.Code.OUT_OF_RANGE, "is after ledger end")
   })
 
   test(
@@ -207,18 +197,18 @@ class TransactionServiceIT extends LedgerTestSuite {
             IouTrade(alice, bob, aliceIou, gbp_bank, "GBP", 100, dkk_bank, "DKK", 110),
           )
         }
-        tree <- eventually { beta.exercise(bob, trade.exerciseIouTrade_Accept(_, bobIou)) }
+        tree <- eventually(beta.exercise(bob, trade.exerciseIouTrade_Accept(_, bobIou)))
 
-        aliceTree <- eventually { alpha.transactionTreeById(tree.transactionId, alice) }
+        aliceTree <- eventually(alpha.transactionTreeById(tree.transactionId, alice))
         bobTree <- beta.transactionTreeById(tree.transactionId, bob)
-        gbpTree <- eventually { alpha.transactionTreeById(tree.transactionId, gbp_bank) }
-        dkkTree <- eventually { delta.transactionTreeById(tree.transactionId, dkk_bank) }
+        gbpTree <- eventually(alpha.transactionTreeById(tree.transactionId, gbp_bank))
+        dkkTree <- eventually(delta.transactionTreeById(tree.transactionId, dkk_bank))
 
       } yield {
         def treeIsWellformed(tree: TransactionTree): Unit = {
           val eventsToObserve = mutable.Map.empty[String, TreeEvent] ++= tree.eventsById
 
-          def go(eventId: String): Unit = {
+          def go(eventId: String): Unit =
             eventsToObserve.remove(eventId) match {
               case Some(TreeEvent(Exercised(exercisedEvent))) =>
                 exercisedEvent.childEventIds.foreach(go)
@@ -229,7 +219,6 @@ class TransactionServiceIT extends LedgerTestSuite {
                   s"Referenced eventId $eventId is not available as node in the transaction."
                 )
             }
-          }
           tree.rootEventIds.foreach(go)
           assert(
             eventsToObserve.isEmpty,
@@ -275,9 +264,7 @@ class TransactionServiceIT extends LedgerTestSuite {
       failure <- ledger
         .flatTransactions(requestWithEmptyFilter)
         .mustFail("subscribing with an empty filter")
-    } yield {
-      assertGrpcError(failure, Status.Code.INVALID_ARGUMENT, "filtersByParty cannot be empty")
-    }
+    } yield assertGrpcError(failure, Status.Code.INVALID_ARGUMENT, "filtersByParty cannot be empty")
   })
 
   test(
@@ -352,13 +339,11 @@ class TransactionServiceIT extends LedgerTestSuite {
     for {
       _ <- Future.sequence(Vector.fill(transactionsToSubmit)(ledger.create(party, Dummy(party))))
       results <- Future.sequence(Vector.fill(parallelRequests)(ledger.flatTransactions(party)))
-    } yield {
-      assert(
-        results.toSet.size == 1,
-        s"All requests are supposed to return the same results but there " +
-          s"where differences: ${results.map(_.map(_.commandId)).mkString(", ")}",
-      )
-    }
+    } yield assert(
+      results.toSet.size == 1,
+      s"All requests are supposed to return the same results but there " +
+        s"where differences: ${results.map(_.map(_.commandId)).mkString(", ")}",
+    )
   })
 
   test(
@@ -369,12 +354,10 @@ class TransactionServiceIT extends LedgerTestSuite {
     for {
       _ <- alpha.create(alice, Dummy(alice))
       bobsView <- alpha.flatTransactions(bob)
-    } yield {
-      assert(
-        bobsView.isEmpty,
-        s"After Alice create a contract, Bob sees one or more transaction he shouldn't, namely those created by commands ${bobsView.map(_.commandId).mkString(", ")}",
-      )
-    }
+    } yield assert(
+      bobsView.isEmpty,
+      s"After Alice create a contract, Bob sees one or more transaction he shouldn't, namely those created by commands ${bobsView.map(_.commandId).mkString(", ")}",
+    )
   })
 
   test(
@@ -391,9 +374,7 @@ class TransactionServiceIT extends LedgerTestSuite {
       failure <- ledger
         .flatTransactions(invalidRequest)
         .mustFail("subscribing with the end before the begin")
-    } yield {
-      assertGrpcError(failure, Status.Code.INVALID_ARGUMENT, "is before Begin offset")
-    }
+    } yield assertGrpcError(failure, Status.Code.INVALID_ARGUMENT, "is before Begin offset")
   })
 
   test(
@@ -404,13 +385,11 @@ class TransactionServiceIT extends LedgerTestSuite {
     case Participants(Participant(alpha, submitter), Participant(beta, listener)) =>
       for {
         (id, _) <- alpha.createAndGetTransactionId(submitter, AgreementFactory(listener, submitter))
-        tree <- eventually { beta.transactionTreeById(id, listener) }
-      } yield {
-        assert(
-          tree.commandId.isEmpty,
-          s"The command identifier was supposed to be empty but it's `${tree.commandId}` instead.",
-        )
-      }
+        tree <- eventually(beta.transactionTreeById(id, listener))
+      } yield assert(
+        tree.commandId.isEmpty,
+        s"The command identifier was supposed to be empty but it's `${tree.commandId}` instead.",
+      )
   })
 
   test(
@@ -498,9 +477,7 @@ class TransactionServiceIT extends LedgerTestSuite {
             .exerciseConsumeIfTimeIsBetween(_, Primitive.Timestamp.MAX, Primitive.Timestamp.MAX),
         )
         .mustFail("exercising with a failing assertion")
-    } yield {
-      assertGrpcError(failure, Status.Code.INVALID_ARGUMENT, "Assertion failed")
-    }
+    } yield assertGrpcError(failure, Status.Code.INVALID_ARGUMENT, "Assertion failed")
   })
 
   test(
@@ -600,15 +577,13 @@ class TransactionServiceIT extends LedgerTestSuite {
   )(implicit ec => { case Participants(Participant(alpha, receiver), Participant(beta, giver)) =>
     for {
       agreementFactory <- beta.create(giver, AgreementFactory(receiver, giver))
-      _ <- eventually { alpha.exercise(receiver, agreementFactory.exerciseCreateAgreement) }
+      _ <- eventually(alpha.exercise(receiver, agreementFactory.exerciseCreateAgreement))
       _ <- synchronize(alpha, beta)
       transactions <- alpha.flatTransactions(receiver, giver)
-    } yield {
-      assert(
-        !transactions.exists(_.events.exists(_.event.isArchived)),
-        s"The transaction include an archival: ${transactions.flatMap(_.events).filter(_.event.isArchived)}",
-      )
-    }
+    } yield assert(
+      !transactions.exists(_.events.exists(_.event.isArchived)),
+      s"The transaction include an archival: ${transactions.flatMap(_.events).filter(_.event.isArchived)}",
+    )
   })
 
   test(
@@ -620,9 +595,9 @@ class TransactionServiceIT extends LedgerTestSuite {
     for {
       _ <- alpha.create(alice, template)
       transactions <- alpha.flatTransactions(alice)
-    } yield {
-      assert(template.arguments == transactions.head.events.head.getCreated.getCreateArguments)
-    }
+    } yield assert(
+      template.arguments == transactions.head.events.head.getCreated.getCreateArguments
+    )
   })
 
   test(
@@ -698,12 +673,10 @@ class TransactionServiceIT extends LedgerTestSuite {
       transaction <- alpha.submitAndWaitForTransaction(create)
       _ <- synchronize(alpha, beta)
       transactions <- beta.flatTransactions(bob)
-    } yield {
-      assert(
-        !transactions.exists(_.transactionId != transaction.transactionId),
-        s"The transaction ${transaction.transactionId} should not have been disclosed.",
-      )
-    }
+    } yield assert(
+      !transactions.exists(_.transactionId != transaction.transactionId),
+      s"The transaction ${transaction.transactionId} should not have been disclosed.",
+    )
   })
 
   test(
@@ -719,9 +692,7 @@ class TransactionServiceIT extends LedgerTestSuite {
         _ <- eventually {
           for {
             transactions <- beta.flatTransactions(observers: _*)
-          } yield {
-            assert(transactions.exists(_.transactionId == transactionId))
-          }
+          } yield assert(transactions.exists(_.transactionId == transactionId))
         }
       } yield {
         // Checks performed in the `eventually` block
@@ -869,9 +840,7 @@ class TransactionServiceIT extends LedgerTestSuite {
             failure <- beta
               .exercise(giver, triProposal.exerciseTriProposalAccept)
               .mustFail("exercising with missing authorizers")
-          } yield {
-            assertGrpcError(failure, Status.Code.INVALID_ARGUMENT, "requires authorizers")
-          }
+          } yield assertGrpcError(failure, Status.Code.INVALID_ARGUMENT, "requires authorizers")
         }
       } yield {
         // Check performed in the `eventually` block
@@ -905,9 +874,7 @@ class TransactionServiceIT extends LedgerTestSuite {
             failure <- beta
               .exercise(giver, agreement.exerciseAcceptTriProposal(_, triProposal))
               .mustFail("exercising with failing assertion")
-          } yield {
-            assertGrpcError(failure, Status.Code.INVALID_ARGUMENT, "Assertion failed")
-          }
+          } yield assertGrpcError(failure, Status.Code.INVALID_ARGUMENT, "Assertion failed")
         }
       } yield {
         // Check performed in the `eventually` block
@@ -987,13 +954,11 @@ class TransactionServiceIT extends LedgerTestSuite {
       _ <- synchronize(alpha, beta)
       alphaView <- alpha.flatTransactions(alice, bob)
       betaView <- beta.flatTransactions(alice, bob)
-    } yield {
-      assertEquals(
-        "Single- and multi-party subscription yield different results",
-        comparableTransactions(alphaView),
-        comparableTransactions(betaView),
-      )
-    }
+    } yield assertEquals(
+      "Single- and multi-party subscription yield different results",
+      comparableTransactions(alphaView),
+      comparableTransactions(betaView),
+    )
   })
 
   test(
@@ -1007,13 +972,11 @@ class TransactionServiceIT extends LedgerTestSuite {
       _ <- synchronize(alpha, beta)
       alphaView <- alpha.transactionTrees(alice, bob)
       betaView <- beta.transactionTrees(alice, bob)
-    } yield {
-      assertEquals(
-        "Single- and multi-party subscription yield different results",
-        comparableTransactionTrees(alphaView),
-        comparableTransactionTrees(betaView),
-      )
-    }
+    } yield assertEquals(
+      "Single- and multi-party subscription yield different results",
+      comparableTransactionTrees(alphaView),
+      comparableTransactionTrees(betaView),
+    )
   })
 
   test(
@@ -1052,9 +1015,11 @@ class TransactionServiceIT extends LedgerTestSuite {
       failure <- ledger
         .flatTransactions(invalidRequest)
         .mustFail("subscribing with the wrong ledger ID")
-    } yield {
-      assertGrpcError(failure, Status.Code.NOT_FOUND, s"Ledger ID '$invalidLedgerId' not found.")
-    }
+    } yield assertGrpcError(
+      failure,
+      Status.Code.NOT_FOUND,
+      s"Ledger ID '$invalidLedgerId' not found.",
+    )
   })
 
   test(
@@ -1070,9 +1035,11 @@ class TransactionServiceIT extends LedgerTestSuite {
       failure <- ledger
         .transactionTrees(invalidRequest)
         .mustFail("subscribing with the wrong ledger ID")
-    } yield {
-      assertGrpcError(failure, Status.Code.NOT_FOUND, s"Ledger ID '$invalidLedgerId' not found.")
-    }
+    } yield assertGrpcError(
+      failure,
+      Status.Code.NOT_FOUND,
+      s"Ledger ID '$invalidLedgerId' not found.",
+    )
   })
 
   test(
@@ -1088,9 +1055,11 @@ class TransactionServiceIT extends LedgerTestSuite {
       failure <- ledger
         .transactionTreeById(invalidRequest)
         .mustFail("subscribing with the wrong ledger ID")
-    } yield {
-      assertGrpcError(failure, Status.Code.NOT_FOUND, s"Ledger ID '$invalidLedgerId' not found.")
-    }
+    } yield assertGrpcError(
+      failure,
+      Status.Code.NOT_FOUND,
+      s"Ledger ID '$invalidLedgerId' not found.",
+    )
   })
 
   test(
@@ -1106,9 +1075,11 @@ class TransactionServiceIT extends LedgerTestSuite {
       failure <- ledger
         .flatTransactionById(invalidRequest)
         .mustFail("subscribing with the wrong ledger ID")
-    } yield {
-      assertGrpcError(failure, Status.Code.NOT_FOUND, s"Ledger ID '$invalidLedgerId' not found.")
-    }
+    } yield assertGrpcError(
+      failure,
+      Status.Code.NOT_FOUND,
+      s"Ledger ID '$invalidLedgerId' not found.",
+    )
   })
 
   test(
@@ -1124,9 +1095,11 @@ class TransactionServiceIT extends LedgerTestSuite {
       failure <- ledger
         .transactionTreeByEventId(invalidRequest)
         .mustFail("subscribing with the wrong ledger ID")
-    } yield {
-      assertGrpcError(failure, Status.Code.NOT_FOUND, s"Ledger ID '$invalidLedgerId' not found.")
-    }
+    } yield assertGrpcError(
+      failure,
+      Status.Code.NOT_FOUND,
+      s"Ledger ID '$invalidLedgerId' not found.",
+    )
   })
 
   test(
@@ -1142,9 +1115,11 @@ class TransactionServiceIT extends LedgerTestSuite {
       failure <- ledger
         .flatTransactionByEventId(invalidRequest)
         .mustFail("subscribing with the wrong ledger ID")
-    } yield {
-      assertGrpcError(failure, Status.Code.NOT_FOUND, s"Ledger ID '$invalidLedgerId' not found.")
-    }
+    } yield assertGrpcError(
+      failure,
+      Status.Code.NOT_FOUND,
+      s"Ledger ID '$invalidLedgerId' not found.",
+    )
   })
 
   test(
@@ -1155,9 +1130,11 @@ class TransactionServiceIT extends LedgerTestSuite {
     val invalidLedgerId = "DEFINITELY_NOT_A_VALID_LEDGER_IDENTIFIER"
     for {
       failure <- ledger.currentEnd(invalidLedgerId).mustFail("requesting with the wrong ledger ID")
-    } yield {
-      assertGrpcError(failure, Status.Code.NOT_FOUND, s"Ledger ID '$invalidLedgerId' not found.")
-    }
+    } yield assertGrpcError(
+      failure,
+      Status.Code.NOT_FOUND,
+      s"Ledger ID '$invalidLedgerId' not found.",
+    )
   })
 
   test(
@@ -1169,9 +1146,7 @@ class TransactionServiceIT extends LedgerTestSuite {
       dummy <- ledger.create(party, Dummy(party))
       tree <- ledger.exercise(party, dummy.exerciseDummyChoice1)
       byId <- ledger.transactionTreeById(tree.transactionId, party)
-    } yield {
-      assertEquals("The transaction fetched by identifier does not match", tree, byId)
-    }
+    } yield assertEquals("The transaction fetched by identifier does not match", tree, byId)
   })
 
   test(
@@ -1186,9 +1161,11 @@ class TransactionServiceIT extends LedgerTestSuite {
       failure <- beta
         .transactionTreeById(tree.transactionId, intruder)
         .mustFail("subscribing to an invisible transaction tree")
-    } yield {
-      assertGrpcError(failure, Status.Code.NOT_FOUND, "Transaction not found, or not visible.")
-    }
+    } yield assertGrpcError(
+      failure,
+      Status.Code.NOT_FOUND,
+      "Transaction not found, or not visible.",
+    )
   })
 
   test(
@@ -1200,9 +1177,11 @@ class TransactionServiceIT extends LedgerTestSuite {
       failure <- ledger
         .transactionTreeById("a" * 60, party)
         .mustFail("looking up an non-existent transaction tree")
-    } yield {
-      assertGrpcError(failure, Status.Code.NOT_FOUND, "Transaction not found, or not visible.")
-    }
+    } yield assertGrpcError(
+      failure,
+      Status.Code.NOT_FOUND,
+      "Transaction not found, or not visible.",
+    )
   })
 
   test(
@@ -1214,9 +1193,11 @@ class TransactionServiceIT extends LedgerTestSuite {
       failure <- ledger
         .transactionTreeById("not-relevant")
         .mustFail("looking up a transaction tree without specifying a party")
-    } yield {
-      assertGrpcError(failure, Status.Code.INVALID_ARGUMENT, "Missing field: requesting_parties")
-    }
+    } yield assertGrpcError(
+      failure,
+      Status.Code.INVALID_ARGUMENT,
+      "Missing field: requesting_parties",
+    )
   })
 
   test(
@@ -1232,13 +1213,11 @@ class TransactionServiceIT extends LedgerTestSuite {
         byId <- Future.sequence(
           trees.map(t => beta.transactionTreeById(t.transactionId, listener, submitter))
         )
-      } yield {
-        assertEquals(
-          "The events fetched by identifier did not match the ones on the transaction stream",
-          comparableTransactionTrees(trees),
-          comparableTransactionTrees(byId),
-        )
-      }
+      } yield assertEquals(
+        "The events fetched by identifier did not match the ones on the transaction stream",
+        comparableTransactionTrees(trees),
+        comparableTransactionTrees(byId),
+      )
   })
 
   test(
@@ -1250,9 +1229,7 @@ class TransactionServiceIT extends LedgerTestSuite {
       dummy <- ledger.create(party, Dummy(party))
       transaction <- ledger.exerciseForFlatTransaction(party, dummy.exerciseDummyChoice1)
       byId <- ledger.flatTransactionById(transaction.transactionId, party)
-    } yield {
-      assertEquals("The transaction fetched by identifier does not match", transaction, byId)
-    }
+    } yield assertEquals("The transaction fetched by identifier does not match", transaction, byId)
   })
 
   test(
@@ -1266,9 +1243,11 @@ class TransactionServiceIT extends LedgerTestSuite {
       failure <- ledger
         .flatTransactionById(tree.transactionId, intruder)
         .mustFail("looking up an invisible flat transaction")
-    } yield {
-      assertGrpcError(failure, Status.Code.NOT_FOUND, "Transaction not found, or not visible.")
-    }
+    } yield assertGrpcError(
+      failure,
+      Status.Code.NOT_FOUND,
+      "Transaction not found, or not visible.",
+    )
   })
 
   test(
@@ -1280,9 +1259,11 @@ class TransactionServiceIT extends LedgerTestSuite {
       failure <- ledger
         .flatTransactionById("a" * 60, party)
         .mustFail("looking up a non-existent flat transaction")
-    } yield {
-      assertGrpcError(failure, Status.Code.NOT_FOUND, "Transaction not found, or not visible.")
-    }
+    } yield assertGrpcError(
+      failure,
+      Status.Code.NOT_FOUND,
+      "Transaction not found, or not visible.",
+    )
   })
 
   test(
@@ -1294,9 +1275,11 @@ class TransactionServiceIT extends LedgerTestSuite {
       failure <- ledger
         .flatTransactionById("not-relevant")
         .mustFail("looking up a flat transaction without specifying a party")
-    } yield {
-      assertGrpcError(failure, Status.Code.INVALID_ARGUMENT, "Missing field: requesting_parties")
-    }
+    } yield assertGrpcError(
+      failure,
+      Status.Code.INVALID_ARGUMENT,
+      "Missing field: requesting_parties",
+    )
   })
 
   test(
@@ -1312,13 +1295,11 @@ class TransactionServiceIT extends LedgerTestSuite {
         byId <- Future.sequence(
           transactions.map(t => beta.flatTransactionById(t.transactionId, listener, submitter))
         )
-      } yield {
-        assertEquals(
-          "The events fetched by identifier did not match the ones on the transaction stream",
-          comparableTransactions(transactions),
-          comparableTransactions(byId),
-        )
-      }
+      } yield assertEquals(
+        "The events fetched by identifier did not match the ones on the transaction stream",
+        comparableTransactions(transactions),
+        comparableTransactions(byId),
+      )
   })
 
   test(
@@ -1330,9 +1311,7 @@ class TransactionServiceIT extends LedgerTestSuite {
       dummy <- ledger.create(party, Dummy(party))
       tree <- ledger.exercise(party, dummy.exerciseDummyChoice1)
       byId <- ledger.transactionTreeByEventId(tree.rootEventIds.head, party)
-    } yield {
-      assertEquals("The transaction fetched by identifier does not match", tree, byId)
-    }
+    } yield assertEquals("The transaction fetched by identifier does not match", tree, byId)
   })
 
   test(
@@ -1347,9 +1326,11 @@ class TransactionServiceIT extends LedgerTestSuite {
       failure <- beta
         .transactionTreeByEventId(tree.rootEventIds.head, intruder)
         .mustFail("looking up an invisible transaction tree")
-    } yield {
-      assertGrpcError(failure, Status.Code.NOT_FOUND, "Transaction not found, or not visible.")
-    }
+    } yield assertGrpcError(
+      failure,
+      Status.Code.NOT_FOUND,
+      "Transaction not found, or not visible.",
+    )
   })
 
   test(
@@ -1361,9 +1342,7 @@ class TransactionServiceIT extends LedgerTestSuite {
       failure <- ledger
         .transactionTreeByEventId("dont' worry, be happy", party)
         .mustFail("looking up an transaction tree using an invalid event ID")
-    } yield {
-      assertGrpcError(failure, Status.Code.INVALID_ARGUMENT, "Invalid field event_id")
-    }
+    } yield assertGrpcError(failure, Status.Code.INVALID_ARGUMENT, "Invalid field event_id")
   })
 
   test(
@@ -1375,9 +1354,11 @@ class TransactionServiceIT extends LedgerTestSuite {
       failure <- ledger
         .transactionTreeByEventId(s"#${"a" * 60}:000", party)
         .mustFail("looking up a non-existent transaction tree")
-    } yield {
-      assertGrpcError(failure, Status.Code.NOT_FOUND, "Transaction not found, or not visible.")
-    }
+    } yield assertGrpcError(
+      failure,
+      Status.Code.NOT_FOUND,
+      "Transaction not found, or not visible.",
+    )
   })
 
   test(
@@ -1389,9 +1370,11 @@ class TransactionServiceIT extends LedgerTestSuite {
       failure <- ledger
         .transactionTreeByEventId("not-relevant")
         .mustFail("looking up a transaction tree without specifying a party")
-    } yield {
-      assertGrpcError(failure, Status.Code.INVALID_ARGUMENT, "Missing field: requesting_parties")
-    }
+    } yield assertGrpcError(
+      failure,
+      Status.Code.INVALID_ARGUMENT,
+      "Missing field: requesting_parties",
+    )
   })
 
   test(
@@ -1405,9 +1388,7 @@ class TransactionServiceIT extends LedgerTestSuite {
       event = transaction.events.head.event
       eventId = event.archived.map(_.eventId).get
       byId <- ledger.flatTransactionByEventId(eventId, party)
-    } yield {
-      assertEquals("The transaction fetched by identifier does not match", transaction, byId)
-    }
+    } yield assertEquals("The transaction fetched by identifier does not match", transaction, byId)
   })
 
   test(
@@ -1421,9 +1402,11 @@ class TransactionServiceIT extends LedgerTestSuite {
       failure <- ledger
         .flatTransactionByEventId(tree.rootEventIds.head, intruder)
         .mustFail("looking up an invisible flat transaction")
-    } yield {
-      assertGrpcError(failure, Status.Code.NOT_FOUND, "Transaction not found, or not visible.")
-    }
+    } yield assertGrpcError(
+      failure,
+      Status.Code.NOT_FOUND,
+      "Transaction not found, or not visible.",
+    )
   })
 
   test(
@@ -1435,9 +1418,7 @@ class TransactionServiceIT extends LedgerTestSuite {
       failure <- ledger
         .flatTransactionByEventId("dont' worry, be happy", party)
         .mustFail("looking up a flat transaction using an invalid event ID")
-    } yield {
-      assertGrpcError(failure, Status.Code.INVALID_ARGUMENT, "Invalid field event_id")
-    }
+    } yield assertGrpcError(failure, Status.Code.INVALID_ARGUMENT, "Invalid field event_id")
   })
 
   test(
@@ -1449,9 +1430,11 @@ class TransactionServiceIT extends LedgerTestSuite {
       failure <- ledger
         .flatTransactionByEventId(s"#${"a" * 60}:000", party)
         .mustFail("looking up a non-existent flat transaction")
-    } yield {
-      assertGrpcError(failure, Status.Code.NOT_FOUND, "Transaction not found, or not visible.")
-    }
+    } yield assertGrpcError(
+      failure,
+      Status.Code.NOT_FOUND,
+      "Transaction not found, or not visible.",
+    )
   })
 
   test(
@@ -1463,9 +1446,11 @@ class TransactionServiceIT extends LedgerTestSuite {
       failure <- ledger
         .flatTransactionByEventId("not-relevant")
         .mustFail("looking up a flat transaction without specifying a party")
-    } yield {
-      assertGrpcError(failure, Status.Code.INVALID_ARGUMENT, "Missing field: requesting_parties")
-    }
+    } yield assertGrpcError(
+      failure,
+      Status.Code.INVALID_ARGUMENT,
+      "Missing field: requesting_parties",
+    )
   })
 
   private def checkTransactionsOrder(
@@ -1530,9 +1515,7 @@ class TransactionServiceIT extends LedgerTestSuite {
         )
       )
       transactions <- ledger.flatTransactions(party)
-    } yield {
-      checkTransactionsOrder("Ledger", transactions, contracts)
-    }
+    } yield checkTransactionsOrder("Ledger", transactions, contracts)
   })
 
   test(
@@ -1550,9 +1533,7 @@ class TransactionServiceIT extends LedgerTestSuite {
           .flatMap(contract => ledger.exercise(party, contract.exerciseDummyChoice1))
       })
       transactions <- ledger.flatTransactions(alice, bob)
-    } yield {
-      checkTransactionsOrder("Ledger", transactions, contracts)
-    }
+    } yield checkTransactionsOrder("Ledger", transactions, contracts)
   })
 
   test(
@@ -1572,18 +1553,16 @@ class TransactionServiceIT extends LedgerTestSuite {
       )
       transactions <- ledger.flatTransactions(party)
       trees <- ledger.transactionTrees(party)
-    } yield {
-      assert(
-        transactions
-          .flatMap(
-            _.events.map(e =>
-              e.event.archived.map(_.eventId).orElse(e.event.created.map(_.eventId)).get
-            )
+    } yield assert(
+      transactions
+        .flatMap(
+          _.events.map(e =>
+            e.event.archived.map(_.eventId).orElse(e.event.created.map(_.eventId)).get
           )
-          .toSet
-          .subsetOf(trees.flatMap(_.eventsById.keys).toSet)
-      )
-    }
+        )
+        .toSet
+        .subsetOf(trees.flatMap(_.eventsById.keys).toSet)
+    )
   })
 
   test(
@@ -1624,9 +1603,8 @@ class TransactionServiceIT extends LedgerTestSuite {
                 .get
             )
           )
-      for ((event, witnesses) <- witnessesByEventIdInFlatStream) {
+      for ((event, witnesses) <- witnessesByEventIdInFlatStream)
         assert(witnesses.subsetOf(witnessesByEventIdInTreesStream(event)))
-      }
     }
   })
 
@@ -1656,7 +1634,7 @@ class TransactionServiceIT extends LedgerTestSuite {
           IouTrade(alice, bob, aliceIou, bank, "GBP", 100, bank, "DKK", 110),
         )
       }
-      tree <- eventually { ledger.exercise(bob, trade.exerciseIouTrade_Accept(_, bobIou)) }
+      tree <- eventually(ledger.exercise(bob, trade.exerciseIouTrade_Accept(_, bobIou)))
       aliceTransactions <- ledger.flatTransactions(alice)
       bobTransactions <- ledger.flatTransactions(bob)
     } yield {

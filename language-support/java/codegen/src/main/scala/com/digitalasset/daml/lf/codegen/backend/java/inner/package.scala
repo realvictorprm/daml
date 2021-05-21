@@ -174,14 +174,13 @@ package object inner {
   // This can happen if there are two fields of type `a`, but we only need to carry
   // this particular type parameter forward once, hence the usage of a set.
   def escapedNestedTypeVarNames(tpe: Type): IndexedSeq[String] = {
-    def go(typeParams: Set[String], tpe: Type): Set[String] = {
+    def go(typeParams: Set[String], tpe: Type): Set[String] =
       tpe match {
         case TypeVar(x) => typeParams + JavaEscaper.escapeString(x)
         case TypePrim(_, args) => args.foldLeft(typeParams)(go)
         case TypeCon(_, args) => args.foldLeft(typeParams)(go)
         case TypeNumeric(_) => Set.empty
       }
-    }
     go(Set.empty, tpe).toVector
   }
 
@@ -205,19 +204,17 @@ package object inner {
   }
 
   implicit class ClassNameExtensions(name: ClassName) {
-    def parameterized(typeParams: IndexedSeq[String]): TypeName = {
+    def parameterized(typeParams: IndexedSeq[String]): TypeName =
       if (typeParams.isEmpty) name
       else ParameterizedTypeName.get(name, typeParams.map(TypeVariableName.get): _*)
-    }
 
-    def asWildcardType(typeParams: IndexedSeq[String]): TypeName = {
+    def asWildcardType(typeParams: IndexedSeq[String]): TypeName =
       if (typeParams.isEmpty) name
       else
         ParameterizedTypeName.get(
           name,
           typeParams.map(_ => WildcardTypeName.subtypeOf(classOf[Object])): _*
         )
-    }
   }
 
 }

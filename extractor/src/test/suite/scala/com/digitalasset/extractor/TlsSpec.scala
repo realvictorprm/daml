@@ -28,11 +28,10 @@ class TlsSpec
 
   override protected def darFile = new File(rlocation("extractor/VeryLargeArchive.dar"))
 
-  val List(serverCrt, serverPem, caCrt, clientCrt, clientPem) = {
+  val List(serverCrt, serverPem, caCrt, clientCrt, clientPem) =
     List("server.crt", "server.pem", "ca.crt", "client.crt", "client.pem").map { src =>
       Some(new File(rlocation("ledger/test-common/test-certificates/" + src)))
     }
-  }
 
   override protected def config: SandboxConfig =
     super.config

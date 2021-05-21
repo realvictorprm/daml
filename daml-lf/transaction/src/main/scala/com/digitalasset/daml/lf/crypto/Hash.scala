@@ -41,9 +41,8 @@ object Hash {
     throw HashingError(msg)
 
   private def handleError[X](x: => X): Either[String, X] =
-    try {
-      Right(x)
-    } catch {
+    try Right(x)
+    catch {
       case HashingError(msg) => Left(msg)
     }
 

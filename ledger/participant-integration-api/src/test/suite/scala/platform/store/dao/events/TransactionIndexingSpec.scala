@@ -66,7 +66,7 @@ final class TransactionIndexingSpec extends AnyWordSpec with Matchers {
           builder: TransactionBuilder,
           id: String,
           parties: Set[String] = Set(partyStr),
-      ) = {
+      ) =
         builder.exercise(
           contract = create(builder, id),
           choice = "C",
@@ -74,7 +74,6 @@ final class TransactionIndexingSpec extends AnyWordSpec with Matchers {
           actingParties = parties,
           argument = V.ValueRecord(None, ImmArray.empty),
         )
-      }
 
       def fetch(builder: TransactionBuilder, id: String) =
         builder.fetch(create(builder, id))

@@ -32,24 +32,19 @@ final class Header(version: String) {
     output.flush()
   }
 
-  def consumeAndVerify(input: InputStream): Unit = {
+  def consumeAndVerify(input: InputStream): Unit =
     if (!isValid(input)) {
       throw new InvalidExportHeaderException(version)
     }
-  }
 
   def isValid(path: Path): Boolean = {
     val input = Files.newInputStream(path)
-    try {
-      isValid(input)
-    } finally {
-      input.close()
-    }
+    try isValid(input)
+    finally input.close()
   }
 
-  private def isValid(input: InputStream): Boolean = {
+  private def isValid(input: InputStream): Boolean =
     verifyChunk(input, preamble) && verifyChunk(input, versionBytes)
-  }
 
   private def verifyChunk(input: InputStream, value: ByteBuffer): Boolean = {
     val size = value.limit() + 1

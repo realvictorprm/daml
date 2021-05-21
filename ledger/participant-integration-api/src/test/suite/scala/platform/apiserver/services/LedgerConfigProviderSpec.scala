@@ -139,13 +139,11 @@ object LedgerConfigProviderSpec {
 
   private val someTimeProvider = TimeProvider.Constant(Instant.EPOCH)
 
-  private def offset(value: String): LedgerOffset.Absolute = {
+  private def offset(value: String): LedgerOffset.Absolute =
     LedgerOffset.Absolute(Ref.LedgerString.assertFromString(value))
-  }
 
-  private def configurationWith(generation: Long): Configuration = {
+  private def configurationWith(generation: Long): Configuration =
     Configuration(generation, TimeModel.reasonableDefault, Duration.ofDays(1))
-  }
 
   private final class FakeWriteConfigService(
       delay: FiniteDuration = scala.concurrent.duration.Duration.Zero

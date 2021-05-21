@@ -18,7 +18,5 @@ object InterfaceReaderMain extends App {
     val archive = DamlLf.Archive.parser().parseFrom(bis)
     val out = InterfaceReader.readInterface(archive)
     println(s"out: $out")
-  } finally {
-    is.close()
-  }
+  } finally is.close()
 }

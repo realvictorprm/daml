@@ -17,9 +17,8 @@ sealed abstract class CidMapper[-A1, +A2, In, Out] {
   def traverse[L](f: In => Either[L, Out]): A1 => Either[L, A2] = {
     case class Ball(x: L) extends Throwable with NoStackTrace
     a =>
-      try {
-        Right(map(x => f(x).fold(y => throw Ball(y), identity))(a))
-      } catch {
+      try Right(map(x => f(x).fold(y => throw Ball(y), identity))(a))
+      catch {
         case Ball(x) => Left(x)
       }
   }
@@ -70,7 +69,7 @@ trait CidContainer[+A] {
   // Uses `f(coid.discriminator)` as suffix.
   final def suffixCid[B](f: crypto.Hash => Bytes)(implicit
       suffixer: CidSuffixer[A, B]
-  ): Either[String, B] = {
+  ): Either[String, B] =
     suffixer.traverse[String] {
       case Value.ContractId.V1(discriminator, Bytes.Empty) =>
         Value.ContractId.V1.build(discriminator, f(discriminator))
@@ -79,7 +78,6 @@ trait CidContainer[+A] {
       case acoid @ Value.ContractId.V0(_) =>
         Left(s"expect a Contract ID V1, found $acoid")
     }(self)
-  }
 
 }
 
@@ -130,9 +128,8 @@ trait CidContainer2[F[_, _]] {
       mapper2: CidMapper[B1, B2, In, Out],
   ): CidMapper[F[A1, B1], F[A2, B2], In, Out] =
     new CidMapper[F[A1, B1], F[A2, B2], In, Out] {
-      override def map(f: In => Out): F[A1, B1] => F[A2, B2] = {
+      override def map(f: In => Out): F[A1, B1] => F[A2, B2] =
         map2[A1, B1, A2, B2](mapper1.map(f), mapper2.map(f))
-      }
     }
 
   final implicit def cidSuffixerInstance[A1, B1, A2, B2](implicit
@@ -165,9 +162,8 @@ trait CidContainer3[F[_, _, _]] {
       mapper3: CidMapper[C1, C2, In, Out],
   ): CidMapper[F[A1, B1, C1], F[A2, B2, C2], In, Out] =
     new CidMapper[F[A1, B1, C1], F[A2, B2, C2], In, Out] {
-      override def map(f: In => Out): F[A1, B1, C1] => F[A2, B2, C2] = {
+      override def map(f: In => Out): F[A1, B1, C1] => F[A2, B2, C2] =
         map3[A1, B1, C1, A2, B2, C2](mapper1.map(f), mapper2.map(f), mapper3.map(f))
-      }
     }
 
   final implicit def cidSuffixerInstance[A1, B1, C1, A2, B2, C2](implicit

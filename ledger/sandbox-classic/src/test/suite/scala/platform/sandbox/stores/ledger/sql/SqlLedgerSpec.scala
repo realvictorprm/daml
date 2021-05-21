@@ -76,17 +76,13 @@ final class SqlLedgerSpec
     "be able to be created from scratch with a random ledger ID" in {
       for {
         ledger <- createSqlLedger(validatePartyAllocation = false)
-      } yield {
-        ledger.ledgerId should not be ""
-      }
+      } yield ledger.ledgerId should not be ""
     }
 
     "be able to be created from scratch with a given ledger ID" in {
       for {
         ledger <- createSqlLedger(ledgerId, validatePartyAllocation = false)
-      } yield {
-        ledger.ledgerId should be(ledgerId)
-      }
+      } yield ledger.ledgerId should be(ledgerId)
     }
 
     "be able to be reused keeping the old ledger ID" in {
@@ -108,11 +104,9 @@ final class SqlLedgerSpec
           ledgerId = "AnotherLedger",
           validatePartyAllocation = false,
         ).failed
-      } yield {
-        throwable.getMessage should be(
-          "The provided ledger id does not match the existing one. Existing: \"TheLedger\", Provided: \"AnotherLedger\"."
-        )
-      }
+      } yield throwable.getMessage should be(
+        "The provided ledger id does not match the existing one. Existing: \"TheLedger\", Provided: \"AnotherLedger\"."
+      )
     }
 
     "correctly initialized the participant ID" in {
@@ -120,9 +114,7 @@ final class SqlLedgerSpec
       for {
         _ <- createSqlLedgerWithParticipantId(participantId, validatePartyAllocation = false)
         metadata <- IndexMetadata.read(postgresDatabase.url)
-      } yield {
-        metadata.participantId shouldEqual participantId
-      }
+      } yield metadata.participantId shouldEqual participantId
     }
 
     "allow to resume on an existing participant ID" in {
@@ -131,9 +123,7 @@ final class SqlLedgerSpec
         _ <- createSqlLedgerWithParticipantId(participantId, validatePartyAllocation = false)
         _ <- createSqlLedgerWithParticipantId(participantId, validatePartyAllocation = false)
         metadata <- IndexMetadata.read(postgresDatabase.url)
-      } yield {
-        metadata.participantId shouldEqual participantId
-      }
+      } yield metadata.participantId shouldEqual participantId
     }
 
     "refuse to create a new ledger when there is already one with a different participant ID" in {
@@ -145,14 +135,12 @@ final class SqlLedgerSpec
           expectedProvided,
           validatePartyAllocation = false,
         ).failed
-      } yield {
-        throwable match {
-          case mismatch: MismatchException.ParticipantId =>
-            mismatch.existing shouldEqual expectedExisting
-            mismatch.provided shouldEqual expectedProvided
-          case _ =>
-            fail("Did not get the expected exception type", throwable)
-        }
+      } yield throwable match {
+        case mismatch: MismatchException.ParticipantId =>
+          mismatch.existing shouldEqual expectedExisting
+          mismatch.provided shouldEqual expectedProvided
+        case _ =>
+          fail("Did not get the expected exception type", throwable)
       }
     }
 
@@ -160,9 +148,7 @@ final class SqlLedgerSpec
       for {
         ledger <- createSqlLedger(validatePartyAllocation = false)
         packages <- ledger.listLfPackages()
-      } yield {
-        packages should have size 0
-      }
+      } yield packages should have size 0
     }
 
     "load packages if provided with a dynamic ledger ID" in {
@@ -172,9 +158,7 @@ final class SqlLedgerSpec
           validatePartyAllocation = false,
         )
         packages <- ledger.listLfPackages()
-      } yield {
-        packages should have size testDar.all.length.toLong
-      }
+      } yield packages should have size testDar.all.length.toLong
     }
 
     "load packages if provided with a static ledger ID" in {
@@ -185,9 +169,7 @@ final class SqlLedgerSpec
           validatePartyAllocation = false,
         )
         packages <- ledger.listLfPackages()
-      } yield {
-        packages should have size testDar.all.length.toLong
-      }
+      } yield packages should have size testDar.all.length.toLong
     }
 
     "load no packages if the ledger already exists" in {
@@ -199,17 +181,13 @@ final class SqlLedgerSpec
           validatePartyAllocation = false,
         )
         packages <- ledger.listLfPackages()
-      } yield {
-        packages should have size 0
-      }
+      } yield packages should have size 0
     }
 
     "be healthy" in {
       for {
         ledger <- createSqlLedger(validatePartyAllocation = false)
-      } yield {
-        ledger.currentHealth() should be(Healthy)
-      }
+      } yield ledger.currentHealth() should be(Healthy)
     }
 
     /** Workaround test for asserting that PostgreSQL asynchronous commits are disabled in
@@ -284,7 +262,9 @@ final class SqlLedgerSpec
       packages: List[DamlLf.Archive],
       validatePartyAllocation: Boolean,
   ): Future[Ledger] = {
-    metrics.getNames.forEach(name => { val _ = metrics.remove(name) })
+    metrics.getNames.forEach { name =>
+      val _ = metrics.remove(name)
+    }
     val ledger =
       new SqlLedger.Owner(
         name = LedgerName(getClass.getSimpleName),
@@ -319,7 +299,7 @@ object SqlLedgerSpec {
   private val ledgerId: LedgerId = LedgerId(Ref.LedgerString.assertFromString("TheLedger"))
 
   private val Success(testDar) = {
-    val reader = DarReader { (_, stream) => Try(DamlLf.Archive.parseFrom(stream)) }
+    val reader = DarReader((_, stream) => Try(DamlLf.Archive.parseFrom(stream)))
     val fileName = new File(rlocation(ModelTestDar.path))
     reader.readArchiveFromFile(fileName)
   }

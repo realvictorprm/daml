@@ -47,9 +47,8 @@ object Update {
       proposedConfiguration: Configuration,
       rejectionReason: String,
   ) extends Update {
-    override def description: String = {
+    override def description: String =
       s"Configuration change '$submissionId' from participant '$participantId' was rejected: $rejectionReason"
-    }
   }
 
   /** Signal that a party is hosted at a participant.
@@ -205,9 +204,8 @@ object Update {
       submitterInfo: SubmitterInfo,
       reason: RejectionReason,
   ) extends Update {
-    override def description: String = {
+    override def description: String =
       s"Reject command ${submitterInfo.commandId}: $reason"
-    }
   }
 
 }

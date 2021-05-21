@@ -79,9 +79,7 @@ class KVUtilsPackageSpec extends AnyWordSpec with Matchers with BazelRunfiles {
     "reject invalid packages" in KVTest.runTest {
       for {
         logEntry <- submitArchives("bad-archive-submission", badArchive).map(_._2)
-      } yield {
-        logEntry.getPayloadCase shouldEqual DamlLogEntry.PayloadCase.PACKAGE_UPLOAD_REJECTION_ENTRY
-      }
+      } yield logEntry.getPayloadCase shouldEqual DamlLogEntry.PayloadCase.PACKAGE_UPLOAD_REJECTION_ENTRY
     }
 
     "reject duplicate" in KVTest.runTest {

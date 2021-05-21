@@ -7,9 +7,8 @@ private[sandbox] sealed abstract class SqlStartMode extends Product with Seriali
 
 private[sandbox] object SqlStartMode {
   /* We do not allow ResetAndStart to be set from options bubbled up to config to avoid mishaps */
-  def fromString(value: String): Option[SqlStartMode] = {
+  def fromString(value: String): Option[SqlStartMode] =
     Vector(MigrateAndStart, ResetAndStart).find(_.toString == value)
-  }
 
   /** Will continue using an initialised ledger, otherwise initialize a new one */
   final case object MigrateAndStart extends SqlStartMode

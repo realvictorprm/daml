@@ -38,9 +38,7 @@ class ActiveContractsServiceIT extends LedgerTestSuite {
       .update(_.ledgerId := invalidLedgerId)
     for {
       failure <- ledger.activeContracts(invalidRequest).mustFail("retrieving active contracts")
-    } yield {
-      assertGrpcError(failure, Status.Code.NOT_FOUND, "not found. Actual Ledger ID")
-    }
+    } yield assertGrpcError(failure, Status.Code.NOT_FOUND, "not found. Actual Ledger ID")
   })
 
   test(
@@ -50,12 +48,10 @@ class ActiveContractsServiceIT extends LedgerTestSuite {
   )(implicit ec => { case Participants(Participant(ledger, party)) =>
     for {
       activeContracts <- ledger.activeContracts(party)
-    } yield {
-      assert(
-        activeContracts.isEmpty,
-        s"There should be no active contracts, but received $activeContracts",
-      )
-    }
+    } yield assert(
+      activeContracts.isEmpty,
+      s"There should be no active contracts, but received $activeContracts",
+    )
   })
 
   test(
@@ -324,12 +320,10 @@ class ActiveContractsServiceIT extends LedgerTestSuite {
       Vector(dummyEvent) <- ledger.activeContracts(party)
       flatTransaction <- ledger.flatTransactionByEventId(dummyEvent.eventId, party)
       transactionTree <- ledger.transactionTreeByEventId(dummyEvent.eventId, party)
-    } yield {
-      assert(
-        flatTransaction.transactionId == transactionTree.transactionId,
-        s"EventId ${dummyEvent.eventId} did not resolve to the same flat transaction (${flatTransaction.transactionId}) and transaction tree (${transactionTree.transactionId}).",
-      )
-    }
+    } yield assert(
+      flatTransaction.transactionId == transactionTree.transactionId,
+      s"EventId ${dummyEvent.eventId} did not resolve to the same flat transaction (${flatTransaction.transactionId}) and transaction tree (${transactionTree.transactionId}).",
+    )
   })
 
   test(
@@ -379,13 +373,12 @@ class ActiveContractsServiceIT extends LedgerTestSuite {
 
   private def createDummyContracts(party: Party, ledger: ParticipantTestContext)(implicit
       ec: ExecutionContext
-  ) = {
+  ) =
     for {
       dummy <- ledger.create(party, Dummy(party))
       dummyWithParam <- ledger.create(party, DummyWithParam(party))
       dummyFactory <- ledger.create(party, DummyFactory(party))
     } yield (dummy, dummyWithParam, dummyFactory)
-  }
 
   private def assertTemplates[A](
       party: Seq[Party],

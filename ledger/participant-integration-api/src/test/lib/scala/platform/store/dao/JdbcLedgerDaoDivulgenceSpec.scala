@@ -196,9 +196,7 @@ private[dao] trait JdbcLedgerDaoDivulgenceSpec extends LoneElement with Inside {
           explicitDisclosure = Map.empty,
         ),
       )
-    } yield {
-      succeed
-    }
+    } yield succeed
   }
 
 }

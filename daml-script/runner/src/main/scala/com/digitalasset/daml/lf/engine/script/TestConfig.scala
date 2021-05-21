@@ -64,7 +64,7 @@ object TestConfig {
 
     help("help").text("Print this usage text")
 
-    checkConfig(c => {
+    checkConfig { c =>
       if (c.ledgerHost.isDefined != c.ledgerPort.isDefined) {
         failure("Must specify both --ledger-host and --ledger-port")
       } else if (c.ledgerHost.isDefined && c.participantConfig.isDefined) {
@@ -72,7 +72,7 @@ object TestConfig {
       } else {
         success
       }
-    })
+    }
   }
   def parse(args: Array[String]): Option[TestConfig] =
     parser.parse(

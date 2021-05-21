@@ -63,12 +63,11 @@ private[inner] object VariantClass extends StrictLogging {
       typeWithContext: TypeWithContext,
       constructor: String,
       identifier: Identifier,
-  ): Boolean = {
+  ): Boolean =
     typeWithContext.interface.typeDecls.get(identifier.qualifiedName).exists(isRecord) &&
-    typeWithContext.identifier.qualifiedName.module == identifier.qualifiedName.module &&
-    typeWithContext.identifier.qualifiedName.name.segments == identifier.qualifiedName.name.segments.init &&
-    constructor == identifier.qualifiedName.name.segments.last
-  }
+      typeWithContext.identifier.qualifiedName.module == identifier.qualifiedName.module &&
+      typeWithContext.identifier.qualifiedName.name.segments == identifier.qualifiedName.name.segments.init &&
+      constructor == identifier.qualifiedName.name.segments.last
 
   private def generateAbstractToValueSpec(typeArgs: IndexedSeq[String]): MethodSpec =
     MethodSpec
@@ -101,12 +100,11 @@ private[inner] object VariantClass extends StrictLogging {
   ): MethodSpec.Builder = {
     val constructorsAsString = constructors.map(_.damlName).mkString("[", ", ", "]")
     logger.debug(s"Generating switch on constructors $constructorsAsString for $variant")
-    for (constructorInfo <- constructors) {
+    for (constructorInfo <- constructors)
       builder
         .beginControlFlow("if ($S.equals(variant$$.getConstructor()))", constructorInfo.damlName)
         .addStatement(useConstructor(List(subPackage, constructorInfo.javaName).mkString(".")))
         .endControlFlow()
-    }
     builder
       .addStatement(
         "throw new IllegalArgumentException($S)",
@@ -194,7 +192,7 @@ private[inner] object VariantClass extends StrictLogging {
         variant.fields,
         packagePrefixes,
       )
-    ) {
+    )
       damlType match {
         case TypeCon(TypeConName(id), _) if isVariantRecord(typeWithContext, damlName, id) =>
           // Variant records will be dealt with in a subsequent phase
@@ -210,8 +208,8 @@ private[inner] object VariantClass extends StrictLogging {
             packagePrefixes,
           )
       }
-    }
-    for (child <- typeWithContext.typesLineages) yield {
+    for (child <- typeWithContext.typesLineages)
+      yield
       // A child of a variant can be either:
       // - a record of a constructor of the variant itself
       // - a type unrelated to the variant
@@ -237,7 +235,6 @@ private[inner] object VariantClass extends StrictLogging {
       } else {
         logger.debug(s"${child.name} is an unrelated inner type")
       }
-    }
     innerClasses.toList
   }
 

@@ -41,8 +41,8 @@ class HttpServiceIntegrationTest extends AbstractHttpServiceIntegrationTest with
 
   override protected def afterAll(): Unit = {
     // clean up temp directory
-    discard { dummyFile.delete() }
-    discard { staticContentDir.delete() }
+    discard(dummyFile.delete())
+    discard(staticContentDir.delete())
     super.afterAll()
   }
 
@@ -55,7 +55,7 @@ class HttpServiceIntegrationTest extends AbstractHttpServiceIntegrationTest with
         )
       )
       .flatMap { resp =>
-        discard { resp.status shouldBe StatusCodes.OK }
+        discard(resp.status shouldBe StatusCodes.OK)
         val bodyF: Future[String] = getResponseDataBytes(resp, debug = false)
         bodyF.flatMap { body =>
           body shouldBe expectedDummyContent

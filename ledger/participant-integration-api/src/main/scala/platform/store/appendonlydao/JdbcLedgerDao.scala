@@ -314,10 +314,10 @@ private class JdbcLedgerDao(
 
         val savepoint = conn.setSavepoint()
 
-        Try({
+        Try {
           sequentialIndexer.store(conn, offsetStep.offset, Some(update))
           PersistenceResponse.Ok
-        }).recover {
+        }.recover {
           case NonFatal(e) if e.getMessage.contains(queries.DUPLICATE_KEY_ERROR) =>
             logger.warn(s"Ignoring duplicate configuration submission, submissionId=$submissionId")
             conn.rollback(savepoint)
@@ -340,7 +340,7 @@ private class JdbcLedgerDao(
       val savepoint = conn.setSavepoint()
       partyEntry match {
         case PartyLedgerEntry.AllocationAccepted(submissionIdOpt, recordTime, partyDetails) =>
-          Try({
+          Try {
             sequentialIndexer.store(
               conn,
               offsetStep.offset,
@@ -355,7 +355,7 @@ private class JdbcLedgerDao(
               ),
             )
             PersistenceResponse.Ok
-          }).recover {
+          }.recover {
             case NonFatal(e) if e.getMessage.contains(queries.DUPLICATE_KEY_ERROR) =>
               logger.warn(
                 s"Ignoring duplicate party submission with ID ${partyDetails.party} for submissionId $submissionIdOpt"
@@ -436,7 +436,7 @@ private class JdbcLedgerDao(
   override def getPartyEntries(
       startExclusive: Offset,
       endInclusive: Offset,
-  )(implicit loggingContext: LoggingContext): Source[(Offset, PartyLedgerEntry), NotUsed] = {
+  )(implicit loggingContext: LoggingContext): Source[(Offset, PartyLedgerEntry), NotUsed] =
     PaginatingAsyncStream(PageSize) { queryOffset =>
       withEnrichedLoggingContext("queryOffset" -> queryOffset.toString) { implicit loggingContext =>
         dbDispatcher.executeSql(metrics.daml.index.db.loadPartyEntries) { implicit connection =>
@@ -451,7 +451,6 @@ private class JdbcLedgerDao(
         }
       }
     }
-  }
 
   override def prepareTransactionInsert(
       submitterInfo: Option[SubmitterInfo],
@@ -1006,7 +1005,7 @@ private[platform] object JdbcLedgerDao {
       lfValueTranslationCache: LfValueTranslationCache.Cache,
       enricher: Option[ValueEnricher],
       participantId: v1.ParticipantId,
-  )(implicit loggingContext: LoggingContext): ResourceOwner[LedgerReadDao] = {
+  )(implicit loggingContext: LoggingContext): ResourceOwner[LedgerReadDao] =
     owner(
       serverRole,
       jdbcUrl,
@@ -1019,7 +1018,6 @@ private[platform] object JdbcLedgerDao {
       enricher = enricher,
       participantId = participantId,
     ).map(new MeteredLedgerReadDao(_, metrics))
-  }
 
   def writeOwner(
       serverRole: ServerRole,
@@ -1208,9 +1206,7 @@ private[platform] object JdbcLedgerDao {
       try {
         statement.execute()
         ()
-      } finally {
-        statement.close()
-      }
+      } finally statement.close()
     }
   }
 

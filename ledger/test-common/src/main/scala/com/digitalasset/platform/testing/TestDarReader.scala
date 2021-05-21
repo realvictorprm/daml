@@ -16,7 +16,7 @@ object TestDarReader {
   def readCommonTestDar(testDar: TestDar): Try[Dar[DamlLf.Archive]] = read(testDar.path)
 
   def read(path: String): Try[Dar[DamlLf.Archive]] = {
-    val reader = DarReader { (_, stream) => Try(DamlLf.Archive.parseFrom(stream)) }
+    val reader = DarReader((_, stream) => Try(DamlLf.Archive.parseFrom(stream)))
     reader
       .readArchive(
         path,

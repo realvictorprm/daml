@@ -53,7 +53,7 @@ object ToValueGenerator {
         Integer.valueOf(fields.length),
       )
 
-    for (FieldInfo(damlName, damlType, javaName, _) <- fields) {
+    for (FieldInfo(damlName, damlType, javaName, _) <- fields)
       toValueMethod.addStatement(
         "fields.add(new $T($S, $L))",
         classOf[javaapi.data.Record.Field],
@@ -65,7 +65,6 @@ object ToValueGenerator {
           packagePrefixes,
         ),
       )
-    }
     toValueMethod.addStatement(returnStatement("fields"))
     toValueMethod.build()
   }
@@ -75,7 +74,7 @@ object ToValueGenerator {
       accessor: CodeBlock,
       args: Iterator[String],
       packagePrefixes: Map[PackageId, String],
-  ): CodeBlock = {
+  ): CodeBlock =
     damlType match {
       case TypeVar(tvName) =>
         CodeBlock.of("toValue$L.apply($L)", JavaEscaper.escapeString(tvName), accessor)
@@ -171,6 +170,5 @@ object ToValueGenerator {
         )
       case ty => throw new IllegalArgumentException(s"Invalid Daml datatype: $ty")
     }
-  }
 
 }

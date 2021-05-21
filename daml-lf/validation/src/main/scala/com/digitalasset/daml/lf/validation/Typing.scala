@@ -316,9 +316,8 @@ private[validation] object Typing {
 
     /* Env Ops */
 
-    private def introTypeVar(v: TypeVarName, k: Kind): Env = {
+    private def introTypeVar(v: TypeVarName, k: Kind): Env =
       copy(tVars = tVars + (v -> k))
-    }
 
     private def introExprVar(x: ExprVarName, t: Type): Env = copy(eVars = eVars + (x -> t))
 
@@ -856,7 +855,7 @@ private[validation] object Typing {
       TUpdate(TTyCon(tpl))
     }
 
-    private def checkByKey(tmplId: TypeConName, key: Expr): Unit = {
+    private def checkByKey(tmplId: TypeConName, key: Expr): Unit =
       lookupTemplate(ctx, tmplId).key match {
         case None =>
           throw EKeyOperationForTemplateWithNoKey(ctx, tmplId)
@@ -864,7 +863,6 @@ private[validation] object Typing {
           checkExpr(key, tmplKey.typ)
           ()
       }
-    }
 
     private def typeOfUpdate(update: Update): Type = update match {
       case UpdatePure(typ, expr) =>
@@ -946,21 +944,20 @@ private[validation] object Typing {
     }
 
     // checks that typ contains neither variables, nor quantifiers, nor synonyms
-    private def checkAnyType_(typ: Type): Unit = {
+    private def checkAnyType_(typ: Type): Unit =
       typ match {
         case TVar(_) | TForall(_, _) | TSynApp(_, _) =>
           throw EExpectedAnyType(ctx, typ)
         case _ =>
           TypeIterable(typ).foreach(checkAnyType_)
       }
-    }
 
     private def checkAnyType(typ: Type): Unit = {
       checkAnyType_(typ)
       checkType(typ, KStar)
     }
 
-    private def checkExceptionType(typ: Type): Unit = {
+    private def checkExceptionType(typ: Type): Unit =
       typ match {
         case TTyCon(tyCon) =>
           lookupException(ctx, tyCon)
@@ -968,7 +965,6 @@ private[validation] object Typing {
         case _ =>
           throw EExpectedExceptionType(ctx, typ)
       }
-    }
 
     def typeOf(expr: Expr): Type = {
       val typ0 = typeOf_(expr)

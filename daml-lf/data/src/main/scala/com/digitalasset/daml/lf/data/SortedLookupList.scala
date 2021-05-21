@@ -37,12 +37,11 @@ final class SortedLookupList[+X] private (entries: ImmArray[(String, X)]) extend
 
   override def canEqual(that: Any): Boolean = that.isInstanceOf[SortedLookupList[_]]
 
-  override def equals(obj: Any): Boolean = {
+  override def equals(obj: Any): Boolean =
     obj match {
       case other: SortedLookupList[X] if other canEqual this => other.toImmArray == entries
       case _ => false
     }
-  }
 
   override def hashCode(): Int = entries.hashCode()
 
@@ -75,9 +74,8 @@ object SortedLookupList extends SortedLookupListInstances {
       case Some(_) => Left(s"the entries $entries are not sorted by key")
     }
 
-  def apply[X](entries: Map[String, X]): SortedLookupList[X] = {
+  def apply[X](entries: Map[String, X]): SortedLookupList[X] =
     new SortedLookupList[X](entries.to(ImmArray.ImmArraySeq).sorted(EntryOrdering).toImmArray)
-  }
 
   def Empty: SortedLookupList[Nothing] = new SortedLookupList(ImmArray.empty)
 

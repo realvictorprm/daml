@@ -16,16 +16,15 @@ private[lf] object CheckAuthorization {
   private[this] def authorize(
       passIf: Boolean,
       failWith: => FailedAuthorization,
-  ): List[FailedAuthorization] = {
+  ): List[FailedAuthorization] =
     if (passIf)
       List()
     else
       List(failWith)
-  }
 
   private[lf] def authorizeCreate(create: NodeCreate[_])(
       auth: Authorize
-  ): List[FailedAuthorization] = {
+  ): List[FailedAuthorization] =
     authorize(
       passIf = create.signatories subsetOf auth.authParties,
       failWith = FailedAuthorization.CreateMissingAuthorization(
@@ -53,11 +52,10 @@ private[lf] object CheckAuthorization {
             ),
           )
       })
-  }
 
   private[lf] def authorizeFetch(fetch: NodeFetch[_])(
       auth: Authorize
-  ): List[FailedAuthorization] = {
+  ): List[FailedAuthorization] =
     authorize(
       passIf = fetch.stakeholders.intersect(auth.authParties).nonEmpty,
       failWith = FailedAuthorization.FetchMissingAuthorization(
@@ -67,11 +65,10 @@ private[lf] object CheckAuthorization {
         authorizingParties = auth.authParties,
       ),
     )
-  }
 
   private[lf] def authorizeLookupByKey(lbk: NodeLookupByKey[_])(
       auth: Authorize
-  ): List[FailedAuthorization] = {
+  ): List[FailedAuthorization] =
     authorize(
       passIf = lbk.key.maintainers subsetOf auth.authParties,
       failWith = FailedAuthorization.LookupByKeyMissingAuthorization(
@@ -81,11 +78,10 @@ private[lf] object CheckAuthorization {
         auth.authParties,
       ),
     )
-  }
 
   private[lf] def authorizeExercise(ex: ExercisesContextInfo)(
       auth: Authorize
-  ): List[FailedAuthorization] = {
+  ): List[FailedAuthorization] =
     authorize(
       passIf = ex.actingParties.nonEmpty,
       failWith = FailedAuthorization.NoControllers(ex.templateId, ex.choiceId, ex.optLocation),
@@ -100,6 +96,5 @@ private[lf] object CheckAuthorization {
           requiredParties = ex.actingParties,
         ),
       )
-  }
 
 }

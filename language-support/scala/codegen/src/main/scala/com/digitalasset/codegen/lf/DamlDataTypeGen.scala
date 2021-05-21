@@ -229,14 +229,13 @@ object DamlDataTypeGen {
         )
       }
 
-      lazy val damlVariantArgumentValueWriteMethod: Tree = {
+      lazy val damlVariantArgumentValueWriteMethod: Tree =
         q"""
           override def write(value: $appliedValueType): $rpcValueAlias.Value.Sum = {
             value match {
               case ..${fields.map(variantWriteCase)}
             }
           }"""
-      }
 
       def variantWriteCase(variant: (Ref.Name, VariantField)): CaseDef = variant match {
         case (label, \/-(genTyp)) =>
@@ -286,11 +285,10 @@ object DamlDataTypeGen {
           case -\/(record) => q"..${util.genArgsWithTypes(record)}"
         }
 
-      lazy val variantCaseClasses: Seq[Tree] = {
+      lazy val variantCaseClasses: Seq[Tree] =
         fields.map({ case (label, typ) =>
           q"final case class ${TypeName(label)}[..$covariantTypeParams](..${caseClassArg(typ)}) extends $appliedValueType"
         })
-      }
 
       def variantGetBody(valueExpr: Tree, field: (String, VariantField)): Tree =
         field match {

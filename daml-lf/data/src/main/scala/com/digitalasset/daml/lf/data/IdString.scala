@@ -135,9 +135,8 @@ private sealed abstract class StringModuleImpl extends StringModule[String] {
   final val Array: ArrayFactory[T] = new ArrayFactory[T]
 
   def fromString(str: String): Either[String, String] =
-    try {
-      Right(assertFromString(str))
-    } catch {
+    try Right(assertFromString(str))
+    catch {
       case err: IllegalArgumentException =>
         Left(err.getMessage)
     }

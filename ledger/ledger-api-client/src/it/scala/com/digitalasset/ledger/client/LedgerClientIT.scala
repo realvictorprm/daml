@@ -47,9 +47,7 @@ final class LedgerClientIT
     "retrieve the ledger ID" in {
       for {
         client <- LedgerClient(channel, ClientConfiguration)
-      } yield {
-        client.ledgerId should be(LedgerId)
-      }
+      } yield client.ledgerId should be(LedgerId)
     }
 
     "make some requests" in {
@@ -61,9 +59,7 @@ final class LedgerClientIT
           .allocateParty(hint = Some(partyName), displayName = None)
         retrievedParties <- client.partyManagementClient
           .getParties(OneAnd(Ref.Party.assertFromString(partyName), Set.empty))
-      } yield {
-        retrievedParties should be(List(allocatedParty))
-      }
+      } yield retrievedParties should be(List(allocatedParty))
     }
 
     "get api version" in {
@@ -73,24 +69,20 @@ final class LedgerClientIT
       for {
         client <- LedgerClient(channel, ClientConfiguration)
         version <- client.versionClient.getApiVersion()
-      } yield {
-        version should fullyMatch regex semVerRegex
-      }
+      } yield version should fullyMatch regex semVerRegex
     }
 
     "shut down the channel when closed" in {
       for {
         client <- LedgerClient(channel, ClientConfiguration)
-      } yield {
-        inside(channel) { case channel: ManagedChannel =>
-          channel.isShutdown should be(false)
-          channel.isTerminated should be(false)
+      } yield inside(channel) { case channel: ManagedChannel =>
+        channel.isShutdown should be(false)
+        channel.isTerminated should be(false)
 
-          client.close()
+        client.close()
 
-          channel.isShutdown should be(true)
-          channel.isTerminated should be(true)
-        }
+        channel.isShutdown should be(true)
+        channel.isTerminated should be(true)
       }
     }
   }

@@ -43,7 +43,7 @@ private[events] object ContractsTable extends PostCommitValidationData {
   // TODO append-only: revisit this approach when doing cleanup, so we can decide if it is enough or not.
   override final def lookupMaximumLedgerTime(
       ids: Set[ContractId]
-  )(implicit connection: Connection): Try[Option[Instant]] = {
+  )(implicit connection: Connection): Try[Option[Instant]] =
     if (ids.isEmpty) {
       Failure(ContractsTable.emptyContractIds)
     } else {
@@ -100,7 +100,6 @@ private[events] object ContractsTable extends PostCommitValidationData {
         Failure(ContractsTable.notFound(missingIds.toSet))
       } else Success(foundLedgerEffectiveTimes.max)
     }
-  }
 
   override final def lookupParties(parties: Seq[Party])(implicit
       connection: Connection

@@ -169,7 +169,7 @@ object KeyValueCommitting {
   /** Compute the submission outputs, that is the DAML State Keys created or updated by
     * the processing of the submission.
     */
-  def submissionOutputs(submission: DamlSubmission): Set[DamlStateKey] = {
+  def submissionOutputs(submission: DamlSubmission): Set[DamlStateKey] =
     submission.getPayloadCase match {
       case DamlSubmission.PayloadCase.PACKAGE_UPLOAD_ENTRY =>
         val packageEntry = submission.getPackageUploadEntry
@@ -202,7 +202,6 @@ object KeyValueCommitting {
       case DamlSubmission.PayloadCase.PAYLOAD_NOT_SET =>
         throw Err.InvalidSubmission("DamlSubmission payload not set")
     }
-  }
 
   private def transactionOutputs(
       transactionEntry: DamlTransactionEntry
@@ -271,7 +270,7 @@ object KeyValueCommitting {
 
   private def contractKeyToStateKey(
       key: GlobalKey
-  ): DamlStateKey = {
+  ): DamlStateKey =
     // NOTE(JM): The deserialization of the values is meant to be temporary. With the removal of relative
     // contract ids from kvutils submissions we will be able to up-front compute the outputs without having
     // to allocate a log entry id and we can directly place the output keys into the submission and do not need
@@ -283,5 +282,4 @@ object KeyValueCommitting {
           .setHash(key.hash.bytes.toByteString)
       )
       .build
-  }
 }

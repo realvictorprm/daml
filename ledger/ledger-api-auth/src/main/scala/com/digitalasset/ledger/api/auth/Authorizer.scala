@@ -30,9 +30,7 @@ final class Authorizer(now: () => Instant, ledgerId: String, participantId: Stri
       _ <- claims.notExpired(now())
       _ <- claims.validForLedger(ledgerId)
       _ <- claims.validForParticipant(participantId)
-    } yield {
-      ()
-    }
+    } yield ()
 
   def requirePublicClaimsOnStream[Req, Res](
       call: (Req, StreamObserver[Res]) => Unit
@@ -41,9 +39,7 @@ final class Authorizer(now: () => Instant, ledgerId: String, participantId: Stri
       for {
         _ <- valid(claims)
         _ <- claims.isPublic
-      } yield {
-        ()
-      }
+      } yield ()
     }
 
   def requirePublicClaims[Req, Res](call: Req => Future[Res]): Req => Future[Res] =
@@ -51,9 +47,7 @@ final class Authorizer(now: () => Instant, ledgerId: String, participantId: Stri
       for {
         _ <- valid(claims)
         _ <- claims.isPublic
-      } yield {
-        ()
-      }
+      } yield ()
     }
 
   def requireAdminClaims[Req, Res](call: Req => Future[Res]): Req => Future[Res] =
@@ -61,19 +55,16 @@ final class Authorizer(now: () => Instant, ledgerId: String, participantId: Stri
       for {
         _ <- valid(claims)
         _ <- claims.isAdmin
-      } yield {
-        ()
-      }
+      } yield ()
     }
 
   private[this] def requireForAll[T](
       xs: IterableOnce[T],
       f: T => Either[AuthorizationError, Unit],
-  ): Either[AuthorizationError, Unit] = {
+  ): Either[AuthorizationError, Unit] =
     xs.iterator.foldLeft[Either[AuthorizationError, Unit]](Right(()))((acc, x) =>
       acc.flatMap(_ => f(x))
     )
-  }
 
   /** Wraps a streaming call to verify whether some Claims authorize to read as all parties
     * of the given set. Authorization is always granted for an empty collection of parties.
@@ -88,9 +79,7 @@ final class Authorizer(now: () => Instant, ledgerId: String, participantId: Stri
         _ <- valid(claims)
         _ <- requireForAll(parties, party => claims.canReadAs(party))
         _ <- applicationId.map(claims.validForApplication).getOrElse(Right(()))
-      } yield {
-        ()
-      }
+      } yield ()
     }
 
   /** Wraps a single call to verify whether some Claims authorize to read as all parties
@@ -104,9 +93,7 @@ final class Authorizer(now: () => Instant, ledgerId: String, participantId: Stri
       for {
         _ <- valid(claims)
         _ <- requireForAll(parties, party => claims.canReadAs(party))
-      } yield {
-        ()
-      }
+      } yield ()
     }
 
   /** Checks whether the current Claims authorize to act as the given party, if any.
@@ -122,9 +109,7 @@ final class Authorizer(now: () => Instant, ledgerId: String, participantId: Stri
         _ <- valid(claims)
         _ <- party.map(claims.canActAs).getOrElse(Right(()))
         _ <- applicationId.map(claims.validForApplication).getOrElse(Right(()))
-      } yield {
-        ()
-      }
+      } yield ()
     }
 
   def requireActAndReadClaimsForParties[Req, Res](
@@ -143,9 +128,7 @@ final class Authorizer(now: () => Instant, ledgerId: String, participantId: Stri
           acc.flatMap(_ => claims.canReadAs(p))
         )
         _ <- applicationId.map(claims.validForApplication).getOrElse(Right(()))
-      } yield {
-        ()
-      }
+      } yield ()
     }
 
   /** Checks whether the current Claims authorize to read data for all parties mentioned in the given transaction filter */

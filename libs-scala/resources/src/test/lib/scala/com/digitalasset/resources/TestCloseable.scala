@@ -12,11 +12,10 @@ final class TestCloseable[T](val value: T, acquired: AtomicBoolean) extends Auto
     throw new TriedToAcquireTwice
   }
 
-  override def close(): Unit = {
+  override def close(): Unit =
     if (!acquired.compareAndSet(true, false)) {
       throw new TriedToReleaseTwice
     }
-  }
 }
 
 object TestCloseable {

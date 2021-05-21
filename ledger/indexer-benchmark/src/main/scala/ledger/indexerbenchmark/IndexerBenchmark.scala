@@ -43,14 +43,13 @@ class IndexerBenchmark() {
   def runWithEphemeralPostgres(
       createUpdates: Config => Future[Iterator[(Offset, Update)]],
       config: Config,
-  ): Future[Unit] = {
+  ): Future[Unit] =
     PostgresResource
       .owner()
-      .use(db => {
+      .use { db =>
         println(s"Running the indexer benchmark against the ephemeral Postgres database ${db.url}")
         run(createUpdates, config.copy(indexerConfig = config.indexerConfig.copy(jdbcUrl = db.url)))
-      })(DirectExecutionContext)
-  }
+      }(DirectExecutionContext)
 
   def run(
       createUpdates: Config => Future[Iterator[(Offset, Update)]],
@@ -181,9 +180,8 @@ class IndexerBenchmark() {
     )
 
     new ReadService {
-      override def getLedgerInitialConditions(): Source[LedgerInitialConditions, NotUsed] = {
+      override def getLedgerInitialConditions(): Source[LedgerInitialConditions, NotUsed] =
         Source.single(initialConditions)
-      }
       override def stateUpdates(beginAfter: Option[Offset]): Source[(Offset, Update), NotUsed] = {
         assert(beginAfter.isEmpty, s"beginAfter is $beginAfter")
         Source.fromIterator(() => updates)
@@ -192,9 +190,8 @@ class IndexerBenchmark() {
     }
   }
 
-  private[this] def histogramToString(data: Snapshot): String = {
+  private[this] def histogramToString(data: Snapshot): String =
     s"[min: ${data.getMin}, median: ${data.getMedian}, max: ${data.getMax}]"
-  }
 }
 
 object IndexerBenchmark {

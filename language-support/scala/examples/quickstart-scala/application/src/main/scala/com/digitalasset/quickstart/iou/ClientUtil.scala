@@ -40,9 +40,8 @@ class ClientUtil(
       sender: P.Party,
       workflowId: WorkflowId,
       command: P.Update[P.ContractId[T]],
-  ): Future[Empty] = {
+  ): Future[Empty] =
     commandClient.submitSingleCommand(submitRequest(sender, workflowId, command))
-  }
 
   def submitRequest[T](
       party: P.Party,

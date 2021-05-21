@@ -53,12 +53,10 @@ private[dao] trait JdbcLedgerDaoPostCommitValidationSpec extends LoneElement {
       _ <- store(duplicate)
       to <- ledgerDao.lookupLedgerEnd()
       completions <- getCompletions(from, to, defaultAppId, Set(alice))
-    } yield {
-      completions should contain.allOf(
-        originalAttempt.commandId.get -> ok,
-        duplicateAttempt.commandId.get -> aborted,
-      )
-    }
+    } yield completions should contain.allOf(
+      originalAttempt.commandId.get -> ok,
+      duplicateAttempt.commandId.get -> aborted,
+    )
   }
 
   it should "refuse to serialize invalid negative lookupByKey" in {
@@ -73,12 +71,10 @@ private[dao] trait JdbcLedgerDaoPostCommitValidationSpec extends LoneElement {
       (_, lookup) <- store(txLookupByKey(alice, keyValue, None))
       to <- ledgerDao.lookupLedgerEnd()
       completions <- getCompletions(from, to, defaultAppId, Set(alice))
-    } yield {
-      completions should contain.allOf(
-        create.commandId.get -> ok,
-        lookup.commandId.get -> aborted,
-      )
-    }
+    } yield completions should contain.allOf(
+      create.commandId.get -> ok,
+      lookup.commandId.get -> aborted,
+    )
   }
 
   it should "refuse to serialize invalid positive lookupByKey" in {
@@ -95,13 +91,11 @@ private[dao] trait JdbcLedgerDaoPostCommitValidationSpec extends LoneElement {
       (_, lookup) <- store(txLookupByKey(alice, keyValue, Some(createdContractId)))
       to <- ledgerDao.lookupLedgerEnd()
       completions <- getCompletions(from, to, defaultAppId, Set(alice))
-    } yield {
-      completions should contain.allOf(
-        create.commandId.get -> ok,
-        archive.commandId.get -> ok,
-        lookup.commandId.get -> aborted,
-      )
-    }
+    } yield completions should contain.allOf(
+      create.commandId.get -> ok,
+      archive.commandId.get -> ok,
+      lookup.commandId.get -> aborted,
+    )
   }
 
   it should "refuse to serialize invalid fetch" in {
@@ -118,13 +112,11 @@ private[dao] trait JdbcLedgerDaoPostCommitValidationSpec extends LoneElement {
       (_, fetch) <- store(txFetch(alice, createdContractId))
       to <- ledgerDao.lookupLedgerEnd()
       completions <- getCompletions(from, to, defaultAppId, Set(alice))
-    } yield {
-      completions should contain.allOf(
-        create.commandId.get -> ok,
-        archive.commandId.get -> ok,
-        fetch.commandId.get -> aborted,
-      )
-    }
+    } yield completions should contain.allOf(
+      create.commandId.get -> ok,
+      archive.commandId.get -> ok,
+      fetch.commandId.get -> aborted,
+    )
   }
 
   it should "be able to use divulged contract in later transaction" in {
@@ -141,13 +133,11 @@ private[dao] trait JdbcLedgerDaoPostCommitValidationSpec extends LoneElement {
       (_, fetch2) <- store(txFetch(alice, divulgedContractId))
       to <- ledgerDao.lookupLedgerEnd()
       completions <- getCompletions(from, to, defaultAppId, Set(alice))
-    } yield {
-      completions should contain.allOf(
-        fetch1.commandId.get -> aborted,
-        divulgence.commandId.get -> ok,
-        fetch2.commandId.get -> ok,
-      )
-    }
+    } yield completions should contain.allOf(
+      fetch1.commandId.get -> aborted,
+      divulgence.commandId.get -> ok,
+      fetch2.commandId.get -> ok,
+    )
   }
 
   it should "refuse to insert entries with conflicting transaction ids" in {

@@ -16,10 +16,9 @@ import scopt.OptionParser
 object MainWithEphemeralDirectory {
   private val DirectoryPattern = "%DIR"
 
-  def main(args: Array[String]): Unit = {
+  def main(args: Array[String]): Unit =
     new ProgramResource(new Runner("SQL Ledger", TestLedgerFactory).owner(args))
       .run(ResourceContext.apply)
-  }
 
   object TestLedgerFactory extends LedgerFactory[ReadWriteService, ExtraConfig] {
     override val defaultExtraConfig: ExtraConfig = SqlLedgerFactory.defaultExtraConfig

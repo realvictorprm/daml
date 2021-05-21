@@ -103,7 +103,7 @@ private[migration] class V4_1__Collect_Parties extends BaseJavaMigration {
     }
   }
 
-  private def getParties(transaction: Tx.Transaction): Set[Ref.Party] = {
+  private def getParties(transaction: Tx.Transaction): Set[Ref.Party] =
     transaction
       .fold[Set[Ref.Party]](Set.empty) { case (parties, (_, node)) =>
         node match {
@@ -126,5 +126,4 @@ private[migration] class V4_1__Collect_Parties extends BaseJavaMigration {
             parties
         }
       }
-  }
 }

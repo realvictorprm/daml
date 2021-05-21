@@ -78,16 +78,14 @@ final class ImmArray[+A] private (
   /** O(n) */
   def copyToArray[B >: A](dst: Array[B], dstStart: Int, dstLen: Int): Int = {
     val numElems = Math.min(length, dstLen)
-    for (i <- 0 until numElems) {
+    for (i <- 0 until numElems)
       dst(dstStart + i) = uncheckedGet(i)
-    }
     numElems
   }
 
   /** O(n) */
-  def copyToArray[B >: A](xs: Array[B]): Int = {
+  def copyToArray[B >: A](xs: Array[B]): Int =
     copyToArray(xs, 0, xs.length)
-  }
 
   /** O(1), crashes on empty list */
   def head: A = this(0)
@@ -96,22 +94,20 @@ final class ImmArray[+A] private (
   def last: A = this(length - 1)
 
   /** O(1), crashes on empty list */
-  def tail: ImmArray[A] = {
+  def tail: ImmArray[A] =
     if (length < 1) {
       throw new RuntimeException("tail on empty ImmArray")
     } else {
       new ImmArray(start + 1, length - 1, array)
     }
-  }
 
   /** O(1), crashes on empty list */
-  def init: ImmArray[A] = {
+  def init: ImmArray[A] =
     if (length < 1) {
       throw new RuntimeException("init on empty ImmArray")
     } else {
       new ImmArray(start, length - 1, array)
     }
-  }
 
   /** O(1)
     *
@@ -153,18 +149,16 @@ final class ImmArray[+A] private (
   /** O(n) */
   def map[B](f: A => B): ImmArray[B] = {
     val newArray: Array[Any] = new Array(length)
-    for (i <- indices) {
+    for (i <- indices)
       newArray(i) = f(uncheckedGet(i))
-    }
     ImmArray.unsafeFromArray[B](newArray)
   }
 
   /** O(n) */
   def reverse: ImmArray[A] = {
     val newArray: Array[Any] = new Array(length)
-    for (i <- indices) {
+    for (i <- indices)
       newArray(i) = array(start + length - (i + 1))
-    }
     ImmArray.unsafeFromArray[A](newArray)
   }
 
@@ -175,12 +169,10 @@ final class ImmArray[+A] private (
     */
   def slowAppend[B >: A](other: ImmArray[B]): ImmArray[B] = {
     val newArray: Array[Any] = new Array(length + other.length)
-    for (i <- indices) {
+    for (i <- indices)
       newArray(i) = uncheckedGet(i)
-    }
-    for (i <- other.indices) {
+    for (i <- other.indices)
       newArray(length + i) = other.uncheckedGet(i)
-    }
     ImmArray.unsafeFromArray[B](newArray)
   }
 
@@ -192,9 +184,8 @@ final class ImmArray[+A] private (
   def slowCons[B >: A](el: B): ImmArray[B] = {
     val newArray: Array[Any] = new Array(length + 1)
     newArray(0) = el
-    for (i <- indices) {
+    for (i <- indices)
       newArray(i + 1) = uncheckedGet(i)
-    }
     ImmArray.unsafeFromArray(newArray)
   }
 
@@ -205,9 +196,8 @@ final class ImmArray[+A] private (
     */
   def slowSnoc[B >: A](el: B): ImmArray[B] = {
     val newArray: Array[Any] = new Array(length + 1)
-    for (i <- indices) {
+    for (i <- indices)
       newArray(i) = uncheckedGet(i)
-    }
     newArray(length) = el
     ImmArray.unsafeFromArray(newArray)
   }
@@ -216,9 +206,8 @@ final class ImmArray[+A] private (
   def zip[B](that: ImmArray[B]): ImmArray[(A, B)] = {
     val newLen = Math.min(length, that.length)
     val newArray: Array[Any] = new Array(newLen)
-    for (i <- 0 until newLen) {
+    for (i <- 0 until newLen)
       newArray(i) = (uncheckedGet(i), that.uncheckedGet(i))
-    }
     ImmArray.unsafeFromArray(newArray)
   }
 
@@ -234,9 +223,8 @@ final class ImmArray[+A] private (
   /** O(n) */
   def toArray[B >: A: ClassTag]: Array[B] = {
     val arr: Array[B] = new Array(length)
-    for (i <- indices) {
+    for (i <- indices)
       arr(i) = uncheckedGet(i)
-    }
     arr
   }
 
@@ -286,12 +274,11 @@ final class ImmArray[+A] private (
   /** O(n) */
   def foldLeft[B](z: B)(f: (B, A) => B): B = {
     @tailrec
-    def go(cursor: Int, acc: B): B = {
+    def go(cursor: Int, acc: B): B =
       if (cursor < length)
         go(cursor + 1, f(acc, uncheckedGet(cursor)))
       else
         acc
-    }
     go(0, z)
   }
 
@@ -383,11 +370,10 @@ object ImmArray extends ImmArrayInstances {
     * you must guarantee that the provided `Array` is not modified for the entire lifetime
     * of the resulting `ImmArray`.
     */
-  def unsafeFromArray[T](arr: Array[Any]): ImmArray[T] = {
+  def unsafeFromArray[T](arr: Array[Any]): ImmArray[T] =
     // ArraySeq can be boxed or unboxed. By requiring an Array[Any] we enforce
     // that values are always boxed.
     new ImmArray(0, arr.length, ArraySeq.unsafeWrapArray(arr).asInstanceOf[ArraySeq[T]])
-  }
 
   def fromArraySeq[T](arr: ArraySeq[T]): ImmArray[T] =
     new ImmArray(0, arr.length, arr)
@@ -395,13 +381,12 @@ object ImmArray extends ImmArrayInstances {
   implicit val immArrayInstance: Traverse[ImmArray] = new Traverse[ImmArray] {
     override def traverseImpl[F[_]: Applicative, A, B](
         immArr: ImmArray[A]
-    )(f: A => F[B]): F[ImmArray[B]] = {
+    )(f: A => F[B]): F[ImmArray[B]] =
       immArr
         .foldLeft(BackStack.empty[B].point[F]) { (ys, x) =>
           ^(ys, f(x))(_ :+ _)
         }
         .map(_.toImmArray)
-    }
   }
 
   implicit def immArrayOrderInstance[A: Order]: Order[ImmArray[A]] = {
@@ -445,11 +430,10 @@ object ImmArray extends ImmArrayInstances {
         fa.foldRight(z)(f(_, _))
       override def traverseImpl[F[_], A, B](
           immArr: ImmArraySeq[A]
-      )(f: A => F[B])(implicit F: Applicative[F]): F[ImmArraySeq[B]] = {
+      )(f: A => F[B])(implicit F: Applicative[F]): F[ImmArraySeq[B]] =
         F.map(immArr.foldLeft[F[BackStack[B]]](F.point(BackStack.empty)) { case (ys, x) =>
           F.apply2(ys, f(x))(_ :+ _)
         })(_.toImmArray.toSeq)
-      }
     }
 
     implicit def `immArraySeq Equal instance`[A: Equal]: Equal[ImmArraySeq[A]] =

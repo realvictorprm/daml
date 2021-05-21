@@ -40,7 +40,7 @@ private[codegen] object JavaBackend extends Backend with StrictLogging {
   private def extractTemplateNames(
       tree: InterfaceTrees,
       packagePrefixes: Map[PackageId, String],
-  ) = {
+  ) =
     tree.interfaceTrees.flatMap(_.bfs(Vector[ClassName]()) {
       case (res, module: ModuleWithContext) =>
         val templateNames = module.typesLineages
@@ -51,7 +51,6 @@ private[codegen] object JavaBackend extends Backend with StrictLogging {
         res ++ templateNames
       case (res, _) => res
     })
-  }
 
   def process(
       nodeWithContext: NodeWithContext,
@@ -89,9 +88,7 @@ private[codegen] object JavaBackend extends Backend with StrictLogging {
     val typeSpecs = for {
       typeWithContext <- moduleWithContext.typesLineages
       javaFile <- ClassForType(typeWithContext, packagePrefixes)
-    } yield {
-      javaFile
-    }
+    } yield javaFile
     MDC.remove("packageId")
     MDC.remove("packageIdShort")
     MDC.remove("moduleName")

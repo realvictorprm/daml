@@ -14,13 +14,12 @@ class Positive[T: Numeric] private (val value: T) {
 }
 
 object Positive {
-  def apply[T](num: T)(implicit numeric: Numeric[T]): Try[Positive[T]] = {
+  def apply[T](num: T)(implicit numeric: Numeric[T]): Try[Positive[T]] =
     if (numeric.lteq(num, numeric.zero)) {
       Failure(new IllegalArgumentException(s"$num must be positive."))
     } else {
       Success(new Positive(num))
     }
-  }
 
   def unsafe[T](num: T)(implicit numeric: Numeric[T]): Positive[T] = Positive(num).get
 
@@ -28,16 +27,13 @@ object Positive {
 
   implicit val configConvertI: ConfigConvert[Positive[Int]] = convertPositive(_.toInt)
 
-  private def convertPositive[T: Numeric](readStr: String => T) = {
-
+  private def convertPositive[T: Numeric](readStr: String => T) =
     ConfigConvert.viaStringTry[Positive[T]](
-      { s =>
+      s =>
         for {
           number <- Try(readStr(s))
           positive <- apply(number)
-        } yield positive
-      },
+        } yield positive,
       _.toString,
     )
-  }
 }

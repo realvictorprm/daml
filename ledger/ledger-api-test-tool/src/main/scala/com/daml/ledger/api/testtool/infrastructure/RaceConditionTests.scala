@@ -54,27 +54,24 @@ private[testtool] object RaceConditionTests {
   def assertTransactionOrder(
       expectedFirst: TransactionTree,
       expectedSecond: TransactionTree,
-  ): Unit = {
+  ): Unit =
     if (offsetLessThan(expectedFirst.offset, expectedSecond.offset)) ()
     else fail(s"""Offset ${expectedFirst.offset} is not before ${expectedSecond.offset}
          |
          |Expected first: ${printTransaction(expectedFirst)}
          |Expected second: ${printTransaction(expectedSecond)}
          |""".stripMargin)
-  }
 
-  def printTransaction(transactionTree: TransactionTree): String = {
+  def printTransaction(transactionTree: TransactionTree): String =
     s"""Offset: ${transactionTree.offset}, number of events: ${transactionTree.eventsById.size}
        |${transactionTree.eventsById.values.map(e => s" -> $e").mkString("\n")}
        |""".stripMargin
-  }
 
   private def offsetLessThan(a: String, b: String): Boolean =
     Bytes.ordering.lt(offsetBytes(a), offsetBytes(b))
 
-  private def offsetBytes(offset: String): Bytes = {
+  private def offsetBytes(offset: String): Bytes =
     Bytes.fromHexString(Ref.HexString.assertFromString(offset))
-  }
 
   object TransactionUtil {
 
@@ -115,9 +112,8 @@ private[testtool] object RaceConditionTests {
       tx.hasEventsNumber(1) &&
         tx.containsEvent(isExerciseEvent(RaceTests.FetchWrapper.ChoiceFetch))
 
-    private def isFoundContractField(found: Boolean)(field: RecordField) = {
+    private def isFoundContractField(found: Boolean)(field: RecordField) =
       field.label == "found" && field.value.exists(_.getBool == found)
-    }
 
     def isContractLookup(success: Boolean)(tx: TransactionTree): Boolean =
       tx.containsEvent { event =>

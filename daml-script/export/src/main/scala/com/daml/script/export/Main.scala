@@ -18,12 +18,11 @@ import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.util.control.NonFatal
 
 object Main {
-  def main(args: Array[String]): Unit = {
+  def main(args: Array[String]): Unit =
     Config.parse(args) match {
       case None => sys.exit(1)
       case Some(config) => main(config)
     }
-  }
 
   def main(config: Config): Unit = {
     implicit val sys: ActorSystem = ActorSystem("script-export")
@@ -45,7 +44,7 @@ object Main {
       ec: ExecutionContext,
       esf: ExecutionSequencerFactory,
       mat: Materializer,
-  ): Future[Unit] = {
+  ): Future[Unit] =
     config.exportType match {
       case Some(exportScript: ExportScript) =>
         for {
@@ -75,7 +74,6 @@ object Main {
       case None =>
         Future.successful(())
     }
-  }
 
   private def clientConfig(config: Config): LedgerClientConfiguration = LedgerClientConfiguration(
     applicationId = "script-export",

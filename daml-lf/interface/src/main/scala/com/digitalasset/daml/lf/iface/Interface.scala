@@ -27,12 +27,8 @@ sealed abstract class InterfaceType extends Product with Serializable {
   def getType: DefDataType.FWT = `type`
   def getTemplate: j.Optional[_ <: DefTemplate.FWT] =
     fold(
-      { _ =>
-        j.Optional.empty()
-      },
-      { (_, tpl) =>
-        j.Optional.of(tpl)
-      },
+      _ => j.Optional.empty(),
+      (_, tpl) => j.Optional.of(tpl),
     )
 }
 object InterfaceType {

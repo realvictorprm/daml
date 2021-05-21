@@ -34,7 +34,7 @@ final case class EventRow(
     key: Option[String],
 ) {
 
-  def toEvent(types: PackageRegistry): Try[Event] = {
+  def toEvent(types: PackageRegistry): Try[Event] =
     subclassType match {
       case "ContractCreated" =>
         (for {
@@ -61,22 +61,20 @@ final case class EventRow(
               )
             )
           )
-        } yield {
-          ContractCreated(
-            ApiTypes.EventId(id),
-            parentId.map(ApiTypes.EventId(_)),
-            ApiTypes.TransactionId(transactionId),
-            wp,
-            ApiTypes.WorkflowId(workflowId),
-            ApiTypes.ContractId(contractId),
-            tp,
-            recArg,
-            agreementText,
-            sig,
-            obs,
-            key,
-          )
-        }).recoverWith { case e: Throwable =>
+        } yield ContractCreated(
+          ApiTypes.EventId(id),
+          parentId.map(ApiTypes.EventId(_)),
+          ApiTypes.TransactionId(transactionId),
+          wp,
+          ApiTypes.WorkflowId(workflowId),
+          ApiTypes.ContractId(contractId),
+          tp,
+          recArg,
+          agreementText,
+          sig,
+          obs,
+          key,
+        )).recoverWith { case e: Throwable =>
           Failure(
             DeserializationFailed(
               s"Failed to deserialize ContractCreated from row: $this. Error: $e"
@@ -101,21 +99,19 @@ final case class EventRow(
           apJson <- Try(actingParties.get)
           ap <- Try(apJson.parseJson.convertTo[List[ApiTypes.Party]])
           consuming <- Try(isConsuming.get)
-        } yield {
-          ChoiceExercised(
-            ApiTypes.EventId(id),
-            parentId.map(ApiTypes.EventId(_)),
-            ApiTypes.TransactionId(transactionId),
-            wp,
-            ApiTypes.WorkflowId(workflowId),
-            ApiTypes.ContractId(contractId),
-            tid,
-            ApiTypes.Choice(chc),
-            arg,
-            ap,
-            consuming,
-          )
-        }).recoverWith { case e: Throwable =>
+        } yield ChoiceExercised(
+          ApiTypes.EventId(id),
+          parentId.map(ApiTypes.EventId(_)),
+          ApiTypes.TransactionId(transactionId),
+          wp,
+          ApiTypes.WorkflowId(workflowId),
+          ApiTypes.ContractId(contractId),
+          tid,
+          ApiTypes.Choice(chc),
+          arg,
+          ap,
+          consuming,
+        )).recoverWith { case e: Throwable =>
           Failure(
             DeserializationFailed(
               s"Failed to deserialize ChoiceExercised from row: $this. Error: $e"
@@ -124,12 +120,11 @@ final case class EventRow(
         }
       case s => Failure(DeserializationFailed(s"unknown subclass type for Event: $s"))
     }
-  }
 }
 
 object EventRow {
 
-  def fromEvent(event: Event): EventRow = {
+  def fromEvent(event: Event): EventRow =
     event match {
       case c: ContractCreated =>
         EventRow(
@@ -172,5 +167,4 @@ object EventRow {
           None,
         )
     }
-  }
 }

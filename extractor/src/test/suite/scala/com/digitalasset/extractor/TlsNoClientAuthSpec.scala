@@ -29,11 +29,10 @@ class TlsNoClientAuthSpec
 
   override protected def darFile = new File(rlocation("extractor/VeryLargeArchive.dar"))
 
-  val List(serverCrt, serverPem, caCrt) = {
+  val List(serverCrt, serverPem, caCrt) =
     List("server.crt", "server.pem", "ca.crt").map { src =>
       Some(new File(rlocation("ledger/test-common/test-certificates/" + src)))
     }
-  }
 
   override protected def config: SandboxConfig =
     super.config

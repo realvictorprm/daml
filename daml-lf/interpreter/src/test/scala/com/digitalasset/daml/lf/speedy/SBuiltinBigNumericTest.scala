@@ -380,9 +380,8 @@ object SBuiltinBigNumericTest {
     x.toOption.get
   }
 
-  private def eval(e: Expr, onLedger: Boolean = true): Either[SError, SValue] = {
+  private def eval(e: Expr, onLedger: Boolean = true): Either[SError, SValue] =
     evalSExpr(compiledPackages.compiler.unsafeCompile(e), onLedger)
-  }
 
   private def evalSExpr(e: SExpr, onLedger: Boolean): Either[SError, SValue] = {
     val machine = if (onLedger) {

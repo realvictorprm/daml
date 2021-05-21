@@ -34,7 +34,7 @@ object ServerWithChannelProvider {
     )
   }
 
-  private def getChannel(port: Option[Int], serverName: String) = {
+  private def getChannel(port: Option[Int], serverName: String) =
     port
       .fold[ManagedChannelBuilder[_]](
         InProcessChannelBuilder
@@ -46,5 +46,4 @@ object ServerWithChannelProvider {
           .usePlaintext()
       )
       .build()
-  }
 }

@@ -76,7 +76,7 @@ class DamlLfEncoderTest
 
   private val preInternalizationVersions = List.range(0, 7).map(_.toString).toSet
 
-  private def getNonEmptyModules(dar: Dar[(PackageId, DamlLf.ArchivePayload)]) = {
+  private def getNonEmptyModules(dar: Dar[(PackageId, DamlLf.ArchivePayload)]) =
     for {
       pkgWithId <- dar.main +: dar.dependencies
       (_, pkg) = pkgWithId
@@ -98,7 +98,6 @@ class DamlLfEncoderTest
 
       }
     } yield DottedName.assertFromSegments(segments)
-  }
 
   private implicit def toDottedName(s: String): DottedName =
     DottedName.assertFromString(s)

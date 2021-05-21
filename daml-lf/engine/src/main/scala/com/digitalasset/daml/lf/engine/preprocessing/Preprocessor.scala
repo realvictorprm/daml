@@ -194,9 +194,8 @@ private[preprocessing] object Preprocessor {
   )(unsafeRun: => X): Result[X] = {
 
     def start: Result[X] =
-      try {
-        ResultDone(unsafeRun)
-      } catch {
+      try ResultDone(unsafeRun)
+      catch {
         case PreprocessorError(e) =>
           ResultError(e)
         case PreprocessorMissingPackage(_) =>
@@ -209,9 +208,8 @@ private[preprocessing] object Preprocessor {
 
   @inline
   def safelyRun[X](unsafeRun: => X): Either[Error, X] =
-    try {
-      Right(unsafeRun)
-    } catch {
+    try Right(unsafeRun)
+    catch {
       case PreprocessorError(e) =>
         Left(e)
       case PreprocessorMissingPackage(pkgId) =>

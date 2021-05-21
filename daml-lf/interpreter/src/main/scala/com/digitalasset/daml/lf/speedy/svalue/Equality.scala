@@ -71,13 +71,12 @@ private[lf] object Equality {
           throw SErrorCrash(s"trying to compare incomparable types:\n- $x\n- $y")
       }
 
-    while (success && stackX.nonEmpty) {
+    while (success && stackX.nonEmpty)
       (stackX.head.hasNext, stackY.head.hasNext) match {
         case (true, true) => step((stackX.head.next(), stackY.head.next()))
         case (false, false) => pop()
         case _ => success = false
       }
-    }
 
     success
   }

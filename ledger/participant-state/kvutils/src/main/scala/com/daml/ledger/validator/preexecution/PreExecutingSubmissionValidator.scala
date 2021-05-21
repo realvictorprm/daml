@@ -77,16 +77,14 @@ class PreExecutingSubmissionValidator[StateValue, ReadSet, WriteSet](
             preExecutionResult,
           ),
         )
-      } yield {
-        PreExecutionOutput(
-          minRecordTime = preExecutionResult.minimumRecordTime.map(_.toInstant),
-          maxRecordTime = preExecutionResult.maximumRecordTime.map(_.toInstant),
-          successWriteSet = generatedWriteSets.successWriteSet,
-          outOfTimeBoundsWriteSet = generatedWriteSets.outOfTimeBoundsWriteSet,
-          readSet = commitStrategy.generateReadSet(fetchedInputs, preExecutionResult.readSet),
-          involvedParticipants = generatedWriteSets.involvedParticipants,
-        )
-      },
+      } yield PreExecutionOutput(
+        minRecordTime = preExecutionResult.minimumRecordTime.map(_.toInstant),
+        maxRecordTime = preExecutionResult.maximumRecordTime.map(_.toInstant),
+        successWriteSet = generatedWriteSets.successWriteSet,
+        outOfTimeBoundsWriteSet = generatedWriteSets.outOfTimeBoundsWriteSet,
+        readSet = commitStrategy.generateReadSet(fetchedInputs, preExecutionResult.readSet),
+        involvedParticipants = generatedWriteSets.involvedParticipants,
+      ),
     )
 
   private def decodeSubmission(submissionEnvelope: Raw.Envelope)(implicit

@@ -38,15 +38,12 @@ class AuthServiceJWTCodecSpec
     } yield parsed
   }
 
-  private implicit val arbInstant: Arbitrary[Instant] = {
+  private implicit val arbInstant: Arbitrary[Instant] =
     Arbitrary {
       for {
         seconds <- Gen.chooseNum(Instant.MIN.getEpochSecond, Instant.MAX.getEpochSecond)
-      } yield {
-        Instant.ofEpochSecond(seconds)
-      }
+      } yield Instant.ofEpochSecond(seconds)
     }
-  }
 
   "AuthServiceJWTPayload codec" when {
 

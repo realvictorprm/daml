@@ -29,11 +29,10 @@ class TlsIT extends AsyncWordSpec with SandboxFixture with SuiteResourceManageme
     trustCertCollectionFilePath,
     clientCertChainFilePath,
     clientPrivateKeyFilePath,
-  ) = {
+  ) =
     List("server.crt", "server.pem", "ca.crt", "client.crt", "client.pem").map { src =>
       new File(rlocation("ledger/test-common/test-certificates/" + src))
     }
-  }
 
   private lazy val baseConfig: LedgerClientConfiguration =
     LedgerClientConfiguration(

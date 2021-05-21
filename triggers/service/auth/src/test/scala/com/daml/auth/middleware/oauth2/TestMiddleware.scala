@@ -61,11 +61,8 @@ class TestMiddleware extends AsyncWordSpec with TestFixture with SuiteResourceMa
       val bindingPort = middlewareBinding.localAddress.getPort.toString
       val filePort = {
         val source = Source.fromFile(middlewarePortFile)
-        try {
-          source.mkString.stripLineEnd
-        } finally {
-          source.close()
-        }
+        try source.mkString.stripLineEnd
+        finally source.close()
       }
       assert(bindingPort == filePort)
     }
@@ -75,9 +72,7 @@ class TestMiddleware extends AsyncWordSpec with TestFixture with SuiteResourceMa
       val claims = Request.Claims(actAs = List(Party("Alice")))
       for {
         result <- middlewareClient.requestAuth(claims, Nil)
-      } yield {
-        assert(result == None)
-      }
+      } yield assert(result == None)
     }
     "return the token from a cookie" in {
       val claims = Request.Claims(actAs = List(Party("Alice")))
@@ -97,9 +92,7 @@ class TestMiddleware extends AsyncWordSpec with TestFixture with SuiteResourceMa
       val cookieHeader = Cookie("daml-ledger-token", token.toCookieValue)
       for {
         result <- middlewareClient.requestAuth(claims, List(cookieHeader))
-      } yield {
-        assert(result == None)
-      }
+      } yield assert(result == None)
     }
     "return unauthorized on insufficient app id claims" in {
       val claims = Request.Claims(
@@ -115,9 +108,7 @@ class TestMiddleware extends AsyncWordSpec with TestFixture with SuiteResourceMa
       val cookieHeader = Cookie("daml-ledger-token", token.toCookieValue)
       for {
         result <- middlewareClient.requestAuth(claims, List(cookieHeader))
-      } yield {
-        assert(result == None)
-      }
+      } yield assert(result == None)
     }
     "return unauthorized on an invalid token" in {
       val claims = Request.Claims(actAs = List(ApiTypes.Party("Alice")))
@@ -125,9 +116,7 @@ class TestMiddleware extends AsyncWordSpec with TestFixture with SuiteResourceMa
       val cookieHeader = Cookie("daml-ledger-token", token.toCookieValue)
       for {
         result <- middlewareClient.requestAuth(claims, List(cookieHeader))
-      } yield {
-        assert(result == None)
-      }
+      } yield assert(result == None)
     }
     "return unauthorized on an expired token" in {
       val claims = Request.Claims(actAs = List(ApiTypes.Party("Alice")))
@@ -136,9 +125,7 @@ class TestMiddleware extends AsyncWordSpec with TestFixture with SuiteResourceMa
       val cookieHeader = Cookie("daml-ledger-token", token.toCookieValue)
       for {
         result <- middlewareClient.requestAuth(claims, List(cookieHeader))
-      } yield {
-        assert(result == None)
-      }
+      } yield assert(result == None)
     }
   }
   "the /login endpoint" should {
@@ -297,9 +284,7 @@ class TestMiddleware extends AsyncWordSpec with TestFixture with SuiteResourceMa
           case Failure(exception: Client.RefreshException) => Success(exception)
           case value => fail(s"Expected failure with RefreshException but got $value")
         }
-      } yield {
-        assert(exception.status.isInstanceOf[StatusCodes.ClientError])
-      }
+      } yield assert(exception.status.isInstanceOf[StatusCodes.ClientError])
     }
   }
 }
@@ -536,10 +521,9 @@ class TestMiddlewareClientAutoRedirectToLogin
       val req = HttpRequest(uri = uri, headers = immutable.Seq(acceptHtml))
       for {
         resp <- Http().singleRequest(req)
-      } yield {
-        // Redirect to /login on middleware
-        assert(resp.status == StatusCodes.Found)
-      }
+      } yield
+      // Redirect to /login on middleware
+      assert(resp.status == StatusCodes.Found)
     }
     "not redirect to /login for JSON request" in {
       val claims = Request.Claims(actAs = List(Party("Alice")))
@@ -553,10 +537,9 @@ class TestMiddlewareClientAutoRedirectToLogin
       val req = HttpRequest(uri = uri, headers = immutable.Seq(acceptHtml))
       for {
         resp <- Http().singleRequest(req)
-      } yield {
-        // Unauthorized with WWW-Authenticate header
-        assert(resp.status == StatusCodes.Unauthorized)
-      }
+      } yield
+      // Unauthorized with WWW-Authenticate header
+      assert(resp.status == StatusCodes.Unauthorized)
     }
   }
 }

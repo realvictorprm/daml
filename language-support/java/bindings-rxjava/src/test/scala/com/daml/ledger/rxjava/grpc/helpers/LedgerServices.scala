@@ -67,7 +67,7 @@ final class LedgerServices(val ledgerId: String) {
 
   def withServerAndChannel(authService: AuthService, services: Seq[ServerServiceDefinition])(
       f: ManagedChannel => Any
-  ): Any = {
+  ): Any =
     withServer(authService, services) { server =>
       var channel: Option[ManagedChannel] = None
       try {
@@ -79,7 +79,6 @@ final class LedgerServices(val ledgerId: String) {
         channel.foreach(_.awaitTermination(1, TimeUnit.MINUTES))
       }
     }
-  }
 
   private def createServer(
       authService: AuthService,

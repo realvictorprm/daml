@@ -52,9 +52,7 @@ final class LedgerClientAuthIT
       "retrieve the ledger ID" in {
         for {
           client <- LedgerClient(channel, ClientConfiguration)
-        } yield {
-          client.ledgerId should be(LedgerId)
-        }
+        } yield client.ledgerId should be(LedgerId)
       }
 
       "fail to conduct an admin operation with the same token" in {
@@ -63,10 +61,8 @@ final class LedgerClientAuthIT
           exception <- client.partyManagementClient
             .allocateParty(hint = Some("Bob"), displayName = None)
             .failed
-        } yield {
-          inside(exception) { case GrpcException.PERMISSION_DENIED() =>
-            succeed
-          }
+        } yield inside(exception) { case GrpcException.PERMISSION_DENIED() =>
+          succeed
         }
       }
 
@@ -80,9 +76,7 @@ final class LedgerClientAuthIT
               displayName = Some(partyName),
               token = Some(toHeader(adminToken)),
             )
-        } yield {
-          allocatedParty.displayName should be(Some(partyName))
-        }
+        } yield allocatedParty.displayName should be(Some(partyName))
       }
     }
 
@@ -90,10 +84,8 @@ final class LedgerClientAuthIT
       "fail to construct" in {
         for {
           exception <- LedgerClient(channel, ClientConfigurationWithoutToken).failed
-        } yield {
-          inside(exception) { case GrpcException.UNAUTHENTICATED() =>
-            succeed
-          }
+        } yield inside(exception) { case GrpcException.UNAUTHENTICATED() =>
+          succeed
         }
       }
     }

@@ -101,9 +101,8 @@ trait JsonApiFixture
     jsonApiExecutionSequencerFactory.close()
     materializer.shutdown()
     Await.result(jsonApiActorSystem.terminate(), 30.seconds)
-    try {
-      Files.delete(jsonAccessTokenFile)
-    } catch {
+    try Files.delete(jsonAccessTokenFile)
+    catch {
       case NonFatal(_) =>
     }
     super.afterAll()
@@ -269,9 +268,7 @@ final class JsonApiIt
         for {
           clients <- getClients()
           result <- run(clients, QualifiedName.assertFromString("ScriptTest:jsonBasic"))
-        } yield {
-          assert(result == SInt64(42))
-        }
+        } yield assert(result == SInt64(42))
       }
     }
     "CreateAndExercise" should {
@@ -279,9 +276,7 @@ final class JsonApiIt
         for {
           clients <- getClients()
           result <- run(clients, QualifiedName.assertFromString("ScriptTest:jsonCreateAndExercise"))
-        } yield {
-          assert(result == SInt64(42))
-        }
+        } yield assert(result == SInt64(42))
       }
     }
     "ExerciseByKey" should {
@@ -289,12 +284,10 @@ final class JsonApiIt
         for {
           clients <- getClients()
           result <- run(clients, QualifiedName.assertFromString("ScriptTest:jsonExerciseByKey"))
-        } yield {
-          result match {
-            case SRecord(_, _, vals) if vals.size == 2 =>
-              assert(vals.get(0) == vals.get(1))
-            case _ => fail(s"Expected Tuple2 but got $result")
-          }
+        } yield result match {
+          case SRecord(_, _, vals) if vals.size == 2 =>
+            assert(vals.get(0) == vals.get(1))
+          case _ => fail(s"Expected Tuple2 but got $result")
         }
       }
     }
@@ -308,11 +301,9 @@ final class JsonApiIt
             Some(JsString("Bob")),
           )
         )
-      } yield {
-        assert(
-          exception.getCause.getMessage === "Tried to submit a command with actAs = [Bob] but token provides claims for actAs = [Alice]"
-        )
-      }
+      } yield assert(
+        exception.getCause.getMessage === "Tried to submit a command with actAs = [Bob] but token provides claims for actAs = [Alice]"
+      )
     }
     "application id mismatch" in {
       for {
@@ -342,11 +333,9 @@ final class JsonApiIt
             Some(JsString("Bob")),
           )
         )
-      } yield {
-        assert(
-          exception.getCause.getMessage === "Tried to query as Bob but token provides claims for Alice"
-        )
-      }
+      } yield assert(
+        exception.getCause.getMessage === "Tried to query as Bob but token provides claims for Alice"
+      )
     }
     "submit with no party fails" in {
       for {
@@ -354,11 +343,9 @@ final class JsonApiIt
         exception <- recoverToExceptionIf[RuntimeException](
           run(clients, QualifiedName.assertFromString("ScriptTest:jsonCreate"))
         )
-      } yield {
-        assert(
-          exception.getCause.getMessage === "Tried to submit a command with actAs = [Alice] but token contains no actAs parties."
-        )
-      }
+      } yield assert(
+        exception.getCause.getMessage === "Tried to submit a command with actAs = [Alice] but token contains no actAs parties."
+      )
     }
     "submit fails on assertion failure" in {
       for {
@@ -366,9 +353,7 @@ final class JsonApiIt
         exception <- recoverToExceptionIf[ScriptF.FailedCmd](
           run(clients, QualifiedName.assertFromString("ScriptTest:jsonFailingCreateAndExercise"))
         )
-      } yield {
-        exception.cause.getMessage should include("Error: User abort: Assertion failed.")
-      }
+      } yield exception.cause.getMessage should include("Error: User abort: Assertion failed.")
     }
     "submitMustFail succeeds on assertion falure" in {
       for {
@@ -377,9 +362,7 @@ final class JsonApiIt
           clients,
           QualifiedName.assertFromString("ScriptTest:jsonExpectedFailureCreateAndExercise"),
         )
-      } yield {
-        assert(result == SUnit)
-      }
+      } yield assert(result == SUnit)
     }
     "party management" in {
       for {
@@ -389,9 +372,7 @@ final class JsonApiIt
           QualifiedName.assertFromString("ScriptTest:jsonAllocateParty"),
           Some(JsString("Eve")),
         )
-      } yield {
-        assert(result == SParty(Party.assertFromString("Eve")))
-      }
+      } yield assert(result == SParty(Party.assertFromString("Eve")))
     }
     "multi-party" in {
       for {
@@ -401,9 +382,7 @@ final class JsonApiIt
           QualifiedName.assertFromString("ScriptTest:jsonMultiParty"),
           Some(JsArray(JsString("Alice"), JsString("Bob"))),
         )
-      } yield {
-        assert(result == SUnit)
-      }
+      } yield assert(result == SUnit)
     }
     "missing template id" in {
       for {
@@ -415,17 +394,13 @@ final class JsonApiIt
             dar = darNoLedger,
           )
         )
-      } yield {
-        assert(ex.getCause.toString.contains("Cannot resolve template ID"))
-      }
+      } yield assert(ex.getCause.toString.contains("Cannot resolve template ID"))
     }
     "queryContractId" in {
       for {
         clients <- getClients()
         result <- run(clients, QualifiedName.assertFromString("ScriptTest:jsonQueryContractId"))
-      } yield {
-        assert(result == SUnit)
-      }
+      } yield assert(result == SUnit)
     }
     "queryContractKey" in {
       // fresh party to avoid key collisions with other tests
@@ -437,9 +412,7 @@ final class JsonApiIt
           QualifiedName.assertFromString("ScriptTest:jsonQueryContractKey"),
           inputValue = Some(JsString(party)),
         )
-      } yield {
-        assert(result == SUnit)
-      }
+      } yield assert(result == SUnit)
     }
     "multiPartyQuery" in {
       // fresh parties to avoid key collisions with other tests
@@ -465,9 +438,7 @@ final class JsonApiIt
             )
           ),
         )
-      } yield {
-        assert(cids == SUnit)
-      }
+      } yield assert(cids == SUnit)
     }
     "multiPartySubmission" in {
       val party1 = "multiPartySubmission1"
@@ -493,9 +464,7 @@ final class JsonApiIt
           QualifiedName.assertFromString("ScriptTest:jsonMultiPartySubmissionExercise"),
           inputValue = Some(JsArray(JsString(party1), JsString(party2), cidBoth, cidSingle)),
         )
-      } yield {
-        assert(r == SUnit)
-      }
+      } yield assert(r == SUnit)
     }
     "invalid response" in {
       def withServer[A](f: ServerBinding => Future[A]) = {

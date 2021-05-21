@@ -38,33 +38,27 @@ class Server(config: Config) {
   private var unauthorizedParties: Set[Party] = Set()
 
   // Remove the given party from the set of unauthorized parties.
-  def authorizeParty(party: Party): Unit = {
+  def authorizeParty(party: Party): Unit =
     unauthorizedParties = unauthorizedParties - party
-  }
 
   // Add the given party to the set of unauthorized parties.
-  def revokeParty(party: Party): Unit = {
+  def revokeParty(party: Party): Unit =
     unauthorizedParties = unauthorizedParties + party
-  }
 
   // Clear the set of unauthorized parties.
-  def resetAuthorizedParties(): Unit = {
+  def resetAuthorizedParties(): Unit =
     unauthorizedParties = Set()
-  }
 
   private var allowAdmin = true
 
-  def authorizeAdmin(): Unit = {
+  def authorizeAdmin(): Unit =
     allowAdmin = true
-  }
 
-  def revokeAdmin(): Unit = {
+  def revokeAdmin(): Unit =
     allowAdmin = false
-  }
 
-  def resetAdmin(): Unit = {
+  def resetAdmin(): Unit =
     allowAdmin = true
-  }
 
   // To keep things as simple as possible, we use a UUID as the authorization code and refresh token
   // and in the /authorize request we already pre-compute the JWT payload based on the scope.
@@ -211,9 +205,8 @@ class Server(config: Config) {
     },
   )
 
-  def start()(implicit system: ActorSystem): Future[ServerBinding] = {
+  def start()(implicit system: ActorSystem): Future[ServerBinding] =
     Http().newServerAt("localhost", config.port.value).bind(route)
-  }
 }
 
 object Server {

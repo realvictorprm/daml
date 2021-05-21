@@ -9,9 +9,8 @@ import com.daml.lf.language.Ast._
 object Validation {
 
   private def runSafely[X](x: => X): Either[ValidationError, X] =
-    try {
-      Right(x)
-    } catch {
+    try Right(x)
+    catch {
       case e: ValidationError => Left(e)
     }
 

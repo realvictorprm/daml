@@ -192,9 +192,8 @@ private[speedy] sealed abstract class SBuiltinPure(val arity1: Int) extends SBui
   override private[speedy] final def execute(
       args: util.ArrayList[SValue],
       machine: Machine,
-  ): Unit = {
+  ): Unit =
     machine.returnValue = executePure(args)
-  }
 
   /** Execute the (pure) builtin with 'arity' number of arguments in 'args'.
     *    Returns the resulting value
@@ -223,9 +222,8 @@ private[lf] object SBuiltin {
   //
 
   private[this] def handleArithmeticException[X](x: => X): Option[X] =
-    try {
-      Some(x)
-    } catch {
+    try Some(x)
+    catch {
       case _: ArithmeticException =>
         None
     }
@@ -381,7 +379,7 @@ private[lf] object SBuiltin {
   }
 
   final case object SBImplodeText extends SBuiltinPure(1) {
-    override private[speedy] final def executePure(args: util.ArrayList[SValue]): SValue = {
+    override private[speedy] final def executePure(args: util.ArrayList[SValue]): SValue =
       args.get(0) match {
         case SList(xs) =>
           val ts = xs.map {
@@ -393,7 +391,6 @@ private[lf] object SBuiltin {
         case _ =>
           throw SErrorCrash(s"type mismatch implodeText: $args")
       }
-    }
   }
 
   final case object SBAppendText extends SBuiltinPure(2) {
@@ -452,12 +449,11 @@ private[lf] object SBuiltin {
   }
 
   final case object SBTextToParty extends SBuiltinPure(1) {
-    override private[speedy] final def executePure(args: util.ArrayList[SValue]): SValue = {
+    override private[speedy] final def executePure(args: util.ArrayList[SValue]): SValue =
       Party.fromString(getSText(args, 0)) match {
         case Left(_) => SV.None
         case Right(p) => SOptional(Some(SParty(p)))
       }
-    }
   }
 
   final case object SBTextToInt64 extends SBuiltinPure(1) {
@@ -466,9 +462,8 @@ private[lf] object SBuiltin {
     override private[speedy] final def executePure(args: util.ArrayList[SValue]): SValue = {
       val s = getSText(args, 0)
       if (pattern.matcher(s).matches())
-        try {
-          SOptional(Some(SInt64(java.lang.Long.parseLong(s))))
-        } catch {
+        try SOptional(Some(SInt64(java.lang.Long.parseLong(s))))
+        catch {
           case _: NumberFormatException =>
             SV.None
         }
@@ -674,15 +669,13 @@ private[lf] object SBuiltin {
   // Equality and comparisons
   //
   final case object SBEqual extends SBuiltinPure(2) {
-    override private[speedy] final def executePure(args: util.ArrayList[SValue]): SValue = {
+    override private[speedy] final def executePure(args: util.ArrayList[SValue]): SValue =
       SBool(svalue.Equality.areEqual(args.get(0), args.get(1)))
-    }
   }
 
   sealed abstract class SBCompare(pred: Int => Boolean) extends SBuiltinPure(2) {
-    override private[speedy] final def executePure(args: util.ArrayList[SValue]): SValue = {
+    override private[speedy] final def executePure(args: util.ArrayList[SValue]): SValue =
       SBool(pred(svalue.Ordering.compare(args.get(0), args.get(1))))
-    }
   }
 
   final case object SBLess extends SBCompare(_ < 0)
@@ -698,24 +691,21 @@ private[lf] object SBuiltin {
 
   /** $cons :: a -> List a -> List a */
   final case object SBCons extends SBuiltinPure(2) {
-    override private[speedy] def executePure(args: util.ArrayList[SValue]): SValue = {
+    override private[speedy] def executePure(args: util.ArrayList[SValue]): SValue =
       SList(args.get(0) +: getSList(args, 1))
-    }
   }
 
   /** $some :: a -> Optional a */
   final case object SBSome extends SBuiltinPure(1) {
-    override private[speedy] final def executePure(args: util.ArrayList[SValue]): SValue = {
+    override private[speedy] final def executePure(args: util.ArrayList[SValue]): SValue =
       SOptional(Some(args.get(0)))
-    }
   }
 
   /** $rcon[R, fields] :: a -> b -> ... -> R */
   final case class SBRecCon(id: Identifier, fields: ImmArray[Name])
       extends SBuiltinPure(fields.length) {
-    override private[speedy] final def executePure(args: util.ArrayList[SValue]): SValue = {
+    override private[speedy] final def executePure(args: util.ArrayList[SValue]): SValue =
       SRecord(id, fields, args)
-    }
   }
 
   /** $rupd[R, field] :: R -> a -> R */
@@ -809,21 +799,18 @@ private[lf] object SBuiltin {
   /** $vcon[V, variant] :: a -> V */
   final case class SBVariantCon(id: Identifier, variant: Ast.VariantConName, constructorRank: Int)
       extends SBuiltinPure(1) {
-    override private[speedy] final def executePure(args: util.ArrayList[SValue]): SValue = {
+    override private[speedy] final def executePure(args: util.ArrayList[SValue]): SValue =
       SVariant(id, variant, constructorRank, args.get(0))
-    }
   }
 
   final object SBScaleBigNumeric extends SBuiltinPure(1) {
-    override private[speedy] def executePure(args: util.ArrayList[SValue]): SInt64 = {
+    override private[speedy] def executePure(args: util.ArrayList[SValue]): SInt64 =
       SInt64(getSBigNumeric(args, 0).scale().toLong)
-    }
   }
 
   final object SBPrecisionBigNumeric extends SBuiltinPure(1) {
-    override private[speedy] def executePure(args: util.ArrayList[SValue]): SInt64 = {
+    override private[speedy] def executePure(args: util.ArrayList[SValue]): SInt64 =
       SInt64(getSBigNumeric(args, 0).precision().toLong)
-    }
   }
 
   final object SBAddBigNumeric extends SBBuiltinArithmetic("ADD_BIGNUMERIC", 2) {
@@ -1481,7 +1468,7 @@ private[lf] object SBuiltin {
     override private[speedy] final def execute(
         args: util.ArrayList[SValue],
         machine: Machine,
-    ): Unit = {
+    ): Unit =
       args.get(0) match {
         case SText(message) =>
           machine.traceLog.add(message, machine.lastLocation)
@@ -1489,7 +1476,6 @@ private[lf] object SBuiltin {
         case v =>
           crash(s"invalid argument to trace: $v")
       }
-    }
   }
 
   /** $error :: Text -> a */
@@ -1543,14 +1529,13 @@ private[lf] object SBuiltin {
 
   /** $to-any-exception :: exception-type -> AnyException */
   final case class SBToAnyException(ty: Ast.Type) extends SBuiltinPure(1) {
-    override private[speedy] final def executePure(args: util.ArrayList[SValue]): SValue = {
+    override private[speedy] final def executePure(args: util.ArrayList[SValue]): SValue =
       SAnyException(ty, args.get(0))
-    }
   }
 
   /** $from-any-exception :: AnyException -> any-exception */
   final case class SBFromAnyException(expectedTy: Ast.Type) extends SBuiltinPure(1) {
-    override private[speedy] final def executePure(args: util.ArrayList[SValue]): SValue = {
+    override private[speedy] final def executePure(args: util.ArrayList[SValue]): SValue =
       args.get(0) match {
         case SAnyException(actualTy, v) =>
           SOptional(if (actualTy == expectedTy) Some(v) else None)
@@ -1558,7 +1543,6 @@ private[lf] object SBuiltin {
           SOptional(None)
         case v => crash(s"FromAnyException applied to non-AnyException: $v")
       }
-    }
   }
 
   /** $any-exception-message :: AnyException -> Text */
@@ -1566,7 +1550,7 @@ private[lf] object SBuiltin {
     override private[speedy] final def execute(
         args: util.ArrayList[SValue],
         machine: Machine,
-    ): Unit = {
+    ): Unit =
       getSException(args, 0) match {
         case SAnyException(ty, innerValue) =>
           machine.ctrl = SEApp(exceptionMessage(ty), Array(SEValue(innerValue)))
@@ -1579,31 +1563,28 @@ private[lf] object SBuiltin {
           //   Return more useful exception message (e.g. include the template name)
           machine.returnValue = SText("ContractError")
       }
-    }
   }
 
   /** $any-exception-is-arithmetic-error :: AnyException -> Bool */
   final case object SBAnyExceptionIsArithmeticError extends SBuiltinPure(1) {
-    override private[speedy] final def executePure(args: util.ArrayList[SValue]): SValue = {
+    override private[speedy] final def executePure(args: util.ArrayList[SValue]): SValue =
       getSException(args, 0) match {
         case SBuiltinException(ArithmeticError) =>
           SBool(true)
         case SBuiltinException(_) | SAnyException(_, _) =>
           SBool(false)
       }
-    }
   }
 
   /** $any-exception-is-contract-error :: AnyException -> Bool */
   final case object SBAnyExceptionIsContractError extends SBuiltinPure(1) {
-    override private[speedy] final def executePure(args: util.ArrayList[SValue]): SValue = {
+    override private[speedy] final def executePure(args: util.ArrayList[SValue]): SValue =
       getSException(args, 0) match {
         case SBuiltinException(ContractError) =>
           SBool(true)
         case SBuiltinException(_) | SAnyException(_, _) =>
           SBool(false)
       }
-    }
   }
 
   private def exceptionMessage(ty: Ast.Type): SExpr =
@@ -1618,9 +1599,8 @@ private[lf] object SBuiltin {
     *    -> Any (where t = ty)
     */
   final case class SBToAny(ty: Ast.Type) extends SBuiltinPure(1) {
-    override private[speedy] final def executePure(args: util.ArrayList[SValue]): SValue = {
+    override private[speedy] final def executePure(args: util.ArrayList[SValue]): SValue =
       SAny(ty, args.get(0))
-    }
   }
 
   /** $from_any
@@ -1628,20 +1608,19 @@ private[lf] object SBuiltin {
     *    -> Optional t (where t = expectedType)
     */
   final case class SBFromAny(expectedTy: Ast.Type) extends SBuiltinPure(1) {
-    override private[speedy] final def executePure(args: util.ArrayList[SValue]): SValue = {
+    override private[speedy] final def executePure(args: util.ArrayList[SValue]): SValue =
       args.get(0) match {
         case SAny(actualTy, v) =>
           SOptional(if (actualTy == expectedTy) Some(v) else None)
         case v => crash(s"FromAny applied to non-Any: $v")
       }
-    }
   }
 
   // Unstable text primitives.
 
   /** $text_to_upper :: Text -> Text */
   final case object SBTextToUpper extends SBuiltinPure(1) {
-    override private[speedy] final def executePure(args: util.ArrayList[SValue]): SValue = {
+    override private[speedy] final def executePure(args: util.ArrayList[SValue]): SValue =
       args.get(0) match {
         case SText(t) =>
           SText(t.toUpperCase(util.Locale.ROOT))
@@ -1649,12 +1628,11 @@ private[lf] object SBuiltin {
         case x =>
           throw SErrorCrash(s"type mismatch SBTextoUpper, expected Text got $x")
       }
-    }
   }
 
   /** $text_to_lower :: Text -> Text */
   final case object SBTextToLower extends SBuiltinPure(1) {
-    override private[speedy] final def executePure(args: util.ArrayList[SValue]): SValue = {
+    override private[speedy] final def executePure(args: util.ArrayList[SValue]): SValue =
       args.get(0) match {
         case SText(t) =>
           SText(t.toLowerCase(util.Locale.ROOT))
@@ -1662,12 +1640,11 @@ private[lf] object SBuiltin {
         case x =>
           throw SErrorCrash(s"type mismatch SBTextToLower, expected Text got $x")
       }
-    }
   }
 
   /** $text_slice :: Int -> Int -> Text -> Text */
   final case object SBTextSlice extends SBuiltinPure(3) {
-    override private[speedy] final def executePure(args: util.ArrayList[SValue]): SValue = {
+    override private[speedy] final def executePure(args: util.ArrayList[SValue]): SValue =
       args.get(0) match {
         case SInt64(from) =>
           args.get(1) match {
@@ -1698,12 +1675,11 @@ private[lf] object SBuiltin {
         case x =>
           throw SErrorCrash(s"type mismatch SBTextSlice, expected Int64 got $x")
       }
-    }
   }
 
   /** $text_slice_index :: Text -> Text -> Optional Int */
   final case object SBTextSliceIndex extends SBuiltinPure(2) {
-    override private[speedy] final def executePure(args: util.ArrayList[SValue]): SValue = {
+    override private[speedy] final def executePure(args: util.ArrayList[SValue]): SValue =
       args.get(0) match {
         case SText(slice) =>
           args.get(1) match {
@@ -1722,12 +1698,11 @@ private[lf] object SBuiltin {
         case x =>
           throw SErrorCrash(s"type mismatch SBTextSliceIndex, expected Text got $x")
       }
-    }
   }
 
   /** $text_contains_only :: Text -> Text -> Bool */
   final case object SBTextContainsOnly extends SBuiltinPure(2) {
-    override private[speedy] final def executePure(args: util.ArrayList[SValue]): SValue = {
+    override private[speedy] final def executePure(args: util.ArrayList[SValue]): SValue =
       args.get(0) match {
         case SText(alphabet) =>
           args.get(1) match {
@@ -1741,12 +1716,11 @@ private[lf] object SBuiltin {
         case x =>
           throw SErrorCrash(s"type mismatch SBTextContainsOnly, expected Text got $x")
       }
-    }
   }
 
   /** $text_replicate :: Int -> Text -> Text */
   final case object SBTextReplicate extends SBuiltinPure(2) {
-    override private[speedy] final def executePure(args: util.ArrayList[SValue]): SValue = {
+    override private[speedy] final def executePure(args: util.ArrayList[SValue]): SValue =
       args.get(0) match {
         case SInt64(n) =>
           args.get(1) match {
@@ -1763,12 +1737,11 @@ private[lf] object SBuiltin {
         case x =>
           throw SErrorCrash(s"type mismatch SBTextReplicate, expected Int64 got $x")
       }
-    }
   }
 
   /** $text_split_on :: Text -> Text -> List Text */
   final case object SBTextSplitOn extends SBuiltinPure(2) {
-    override private[speedy] final def executePure(args: util.ArrayList[SValue]): SValue = {
+    override private[speedy] final def executePure(args: util.ArrayList[SValue]): SValue =
       args.get(0) match {
         case SText(pattern) =>
           args.get(1) match {
@@ -1790,12 +1763,11 @@ private[lf] object SBuiltin {
         case x =>
           throw SErrorCrash(s"type mismatch SBTextSplitOn, expected Text got $x")
       }
-    }
   }
 
   /** $text_intercalate :: Text -> List Text -> Text */
   final case object SBTextIntercalate extends SBuiltinPure(2) {
-    override private[speedy] final def executePure(args: util.ArrayList[SValue]): SValue = {
+    override private[speedy] final def executePure(args: util.ArrayList[SValue]): SValue =
       args.get(0) match {
         case SText(sep) =>
           args.get(1) match {
@@ -1816,7 +1788,6 @@ private[lf] object SBuiltin {
         case x =>
           throw SErrorCrash(s"type mismatch SBTextIntercalate, expected Text got $x")
       }
-    }
   }
 
   object SBExperimental {
@@ -1825,9 +1796,8 @@ private[lf] object SBuiltin {
         extends SBuiltin(arity)
 
     private object SBExperimentalAnswer extends SBExperimental("ANSWER", 1) {
-      override private[speedy] def execute(args: util.ArrayList[SValue], machine: Machine) = {
+      override private[speedy] def execute(args: util.ArrayList[SValue], machine: Machine) =
         machine.returnValue = SInt64(42L)
-      }
     }
 
     def apply(name: String): SExpr =

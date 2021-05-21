@@ -101,10 +101,10 @@ object KeyHasher extends KeyHasher {
       case ValueTextMap(xs) =>
         val arr = xs.toImmArray
         val z1 = op(z, HashTokenCollectionBegin(arr.length))
-        val z2 = arr.foldLeft[T](z1)((t, v) => {
+        val z2 = arr.foldLeft[T](z1) { (t, v) =>
           val zz1 = op(t, HashTokenText(v._1))
           foldLeft(v._2, zz1, op)
-        })
+        }
         op(z2, HashTokenCollectionEnd())
       case ValueGenMap(entries) =>
         val z1 = op(z, HashTokenCollectionBegin(entries.length))
@@ -129,7 +129,7 @@ object KeyHasher extends KeyHasher {
   private[serialization] def putValue(
       digest: MessageDigest,
       value: Value[ContractId],
-  ): MessageDigest = {
+  ): MessageDigest =
     // Then, write the value
     foldLeft[MessageDigest](
       value,
@@ -150,7 +150,6 @@ object KeyHasher extends KeyHasher {
         d
       },
     )
-  }
 
   /** @deprecated in favor of [[GlobalKey.hash]]
     */

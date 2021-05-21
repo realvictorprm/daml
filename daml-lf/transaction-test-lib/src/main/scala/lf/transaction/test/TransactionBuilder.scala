@@ -240,9 +240,8 @@ object TransactionBuilder {
   def apply(txVersion: TransactionVersion): TransactionBuilder =
     new TransactionBuilder(_ => txVersion)
 
-  def apply(pkgLangVersion: Ref.PackageId => language.LanguageVersion): TransactionBuilder = {
+  def apply(pkgLangVersion: Ref.PackageId => language.LanguageVersion): TransactionBuilder =
     new TransactionBuilder(pkgId => TransactionVersion.assignNodeVersion(pkgLangVersion(pkgId)))
-  }
 
   def record(fields: (String, String)*): Value =
     LfValue.ValueRecord(

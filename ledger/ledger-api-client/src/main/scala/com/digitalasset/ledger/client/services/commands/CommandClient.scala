@@ -80,9 +80,7 @@ final class CommandClient(
     for {
       tracker <- trackCommandsUnbounded[Unit](effectiveActAs.toList, token)
       result <- Source.single(Ctx.unit(submitRequest)).via(tracker).runWith(Sink.head)
-    } yield {
-      result.value
-    }
+    } yield result.value
   }
 
   /** Tracks the results (including timeouts) of incoming commands.
@@ -96,15 +94,13 @@ final class CommandClient(
       ec: ExecutionContext
   ): Future[
     Flow[Ctx[Context, SubmitRequest], Ctx[Context, Completion], Materialized[NotUsed, Context]]
-  ] = {
+  ] =
     for {
       tracker <- trackCommandsUnbounded[Context](parties, token)
-    } yield {
-      // The counters are ignored on the client
-      MaxInFlight(config.maxCommandsInFlight, new Counter, new Counter)
-        .joinMat(tracker)(Keep.right)
-    }
-  }
+    } yield
+    // The counters are ignored on the client
+    MaxInFlight(config.maxCommandsInFlight, new Counter, new Counter)
+      .joinMat(tracker)(Keep.right)
 
   /** Tracks the results (including timeouts) of incoming commands.
     *
@@ -119,18 +115,16 @@ final class CommandClient(
   ] =
     for {
       ledgerEnd <- getCompletionEnd(token)
-    } yield {
-      partyFilter(parties.toSet)
-        .via(commandUpdaterFlow[Context])
-        .viaMat(
-          CommandTrackerFlow[Context, NotUsed](
-            CommandSubmissionFlow[(Context, String)](submit(token), config.maxParallelSubmissions),
-            offset => completionSource(parties, offset, token),
-            ledgerEnd.getOffset,
-            () => config.defaultDeduplicationTime,
-          )
-        )(Keep.right)
-    }
+    } yield partyFilter(parties.toSet)
+      .via(commandUpdaterFlow[Context])
+      .viaMat(
+        CommandTrackerFlow[Context, NotUsed](
+          CommandSubmissionFlow[(Context, String)](submit(token), config.maxParallelSubmissions),
+          offset => completionSource(parties, offset, token),
+          ledgerEnd.getOffset,
+          () => config.defaultDeduplicationTime,
+        )
+      )(Keep.right)
 
   private def partyFilter[Context](allowedParties: Set[String]) =
     Flow[Ctx[Context, SubmitRequest]].map { elem =>
@@ -185,11 +179,10 @@ final class CommandClient(
 
   def submissionFlow[Context](
       token: Option[String] = None
-  ): Flow[Ctx[Context, SubmitRequest], Ctx[Context, Try[Empty]], NotUsed] = {
+  ): Flow[Ctx[Context, SubmitRequest], Ctx[Context, Try[Empty]], NotUsed] =
     Flow[Ctx[Context, SubmitRequest]]
       .via(commandUpdaterFlow)
       .via(CommandSubmissionFlow[Context](submit(token), config.maxParallelSubmissions))
-  }
 
   def getCompletionEnd(token: Option[String] = None): Future[CompletionEndResponse] =
     LedgerClient

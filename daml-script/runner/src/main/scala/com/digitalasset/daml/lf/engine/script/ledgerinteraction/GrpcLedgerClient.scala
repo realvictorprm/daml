@@ -48,9 +48,8 @@ class GrpcLedgerClient(val grpcClient: LedgerClient, val applicationId: Applicat
   override def query(parties: OneAnd[Set, Ref.Party], templateId: Identifier)(implicit
       ec: ExecutionContext,
       mat: Materializer,
-  ) = {
+  ) =
     queryWithKey(parties, templateId).map(_.map(_._1))
-  }
 
   private def transactionFilter(
       parties: OneAnd[Set, Ref.Party],
@@ -72,7 +71,7 @@ class GrpcLedgerClient(val grpcClient: LedgerClient, val applicationId: Applicat
         .runWith(Sink.seq)
     acsResponses.map(acsPages =>
       acsPages.toVector.flatMap(page =>
-        page.activeContracts.toVector.map(createdEvent => {
+        page.activeContracts.toVector.map { createdEvent =>
           val argument = ValueValidator.validateRecord(createdEvent.getCreateArguments) match {
             case Left(err) => throw new ConverterException(err.toString)
             case Right(argument) => argument
@@ -91,7 +90,7 @@ class GrpcLedgerClient(val grpcClient: LedgerClient, val applicationId: Applicat
                 identity,
               )
           (ScriptLedgerClient.ActiveContract(templateId, cid, argument), key)
-        })
+        }
       )
     )
   }
@@ -103,14 +102,11 @@ class GrpcLedgerClient(val grpcClient: LedgerClient, val applicationId: Applicat
   )(implicit
       ec: ExecutionContext,
       mat: Materializer,
-  ): Future[Option[ScriptLedgerClient.ActiveContract]] = {
+  ): Future[Option[ScriptLedgerClient.ActiveContract]] =
     // We cannot do better than a linear search over query here.
     for {
       activeContracts <- query(parties, templateId)
-    } yield {
-      activeContracts.find(c => c.contractId == cid)
-    }
-  }
+    } yield activeContracts.find(c => c.contractId == cid)
 
   override def queryContractKey(
       parties: OneAnd[Set, Ref.Party],
@@ -131,14 +127,13 @@ class GrpcLedgerClient(val grpcClient: LedgerClient, val applicationId: Applicat
       speedyContracts <- activeContracts.traverse { case (t, kOpt) =>
         Converter.toFuture(kOpt.traverse(translateKey(templateId, _)).map(k => (t, k)))
       }
-    } yield {
-      // Note that the Equal instance on Value performs structural equality
-      // and also compares optional field and constructor names and is
-      // therefore not correct here.
-      // Equality.areEqual corresponds to the Daml-LF value equality
-      // which we want here.
-      speedyContracts.collectFirst({ case (c, Some(k)) if svalue.Equality.areEqual(k, key) => c })
-    }
+    } yield
+    // Note that the Equal instance on Value performs structural equality
+    // and also compares optional field and constructor names and is
+    // therefore not correct here.
+    // Equality.areEqual corresponds to the Daml-LF value equality
+    // which we want here.
+    speedyContracts.collectFirst({ case (c, Some(k)) if svalue.Equality.areEqual(k, key) => c })
   }
 
   override def submit(
@@ -174,7 +169,7 @@ class GrpcLedgerClient(val grpcClient: LedgerClient, val applicationId: Applicat
 
       })
     transactionTreeF.map(r =>
-      r.map(transactionTree => {
+      r.map { transactionTree =>
         val events = transactionTree.getTransaction.rootEventIds
           .map(evId => transactionTree.getTransaction.eventsById(evId))
           .toList
@@ -182,7 +177,7 @@ class GrpcLedgerClient(val grpcClient: LedgerClient, val applicationId: Applicat
           case Left(err) => throw new ConverterException(err)
           case Right(results) => results
         }
-      })
+      }
     )
   }
 
@@ -191,12 +186,11 @@ class GrpcLedgerClient(val grpcClient: LedgerClient, val applicationId: Applicat
       readAs: Set[Ref.Party],
       commands: List[command.ApiCommand],
       optLocation: Option[Location],
-  )(implicit ec: ExecutionContext, mat: Materializer) = {
+  )(implicit ec: ExecutionContext, mat: Materializer) =
     submit(actAs, readAs, commands, optLocation).map({
       case Right(_) => Left(())
       case Left(_) => Right(())
     })
-  }
 
   override def submitTree(
       actAs: OneAnd[Set, Ref.Party],
@@ -230,16 +224,14 @@ class GrpcLedgerClient(val grpcClient: LedgerClient, val applicationId: Applicat
   override def allocateParty(partyIdHint: String, displayName: String)(implicit
       ec: ExecutionContext,
       mat: Materializer,
-  ) = {
+  ) =
     grpcClient.partyManagementClient
       .allocateParty(Some(partyIdHint), Some(displayName))
       .map(_.party)
-  }
 
-  override def listKnownParties()(implicit ec: ExecutionContext, mat: Materializer) = {
+  override def listKnownParties()(implicit ec: ExecutionContext, mat: Materializer) =
     grpcClient.partyManagementClient
       .listKnownParties()
-  }
 
   override def getStaticTime()(implicit
       ec: ExecutionContext,

@@ -16,7 +16,7 @@ private[inner] object EnumClass extends StrictLogging {
   def generate(
       className: ClassName,
       enum: iface.Enum,
-  ): TypeSpec = {
+  ): TypeSpec =
     TrackLineage.of("enum", className.simpleName()) {
       logger.info("Start")
       val enumType = TypeSpec.enumBuilder(className).addModifiers(Modifier.PUBLIC)
@@ -29,7 +29,6 @@ private[inner] object EnumClass extends StrictLogging {
       logger.debug("End")
       enumType.build()
     }
-  }
 
   private def generateValuesArray(enum: iface.Enum): FieldSpec = {
     val fieldSpec = FieldSpec.builder(ArrayTypeName.of(classOf[javaapi.data.DamlEnum]), "__values$")

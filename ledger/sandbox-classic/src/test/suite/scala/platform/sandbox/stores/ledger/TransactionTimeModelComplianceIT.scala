@@ -127,9 +127,8 @@ class TransactionTimeModelComplianceIT
     }
   }
 
-  private[this] def expectInvalidLedgerTime(completion: Completion): Assertion = {
+  private[this] def expectInvalidLedgerTime(completion: Completion): Assertion =
     completion.status.value.code shouldBe aborted
-  }
 
   private[this] def expectValidTx(completion: Completion): Assertion =
     completion.status.value.code shouldBe ok
@@ -140,9 +139,7 @@ class TransactionTimeModelComplianceIT
 
       for {
         r1 <- publishTxAt(ledger, ledgerTime, "lt-valid")
-      } yield {
-        expectInvalidLedgerTime(r1)
-      }
+      } yield expectInvalidLedgerTime(r1)
     }
     "accept transactions with ledger time that is right" in allFixtures { ledger =>
       val ledgerTime = recordTime
@@ -150,9 +147,7 @@ class TransactionTimeModelComplianceIT
       for {
         _ <- publishConfig(ledger, recordTime, 1, JDuration.ofSeconds(1), JDuration.ofSeconds(1))
         r1 <- publishTxAt(ledger, ledgerTime, "lt-valid")
-      } yield {
-        expectValidTx(r1)
-      }
+      } yield expectValidTx(r1)
     }
     "reject transactions with ledger time that is too low" in allFixtures { ledger =>
       val minSkew = JDuration.ofSeconds(1)
@@ -162,9 +157,7 @@ class TransactionTimeModelComplianceIT
       for {
         _ <- publishConfig(ledger, recordTime, 1, minSkew, maxSkew)
         r1 <- publishTxAt(ledger, ledgerTime, "lt-low")
-      } yield {
-        expectInvalidLedgerTime(r1)
-      }
+      } yield expectInvalidLedgerTime(r1)
     }
     "reject transactions with ledger time that is too high" in allFixtures { ledger =>
       val minSkew = JDuration.ofDays(1)
@@ -174,9 +167,7 @@ class TransactionTimeModelComplianceIT
       for {
         _ <- publishConfig(ledger, recordTime, 1, minSkew, maxSkew)
         r1 <- publishTxAt(ledger, ledgerTime, "lt-high")
-      } yield {
-        expectInvalidLedgerTime(r1)
-      }
+      } yield expectInvalidLedgerTime(r1)
     }
     "reject transactions after ledger config changes" in allFixtures { ledger =>
       val largeSkew = JDuration.ofDays(1)

@@ -50,13 +50,11 @@ object Configuration {
             decodeTimeModel(config.getTimeModel)
           else
             Left("Missing time model")
-      } yield {
-        Configuration(
-          generation = config.getGeneration,
-          timeModel = tm,
-          maxDeduplicationTime = Duration.ofDays(1),
-        )
-      }
+      } yield Configuration(
+        generation = config.getGeneration,
+        timeModel = tm,
+        maxDeduplicationTime = Duration.ofDays(1),
+      )
 
     def decodeTimeModel(tm: protobuf.LedgerTimeModel): Either[String, TimeModel] =
       TimeModel(
@@ -80,13 +78,11 @@ object Configuration {
             Right(parseDuration(config.getMaxDeduplicationTime))
           else
             Left("Missing maximum command time to live")
-      } yield {
-        Configuration(
-          generation = config.getGeneration,
-          timeModel = tm,
-          maxDeduplicationTime = maxDeduplicationTime,
-        )
-      }
+      } yield Configuration(
+        generation = config.getGeneration,
+        timeModel = tm,
+        maxDeduplicationTime = maxDeduplicationTime,
+      )
 
     def decodeTimeModel(tm: protobuf.LedgerTimeModel): Either[String, TimeModel] =
       TimeModel(
@@ -111,15 +107,13 @@ object Configuration {
       .build
   }
 
-  private def parseDuration(dur: com.google.protobuf.Duration): Duration = {
+  private def parseDuration(dur: com.google.protobuf.Duration): Duration =
     Duration.ofSeconds(dur.getSeconds, dur.getNanos.toLong)
-  }
 
-  private def buildDuration(dur: Duration): com.google.protobuf.Duration = {
+  private def buildDuration(dur: Duration): com.google.protobuf.Duration =
     com.google.protobuf.Duration.newBuilder
       .setSeconds(dur.getSeconds)
       .setNanos(dur.getNano)
       .build
-  }
 
 }

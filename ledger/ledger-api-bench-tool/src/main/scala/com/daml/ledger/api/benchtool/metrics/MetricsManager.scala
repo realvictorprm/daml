@@ -41,7 +41,7 @@ class MetricsManager[T](
 
   private val startTime: Instant = Instant.now()
 
-  def handlingMessages(metrics: List[Metric[T]]): Behavior[Message[T]] = {
+  def handlingMessages(metrics: List[Metric[T]]): Behavior[Message[T]] =
     Behaviors.receive { case (context, message) =>
       message match {
         case newValue: NewValue[T] =>
@@ -57,7 +57,6 @@ class MetricsManager[T](
           Behaviors.stopped
       }
     }
-  }
 
   private def summary(metrics: List[Metric[T]], durationSeconds: Double): String = {
     val reports = metrics.flatMap { metric =>

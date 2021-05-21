@@ -92,8 +92,7 @@ class DarReaderTest
       internedDotted: collection.Seq[DamlLf1.InternedDottedName],
       internedStrings: collection.Seq[String],
       n: Int,
-  ): String = {
+  ): String =
     internedDotted(n).getSegmentsInternedStrList.asScala.map(i => internedStrings(i)).mkString(".")
-  }
 
 }

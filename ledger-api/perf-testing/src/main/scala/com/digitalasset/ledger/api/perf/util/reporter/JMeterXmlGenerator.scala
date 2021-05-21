@@ -24,11 +24,10 @@ private[reporter] object JMeterXmlGenerator {
     addMeasurementsToDocument(results, doc, root)
   }
 
-  private def newDocBuilder = {
+  private def newDocBuilder =
     DocumentBuilderFactory.newInstance.newDocumentBuilder
-  }
 
-  def appendToDocument[T: Numeric](results: Tree[CurveData[T]], file: File): Document = {
+  def appendToDocument[T: Numeric](results: Tree[CurveData[T]], file: File): Document =
     if (file.exists()) {
       val doc = newDocBuilder.parse(file) // Will throw on failure.
       Option(doc.getDocumentElement)
@@ -42,8 +41,6 @@ private[reporter] object JMeterXmlGenerator {
       newDocument(results)
     }
 
-  }
-
   private def addMeasurementsToDocument[T: Numeric](
       results: Tree[CurveData[T]],
       doc: Document,
@@ -54,9 +51,7 @@ private[reporter] object JMeterXmlGenerator {
     for {
       result <- results
       xmlElement <- measurementXmlGenerator.asXmlElements(result)
-    } {
-      root.appendChild(xmlElement)
-    }
+    } root.appendChild(xmlElement)
     doc
   }
 

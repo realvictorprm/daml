@@ -63,17 +63,16 @@ private[platform] final class DbDispatcher private (
           case t: Throwable =>
             logger.error("Fatal error!", t)
             throw t
-        } finally {
-          // decouple metrics updating from sql execution above
-          try {
-            val execNanos = System.nanoTime() - startExec
-            logger.trace(s"Executed query in ${(execNanos / 1e6).toLong} ms")
-            databaseMetrics.executionTimer.update(execNanos, TimeUnit.NANOSECONDS)
-            overallExecutionTimer.update(execNanos, TimeUnit.NANOSECONDS)
-          } catch {
-            case NonFatal(e) =>
-              logger.error("Got an exception while updating timer metrics. Ignoring.", e)
-          }
+        } finally
+        // decouple metrics updating from sql execution above
+        try {
+          val execNanos = System.nanoTime() - startExec
+          logger.trace(s"Executed query in ${(execNanos / 1e6).toLong} ms")
+          databaseMetrics.executionTimer.update(execNanos, TimeUnit.NANOSECONDS)
+          overallExecutionTimer.update(execNanos, TimeUnit.NANOSECONDS)
+        } catch {
+          case NonFatal(e) =>
+            logger.error("Got an exception while updating timer metrics. Ignoring.", e)
         }
       }(executionContext)
     }

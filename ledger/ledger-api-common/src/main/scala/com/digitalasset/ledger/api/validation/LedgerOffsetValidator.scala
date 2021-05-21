@@ -31,7 +31,7 @@ object LedgerOffsetValidator {
   def validate(
       ledgerOffset: LedgerOffset,
       fieldName: String,
-  ): Either[StatusRuntimeException, domain.LedgerOffset] = {
+  ): Either[StatusRuntimeException, domain.LedgerOffset] =
     ledgerOffset match {
       case LedgerOffset(LedgerOffset.Value.Absolute(value)) =>
         requireLedgerString(value, fieldName).map(domain.LedgerOffset.Absolute)
@@ -40,7 +40,6 @@ object LedgerOffsetValidator {
       case LedgerOffset(LedgerOffset.Value.Empty) =>
         Left(missingField(fieldName + ".(" + boundary + "|value)"))
     }
-  }
 
   def offsetIsBeforeEndIfAbsolute(
       offsetType: String,
@@ -68,7 +67,7 @@ object LedgerOffsetValidator {
   private def convertLedgerBoundary(
       fieldName: String,
       value: LedgerBoundary,
-  ): Either[StatusRuntimeException, domain.LedgerOffset] = {
+  ): Either[StatusRuntimeException, domain.LedgerOffset] =
     value match {
       case LedgerBoundary.Unrecognized(invalid) =>
         Left(
@@ -79,5 +78,4 @@ object LedgerOffsetValidator {
       case LedgerBoundary.LEDGER_BEGIN => Right(domain.LedgerOffset.LedgerBegin)
       case LedgerBoundary.LEDGER_END => Right(domain.LedgerOffset.LedgerEnd)
     }
-  }
 }

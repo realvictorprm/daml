@@ -36,15 +36,14 @@ class AkkaExecutionSequencer private (private val actorRef: ActorRef)(implicit
         Done
     }
 
-  private def actorIsTerminated(askTimeoutException: AskTimeoutException) = {
+  private def actorIsTerminated(askTimeoutException: AskTimeoutException) =
     AkkaExecutionSequencer.actorTerminatedRegex.findFirstIn(askTimeoutException.getMessage).nonEmpty
-  }
 }
 
 object AkkaExecutionSequencer {
   def apply(name: String, terminationTimeout: FiniteDuration)(implicit
       system: ActorSystem
-  ): AkkaExecutionSequencer = {
+  ): AkkaExecutionSequencer =
     system match {
       case extendedSystem: ExtendedActorSystem =>
         new AkkaExecutionSequencer(
@@ -56,7 +55,6 @@ object AkkaExecutionSequencer {
         )
 
     }
-  }
 
   private val actorTerminatedRegex = """Recipient\[.*]\] had already been terminated.""".r
 }
@@ -65,9 +63,8 @@ private[grpc] class RunnableSequencingActor extends Actor with ActorLogging {
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
   override val receive: Receive = {
     case runnable: Runnable =>
-      try {
-        runnable.run()
-      } catch {
+      try runnable.run()
+      catch {
         case NonFatal(t) => log.error("Unexpected exception while executing Runnable", t)
       }
     case ShutdownRequest =>

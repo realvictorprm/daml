@@ -119,9 +119,8 @@ class Extractor[T](config: ExtractorConfig, target: T)(
     }
   }
 
-  def shutdown(): Future[Unit] = {
+  def shutdown(): Future[Unit] =
     system.terminate().map(_ => killSwitch.shutdown())
-  }
 
   private def keepRetryingOnPermissionDenied[A](f: () => Future[A]): Future[A] =
     RetryStrategy.constant(waitTime = 1.second) { case GrpcException.PERMISSION_DENIED() =>
@@ -139,14 +138,13 @@ class Extractor[T](config: ExtractorConfig, target: T)(
       LedgerReader.loadPackageStoreUpdates(packageClient, tokenHolder.flatMap(_.token))(Set.empty)
     }
 
-  private def fetchPackages(client: LedgerClient, writer: Writer): Future[PackageStore] = {
+  private def fetchPackages(client: LedgerClient, writer: Writer): Future[PackageStore] =
     for {
       packageStoreE <- doFetchPackages(client.packageClient)
         .map(_.map(_.getOrElse(Map.empty))): Future[LedgerReader.Error \/ PackageStore]
       packageStore <- toFuture(packageStoreE): Future[PackageStore]
       _ <- writer.handlePackages(packageStore)
     } yield packageStore
-  }
 
   private def selectTransactions(parties: ExtractorConfig.Parties): TransactionFilter = {
     // Template filtration is not supported on GetTransactionTrees RPC

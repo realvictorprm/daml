@@ -44,14 +44,13 @@ final class LogCollector extends AppenderBase[ILoggingEvent] {
   @BeanProperty
   var test: String = _
 
-  override def append(e: ILoggingEvent): Unit = {
+  override def append(e: ILoggingEvent): Unit =
     if (test == null) {
       addError("Test identifier undefined, skipping logging")
     } else {
       val log = LogCollector.log
         .getOrElseUpdate(test, TrieMap.empty)
         .getOrElseUpdate(e.getLoggerName, Vector.newBuilder)
-      val _ = log.synchronized { log += e.getLevel -> e.getMessage }
+      val _ = log.synchronized(log += e.getLevel -> e.getMessage)
     }
-  }
 }

@@ -47,8 +47,8 @@ final class NonRepudiationApi[Context: HasExecutionContext] private (
   private val route: Route =
     pathPrefix("v1") {
       concat(
-        pathPrefix("certificate") { v1.CertificatesEndpoint(certificates) },
-        pathPrefix("command") { v1.SignedPayloadsEndpoint(signedPayloads) },
+        pathPrefix("certificate")(v1.CertificatesEndpoint(certificates)),
+        pathPrefix("command")(v1.SignedPayloadsEndpoint(signedPayloads)),
       )
     }
 

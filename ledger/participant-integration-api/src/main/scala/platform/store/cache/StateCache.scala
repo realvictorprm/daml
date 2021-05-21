@@ -48,20 +48,19 @@ private[platform] case class StateCache[K, V](cache: Cache[K, V], registerUpdate
     * @param value the value to insert
     */
   def put(key: K, validAt: Long, value: V): Unit = Timed.value(
-    registerUpdateTimer, {
-      pendingUpdates.synchronized {
-        val competingLatestForKey =
-          pendingUpdates
-            .get(key)
-            .map { pendingUpdate =>
-              val oldLatestValidAt = pendingUpdate.latestValidAt
-              pendingUpdate.latestValidAt = Math.max(validAt, pendingUpdate.latestValidAt)
-              oldLatestValidAt
-            }
-            .getOrElse(Long.MinValue)
+    registerUpdateTimer,
+    pendingUpdates.synchronized {
+      val competingLatestForKey =
+        pendingUpdates
+          .get(key)
+          .map { pendingUpdate =>
+            val oldLatestValidAt = pendingUpdate.latestValidAt
+            pendingUpdate.latestValidAt = Math.max(validAt, pendingUpdate.latestValidAt)
+            oldLatestValidAt
+          }
+          .getOrElse(Long.MinValue)
 
-        if (competingLatestForKey < validAt) cache.put(key, value) else ()
-      }
+      if (competingLatestForKey < validAt) cache.put(key, value) else ()
     },
   )
 

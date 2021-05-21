@@ -92,7 +92,6 @@ object LargeTransactionCommands {
     * once daml-tools is upgrade, it has to be the 3rd option from above.
     */
   @nowarn("msg=parameter value choice .* is never used") // part of public API
-  def emptyChoiceArgs(choice: String): Value = {
+  def emptyChoiceArgs(choice: String): Value =
     Value(P.Record(Record(recordId = None, fields = Seq())))
-  }
 }

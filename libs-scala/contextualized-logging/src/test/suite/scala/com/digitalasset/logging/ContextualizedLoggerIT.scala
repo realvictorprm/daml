@@ -32,7 +32,7 @@ final class ContextualizedLoggerIT extends AnyFlatSpec with Matchers {
 
   behavior of "ContextualizedLogger"
 
-  def testCase(logger: ContextualizedLogger): Unit = {
+  def testCase(logger: ContextualizedLogger): Unit =
     newLoggingContext { implicit loggingContext =>
       logger.error("1")
       withEnrichedLoggingContext("a" -> "1") { implicit loggingContext =>
@@ -51,7 +51,6 @@ final class ContextualizedLoggerIT extends AnyFlatSpec with Matchers {
       }
       logger.info("1")
     }
-  }
 
   it should "write the expected JSON file" in {
 

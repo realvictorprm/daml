@@ -200,23 +200,20 @@ class KeyValueParticipantStateReaderSpec
   "offsetForUpdate" should {
     "not overwrite middle offset from record in case of 2 updates" in {
       val offsetFromRecord = OffsetBuilder.fromLong(1, 2)
-      for (subOffset <- Seq(0, 1)) {
+      for (subOffset <- Seq(0, 1))
         offsetForUpdate(offsetFromRecord, subOffset, 2) shouldBe OffsetBuilder.fromLong(
           1,
           2,
           subOffset,
         )
-      }
       succeed
     }
 
     "use original offset in case less than 2 updates" in {
       val expectedOffset = OffsetBuilder.fromLong(1, 2, 3)
-      for (totalUpdates <- Seq(0, 1)) {
-        for (i <- 0 until totalUpdates) {
+      for (totalUpdates <- Seq(0, 1))
+        for (i <- 0 until totalUpdates)
           offsetForUpdate(expectedOffset, i, totalUpdates) shouldBe expectedOffset
-        }
-      }
       succeed
     }
   }

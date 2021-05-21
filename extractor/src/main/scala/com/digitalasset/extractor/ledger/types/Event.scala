@@ -54,7 +54,7 @@ object Event {
   }
 
   final implicit class CreatedEventOps(val apiEvent: event.CreatedEvent) extends AnyVal {
-    def convert: String \/ CreatedEvent = {
+    def convert: String \/ CreatedEvent =
       for {
         apiTemplateId <- createdTemplateIdLens(apiEvent)
         templateId = apiTemplateId.convert
@@ -67,11 +67,10 @@ object Event {
         createArguments,
         (apiEvent.observers ++ apiEvent.signatories).toSet,
       )
-    }
   }
 
   final implicit class ExercisedEventOps(val apiEvent: event.ExercisedEvent) extends AnyVal {
-    def convert: String \/ ExercisedEvent = {
+    def convert: String \/ ExercisedEvent =
       for {
         apiTemplateId <- exercisedTemplateIdLens(apiEvent)
         templateId = apiTemplateId.convert
@@ -88,6 +87,5 @@ object Event {
         apiEvent.witnessParties.toSet,
         apiEvent.childEventIds,
       )
-    }
   }
 }

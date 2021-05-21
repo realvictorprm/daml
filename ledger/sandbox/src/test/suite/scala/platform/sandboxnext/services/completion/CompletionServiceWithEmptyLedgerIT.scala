@@ -104,9 +104,7 @@ final class CompletionServiceWithEmptyLedgerIT
         offset = end.getOffset,
         completionTimeout = 2.seconds,
       )
-    } yield {
-      completions shouldBe Vector(commandId)
-    }
+    } yield completions shouldBe Vector(commandId)
   }
 }
 
@@ -115,11 +113,8 @@ object CompletionServiceWithEmptyLedgerIT {
     val packageService = PackageManagementServiceGrpc.stub(channel)
     val darContents = {
       val inputStream = Files.newInputStream(darFile.toPath)
-      try {
-        ByteString.readFrom(inputStream)
-      } finally {
-        inputStream.close()
-      }
+      try ByteString.readFrom(inputStream)
+      finally inputStream.close()
     }
     packageService.uploadDarFile(UploadDarFileRequest(darContents, "uploadSubmissionId"))
   }
@@ -137,7 +132,7 @@ object CompletionServiceWithEmptyLedgerIT {
       // Because the stream does not terminate, we use a timeout to cut it off when it *should* be
       // done. Obviously, this is prone to error, so the timeouts are fairly generous.
       completionTimeout: FiniteDuration,
-  )(implicit ec: ExecutionContext): Future[Vector[String]] = {
+  )(implicit ec: ExecutionContext): Future[Vector[String]] =
     new StreamConsumer[CompletionStreamResponse](
       completionService.completionStream(
         CompletionStreamRequest(ledgerId.unwrap, MockMessages.applicationId, parties, Some(offset)),
@@ -145,5 +140,4 @@ object CompletionServiceWithEmptyLedgerIT {
       )
     ).within(completionTimeout)
       .map(_.flatMap(_.completions).map(_.commandId))
-  }
 }

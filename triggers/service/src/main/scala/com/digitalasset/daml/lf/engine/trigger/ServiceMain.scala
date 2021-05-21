@@ -81,7 +81,7 @@ object ServiceMain {
     serviceF.map(server => (server, system))
   }
 
-  def main(args: Array[String]): Unit = {
+  def main(args: Array[String]): Unit =
     ServiceConfig.parse(
       args,
       DbTriggerDao.supportedJdbcDriverNames(JdbcDrivers.availableJdbcDriverNames),
@@ -176,5 +176,4 @@ object ServiceMain {
           discard[serviceF.type](Await.ready(serviceF, 5.seconds))
         }
     }
-  }
 }

@@ -76,14 +76,13 @@ class LegacyServiceIT
 
   private val randomLedgerId = UUID.randomUUID().toString
 
-  private def expectNotUnimplemented[A](block: => A): Assertion = {
+  private def expectNotUnimplemented[A](block: => A): Assertion =
     inside(Try(block)) {
       case Success(_) => succeed
       case Failure(exc: StatusRuntimeException) =>
         exc.getStatus.getCode should not be Status.Code.UNIMPLEMENTED
       case Failure(otherwise) => fail(otherwise)
     }
-  }
 
   "Ledger API Server" should {
     "offer com.digitalasset.ledger.api.v1.ActiveContractsService" in {

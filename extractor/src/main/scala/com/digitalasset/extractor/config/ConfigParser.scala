@@ -268,7 +268,7 @@ object ConfigParser {
     }
 
   @SuppressWarnings(Array("org.wartremover.warts.Product", "org.wartremover.warts.Serializable"))
-  def parse(args: collection.Seq[String]): Option[(ExtractorConfig, Target)] = {
+  def parse(args: collection.Seq[String]): Option[(ExtractorConfig, Target)] =
     configParser.parse(args, CliParams()).map { cliParams =>
       val from = cliParams.from.fold(
         LedgerOffset(LedgerOffset.Value.Boundary(LedgerOffset.LedgerBoundary.LEDGER_BEGIN))
@@ -313,7 +313,6 @@ object ConfigParser {
 
       (config, target)
     }
-  }
 
   private def validateUniqueElements[A](x: Seq[A], message: => String): Either[String, Unit] =
     Either.cond(x.size == x.toSet.size, (), message)

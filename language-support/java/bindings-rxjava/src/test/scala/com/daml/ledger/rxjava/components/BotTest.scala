@@ -512,25 +512,23 @@ final class BotTest extends AnyFlatSpec with Matchers with Eventually {
       /* The bot is wired here and inside wire is where the race condition can happen. We catch the possible
        * error to pretty-print it. This try-catch depends on the implementation of `TransactionServiceImpl.getTransactionTree()`
        */
-      try {
-        Bot
-          .wireSimple(
-            "appId",
-            client,
-            new FiltersByParty(Collections.emptyMap()),
-            _ => Flowable.empty(),
-          )
-          .dispose()
-      } catch {
+      try Bot
+        .wireSimple(
+          "appId",
+          client,
+          new FiltersByParty(Collections.emptyMap()),
+          _ => Flowable.empty(),
+        )
+        .dispose()
+      catch {
         case GrpcException(GrpcStatus.INVALID_ARGUMENT(), trailers) =>
           /** the tests relies on specific implementation of the [[TransactionsServiceImpl.getTransactions()]] */
           fail(trailers.get(Metadata.Key.of("cause", Metadata.ASCII_STRING_MARSHALLER)))
       }
 
       // If there is an exception, we just ignore it as there are some problems with gRPC.
-      try {
-        client.close()
-      } catch {
+      try client.close()
+      catch {
         case NonFatal(exception) =>
           logger.warn(
             "Closing DamlLedgerClient caused an error, ignoring it because it can happen and it should not be a problem",
@@ -589,7 +587,7 @@ object BotTest {
     private var observerMay = Option.empty[Subscriber[_ >: A]]
     private var isComplete = false
 
-    override def subscribeActual(observer: Subscriber[_ >: A]): Unit = {
+    override def subscribeActual(observer: Subscriber[_ >: A]): Unit =
       observerMay match {
         case Some(oldObserver) =>
           throw new IllegalStateException(
@@ -609,9 +607,8 @@ object BotTest {
             observer.onComplete()
           }
       }
-    }
 
-    def emit(a: A): Unit = {
+    def emit(a: A): Unit =
       observerMay match {
         case None =>
           logger.debug(s"no observer, buffering $a")
@@ -620,9 +617,8 @@ object BotTest {
           logger.debug(s"emitting $a to subscribed $observer")
           observer.onNext(a)
       }
-    }
 
-    def complete(): Unit = {
+    def complete(): Unit =
       observerMay match {
         case None =>
           logger.debug("no observer, buffering onComplete")
@@ -631,14 +627,9 @@ object BotTest {
           logger.debug(s"calling onComplete() on subscribed $observer")
           observer.onComplete()
       }
-    }
   }
 
-  private def using[A <: Disposable, B](disposable: A)(run: => B): B = {
-    try {
-      run
-    } finally {
-      disposable.dispose()
-    }
-  }
+  private def using[A <: Disposable, B](disposable: A)(run: => B): B =
+    try run
+    finally disposable.dispose()
 }

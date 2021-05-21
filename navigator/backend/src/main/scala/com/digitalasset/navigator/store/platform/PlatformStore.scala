@@ -118,13 +118,11 @@ class PlatformStore(
   // ----------------------------------------------------------------------------------------------
   // Lifecycle
   // ----------------------------------------------------------------------------------------------
-  override def preStart(): Unit = {
+  override def preStart(): Unit =
     connect()
-  }
 
-  override def postStop(): Unit = {
+  override def postStop(): Unit =
     esf.close()
-  }
 
   // ----------------------------------------------------------------------------------------------
   // Messages
@@ -217,21 +215,19 @@ class PlatformStore(
       val snd = sender()
 
       Future
-        .traverse(state.parties.toList) {
-          case (p, ps) => {
-            val result = for {
-              ref <- context.child(childName(ps.name))
-              pi <- Try(
-                (ref ? GetPartyActorInfo)
-                  .mapTo[PartyActorInfo]
-                  .map(PartyActorRunning(_): PartyActorResponse)
-                  .recover { case _ => PartyActorUnresponsive }
-              ).toOption
-            } yield pi
-            result
-              .getOrElse(Future.successful(PartyActorUnresponsive))
-              .map(actorInfo => (p, actorInfo))
-          }
+        .traverse(state.parties.toList) { case (p, ps) =>
+          val result = for {
+            ref <- context.child(childName(ps.name))
+            pi <- Try(
+              (ref ? GetPartyActorInfo)
+                .mapTo[PartyActorInfo]
+                .map(PartyActorRunning(_): PartyActorResponse)
+                .recover { case _ => PartyActorUnresponsive }
+            ).toOption
+          } yield pi
+          result
+            .getOrElse(Future.successful(PartyActorUnresponsive))
+            .map(actorInfo => (p, actorInfo))
         }
         .andThen {
           case Success(actorStatus) =>
@@ -279,12 +275,11 @@ class PlatformStore(
   private def childName(party: ApiTypes.Party): String =
     "party-" + URLEncoder.encode(ApiTypes.Party.unwrap(party), "UTF-8")
 
-  private def startPartyActor(ledgerClient: LedgerClient, state: PartyState): ActorRef = {
+  private def startPartyActor(ledgerClient: LedgerClient, state: PartyState): ActorRef =
     context.actorOf(
       PlatformSubscriber.props(ledgerClient, state, applicationId, token),
       childName(state.name),
     )
-  }
 
   private def sslContext: Option[SslContext] =
     tlsConfig.flatMap { c =>
@@ -356,46 +351,43 @@ class PlatformStore(
     } yield ConnectionResult(ledgerClient, staticTime, time)
   }
 
-  private def getStaticTime(channel: Channel, ledgerId: String): Future[Option[StaticTime]] = {
+  private def getStaticTime(channel: Channel, ledgerId: String): Future[Option[StaticTime]] =
     // Note: StaticTime is a TimeProvider that is automatically updated by push events from the ledger.
     Future
       .fromTry(Try(TimeServiceGrpc.stub(channel)))
       .flatMap(tp => StaticTime.updatedVia(tp, ledgerId, token))
-      .map(staticTime => {
+      .map { staticTime =>
         log.info(s"Time service is available, platform time is ${staticTime.getCurrentTime}")
         Some(staticTime)
-      })
+      }
       .recover({
         // If the time service is not implemented, then the ledger uses UTC time.
         case GrpcException.UNIMPLEMENTED() =>
           log.info("Time service is not implemented")
           None
       })
-  }
 
-  private def getTimeProvider(ledgerTime: Option[StaticTime]): Future[TimeProviderWithType] = {
+  private def getTimeProvider(ledgerTime: Option[StaticTime]): Future[TimeProviderWithType] =
     TimeProviderFactory(timeProviderType, ledgerTime)
-      .fold[Future[TimeProviderWithType]]({
+      .fold[Future[TimeProviderWithType]] {
         log.error("Unable to initialize the time provider")
         Future.failed(StoreException("Unable to initialize the time provider"))
-      })(t => {
+      } { t =>
         log.debug(s"Time provider initialized: type=${t.`type`}, time=${t.time.getCurrentTime}")
         Future.successful(t)
-      })
-  }
+      }
 
-  private def advanceTime(staticTime: Option[StaticTime], to: Instant, sender: ActorRef): Unit = {
+  private def advanceTime(staticTime: Option[StaticTime], to: Instant, sender: ActorRef): Unit =
     staticTime.fold[Unit](
       sender ! Failure(StoreException("staticTime not available"))
-    )(t => {
+    ) { t =>
       log.info("Advancing time from {} to {}.", t.getCurrentTime, to)
       t.setTime(to)
         .map(_ => TimeProviderWithType(t, TimeProviderType.Static))
         .recoverWith(apiFailure)
         .andThen(returnToSender[TimeProviderWithType](sender))
       ()
-    })
-  }
+    }
 
   private def createContract(
       platformTime: Instant,
@@ -408,14 +400,14 @@ class PlatformStore(
     val workflowId = workflowIdGenerator.generateRandom
     val index = commandIndex.incrementAndGet()
 
-    parseOpaqueIdentifier(templateId).fold({
+    parseOpaqueIdentifier(templateId).fold {
       val msg = s"Create contract command not sent, '$templateId' is not a valid DAML-LF identifier"
       log.warning(msg)
       sender ! Failure(StoreException(msg))
-    })(id => {
+    } { id =>
       val command = CreateCommand(commandId, index, workflowId, platformTime, id, value)
       submitCommand(party, command, sender)
-    })
+    }
 
   }
 
@@ -434,11 +426,11 @@ class PlatformStore(
     // However, Navigator needs it to serialize/deserialize the choice argument, so we look up the template here.
     party.ledger
       .contract(contractId, party.packageRegistry)
-      .fold({
+      .fold {
         val msg = s"Exercise contract command not sent, contract $contractId not found"
         log.warning(msg)
         sender ! Failure(StoreException(msg))
-      })(contract => {
+      } { contract =>
         val command =
           ExerciseCommand(
             commandId,
@@ -452,20 +444,19 @@ class PlatformStore(
           )
 
         submitCommand(party, command, sender)
-      })
+      }
   }
 
   private def submitCommand(
       party: PartyState,
       command: Command,
       sender: ActorRef,
-  ): Unit = {
+  ): Unit =
     // Each party has its own command completion stream.
     // Forward the request to the party actor, so that it can be tracked.
     context
       .child(childName(party.name))
       .foreach(child => child ! PlatformSubscriber.SubmitCommand(command, sender))
-  }
 
   private val idGeneratorSeed = System.currentTimeMillis()
   private val workflowIdGenerator: IdGenerator[ApiTypes.WorkflowIdTag] = new IdGenerator(

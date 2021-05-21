@@ -34,21 +34,19 @@ private final class Validation[Nid, Cid](implicit ECid: Equal[Cid]) {
   private[this] def keyIsReplayedBy(
       recorded: KeyWithMaintainers[Value[Cid]],
       replayed: KeyWithMaintainers[Value[Cid]],
-  ): Boolean = {
+  ): Boolean =
     valueIsReplayedBy(recorded.key, replayed.key) && recorded.maintainers == replayed.maintainers
-  }
 
   private[this] def keyIsReplayedBy(
       recorded: Option[KeyWithMaintainers[Value[Cid]]],
       replayed: Option[KeyWithMaintainers[Value[Cid]]],
-  ): Boolean = {
+  ): Boolean =
     (recorded, replayed) match {
       case (None, None) => true
       case (Some(recordedValue), Some(replayedValue)) =>
         keyIsReplayedBy(recordedValue, replayedValue)
       case _ => false
     }
-  }
 
   private[this] def resultIsReplayedBy(
       recorded: Option[Value[Cid]],

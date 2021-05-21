@@ -60,9 +60,8 @@ private class MeteredLedger(ledger: Ledger, metrics: Metrics)
       ledger.publishConfiguration(maxRecordTime, submissionId, config),
     )
 
-  override def close(): Unit = {
+  override def close(): Unit =
     ledger.close()
-  }
 
 }
 

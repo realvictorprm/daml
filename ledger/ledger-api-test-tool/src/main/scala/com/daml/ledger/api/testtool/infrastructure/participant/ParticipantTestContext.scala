@@ -235,7 +235,7 @@ private[testtool] final class ParticipantTestContext private[participant] (
       eventually {
         val participants = otherParticipants.toSet + this
         Future
-          .sequence(participants.map(otherParticipant => {
+          .sequence(participants.map { otherParticipant =>
             otherParticipant
               .listKnownParties()
               .map { actualParties =>
@@ -244,7 +244,7 @@ private[testtool] final class ParticipantTestContext private[participant] (
                   s"Parties from $this never appeared on $otherParticipant.",
                 )
               }
-          }))
+          })
           .map(_ => ())
       }
     } else {
@@ -694,9 +694,7 @@ private[testtool] final class ParticipantTestContext private[participant] (
     // Distributed ledger participants need to reach global consensus prior to pruning. Hence the "eventually" here:
     eventually(
       attempts = attempts,
-      runAssertion = {
-        services.participantPruning.prune(PruneRequest(pruneUpTo, nextSubmissionId()))
-      },
+      runAssertion = services.participantPruning.prune(PruneRequest(pruneUpTo, nextSubmissionId())),
     )
 
   def prune(pruneUpTo: LedgerOffset, attempts: Int = 10): Future[PruneResponse] =

@@ -117,14 +117,13 @@ class LedgerClientBinding(
 
   type CommandsFlow[C] = Flow[Ctx[C, CompositeCommand], Ctx[C, Completion], NotUsed]
 
-  def commands[C](party: Party)(implicit ec: ExecutionContext): Future[CommandsFlow[C]] = {
+  def commands[C](party: Party)(implicit ec: ExecutionContext): Future[CommandsFlow[C]] =
     for {
       trackCommandsFlow <- ledgerClient.commandClient.trackCommands[C](List(party.unwrap))
     } yield Flow[Ctx[C, CompositeCommand]]
       .map(_.map(compositeCommandAdapter.transform))
       .via(trackCommandsFlow)
       .mapMaterializedValue(_ => NotUsed)
-  }
 
   def shutdown()(implicit ec: ExecutionContext): Future[Unit] = Future {
     channel.shutdown()

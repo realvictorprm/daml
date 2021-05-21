@@ -58,8 +58,7 @@ abstract class PerformanceTest extends Bench[Double] {
       verbose -> true,
     )
 
-  protected def await[T](f: => Future[T]): T = {
+  protected def await[T](f: => Future[T]): T =
     Await.result(f, asyncTimeout)
-  }
 
 }

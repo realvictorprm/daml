@@ -69,11 +69,8 @@ object TestMain extends StrictLogging {
           case Some(file) =>
             val source = Source.fromFile(file)
             val fileContent =
-              try {
-                source.mkString
-              } finally {
-                source.close
-              }
+              try source.mkString
+              finally source.close
             val jsVal = fileContent.parseJson
             import ParticipantsJsonProtocol._
             (jsVal.convertTo[Participants[ApiParameters]], () => Future.unit)

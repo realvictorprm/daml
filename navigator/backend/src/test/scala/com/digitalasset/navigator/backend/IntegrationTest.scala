@@ -91,9 +91,7 @@ class IntegrationTest
           for {
             resp <- Http().singleRequest(HttpRequest(uri = uri.withPath(Uri.Path("/api/session/"))))
             respBody <- getResponseDataBytes(resp)
-          } yield {
-            respBody shouldBe """{"method":{"type":"select","users":["display-name"]},"type":"sign-in"}"""
-          }
+          } yield respBody shouldBe """{"method":{"type":"select","users":["display-name"]},"type":"sign-in"}"""
         }
       } yield succeed
     }

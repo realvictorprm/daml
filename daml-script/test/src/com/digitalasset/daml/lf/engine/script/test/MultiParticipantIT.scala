@@ -39,11 +39,9 @@ final class MultiParticipantIT
             QualifiedName.assertFromString("MultiTest:partyIdHintTest"),
             dar = dar,
           )
-        } yield {
-          vals should contain theSameElementsInOrderAs Seq("alice", "bob").map(p =>
-            SParty(Party.assertFromString(p))
-          )
-        }
+        } yield vals should contain theSameElementsInOrderAs Seq("alice", "bob").map(p =>
+          SParty(Party.assertFromString(p))
+        )
       }
     }
     "listKnownPartiesTest" should {

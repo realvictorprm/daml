@@ -118,9 +118,8 @@ private[apiserver] final class ApiPackageManagementService private (
           )
           _ <- synchronousResponse.submitAndWait(submissionId, dar)
         } yield {
-          for (archive <- dar.all) {
+          for (archive <- dar.all)
             logger.info(s"Package ${archive.getHash} successfully uploaded")
-          }
           UploadDarFileResponse()
         }
 

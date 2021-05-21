@@ -43,14 +43,13 @@ class AcsBench extends TestCommands with InfAwait {
       contractId: String,
       ledgerId: domain.LedgerId,
       template: Identifier,
-  ): SubmitAndWaitRequest = {
+  ): SubmitAndWaitRequest =
     buildRequest(
       ledgerId = ledgerId,
       commandId = s"command-id-exercise-$sequenceNumber",
       commands = Seq(exerciseWithUnit(template, contractId, "DummyChoice1")),
       applicationId = "app1",
     ).toSync
-  }
 
   private def extractContractId(
       response: GetActiveContractsResponse,

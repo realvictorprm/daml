@@ -57,7 +57,7 @@ private[lf] object Speedy {
   }
 
   private object Instrumentation {
-    def apply(): Instrumentation = {
+    def apply(): Instrumentation =
       Instrumentation(
         classifyCounts = new Classify.Counts(),
         countPushesKont = 0,
@@ -65,7 +65,6 @@ private[lf] object Speedy {
         maxDepthKont = 0,
         maxDepthEnv = 0,
       )
-    }
   }
 
   /*
@@ -190,9 +189,8 @@ private[lf] object Speedy {
     }
 
     @inline
-    private[speedy] def popKont(): Kont = {
+    private[speedy] def popKont(): Kont =
       kontStack.remove(kontStack.size - 1)
-    }
 
     /* env manipulation... */
 
@@ -279,14 +277,13 @@ private[lf] object Speedy {
         // NOTE(MH): If the top of the continuation stack is the monadic token,
         // we push location information under it to account for the implicit
         // lambda binding the token.
-        case Some(KArg(_, Array(SEValue.Token))) => {
+        case Some(KArg(_, Array(SEValue.Token))) =>
           // Can't call pushKont here, because we don't push at the top of the stack.
           kontStack.add(last_index, KLocation(this, loc))
           if (enableInstrumentation) {
             track.countPushesKont += 1
             if (kontDepth() > track.maxDepthKont) track.maxDepthKont = kontDepth()
           }
-        }
         // NOTE(MH): When we use a cached top level value, we need to put the
         // stack trace it produced back on the continuation stack to get
         // complete stack trace at the use site. Thus, we store the stack traces
@@ -385,28 +382,27 @@ private[lf] object Speedy {
       //    case _:SErrorDamlException if tryHandleSubmitMustFail =>
       // where we must continue iteration.
       var result: SResult = null
-      while (result == null) {
+      while (result == null)
         // note: exception handler is outside while loop
-        try {
-          // normal exit from this loop is when KFinished.execute throws SpeedyHungry
-          while (true) {
-            if (enableInstrumentation) {
-              Classify.classifyMachine(this, track.classifyCounts)
-            }
-            if (enableLightweightStepTracing) {
-              steps += 1
-              println(s"$steps: ${PrettyLightweight.ppMachine(this)}")
-            }
-            if (returnValue != null) {
-              val value = returnValue
-              returnValue = null
-              popTempStackToBase()
-              popKont().execute(value)
-            } else {
-              val expr = ctrl
-              ctrl = null
-              expr.execute(this)
-            }
+        try
+        // normal exit from this loop is when KFinished.execute throws SpeedyHungry
+        while (true) {
+          if (enableInstrumentation) {
+            Classify.classifyMachine(this, track.classifyCounts)
+          }
+          if (enableLightweightStepTracing) {
+            steps += 1
+            println(s"$steps: ${PrettyLightweight.ppMachine(this)}")
+          }
+          if (returnValue != null) {
+            val value = returnValue
+            returnValue = null
+            popTempStackToBase()
+            popKont().execute(value)
+          } else {
+            val expr = ctrl
+            ctrl = null
+            expr.execute(this)
           }
         } catch {
           case SpeedyHungry(res: SResult) =>
@@ -426,7 +422,6 @@ private[lf] object Speedy {
           case ex: RuntimeException =>
             result = SResultError(SErrorCrash(s"exception: $ex")) //stop
         }
-      }
       result
     }
 
@@ -434,9 +429,9 @@ private[lf] object Speedy {
       * the catch handler. Returns true if the exception
       * was caught.
       */
-    private[speedy] def tryHandleSubmitMustFail(): Boolean = {
+    private[speedy] def tryHandleSubmitMustFail(): Boolean =
       if (kontStack.asScala.exists(k => k.isInstanceOf[KCatchSubmitMustFail])) {
-        @tailrec def unwind(): KCatchSubmitMustFail = {
+        @tailrec def unwind(): KCatchSubmitMustFail =
           popKont() match {
             case handler: KCatchSubmitMustFail =>
               handler
@@ -453,7 +448,6 @@ private[lf] object Speedy {
             case _ =>
               unwind()
           }
-        }
         val mustFail = unwind()
         restoreBase(mustFail.envSize)
         returnValue = SValue.SValue.True
@@ -464,9 +458,8 @@ private[lf] object Speedy {
         // and error messages.
         false
       }
-    }
 
-    def lookupVal(eval: SEVal): Unit = {
+    def lookupVal(eval: SEVal): Unit =
       eval.cached match {
         case Some((v, stack_trace)) =>
           pushStackTrace(stack_trace)
@@ -503,13 +496,12 @@ private[lf] object Speedy {
                 )
           }
       }
-    }
 
     /** This function is used to enter an ANF application.  The function has been evaluated to
       *      a value, and so have the arguments - they just need looking up
       */
     // TODO: share common code with executeApplication
-    private[speedy] def enterApplication(vfun: SValue, newArgs: Array[SExprAtomic]): Unit = {
+    private[speedy] def enterApplication(vfun: SValue, newArgs: Array[SExprAtomic]): Unit =
       vfun match {
         case SValue.SPAP(prim, actualsSoFar, arity) =>
           val missing = arity - actualsSoFar.size
@@ -564,10 +556,9 @@ private[lf] object Speedy {
         case _ =>
           crash(s"Applying non-PAP: $vfun")
       }
-    }
 
     /** The function has been evaluated to a value, now start evaluating the arguments. */
-    private[speedy] def executeApplication(vfun: SValue, newArgs: Array[SExpr]): Unit = {
+    private[speedy] def executeApplication(vfun: SValue, newArgs: Array[SExpr]): Unit =
       vfun match {
         case SValue.SPAP(prim, actualsSoFar, arity) =>
           val missing = arity - actualsSoFar.size
@@ -604,7 +595,6 @@ private[lf] object Speedy {
         case _ =>
           crash(s"Applying non-PAP: $vfun")
       }
-    }
 
     /** Evaluate the first 'n' arguments in 'args'.
       *      'args' will contain at least 'n' expressions, but it may contain more(!)
@@ -958,9 +948,8 @@ private[lf] object Speedy {
 
   /** Final continuation; machine has computed final value */
   private[speedy] final case object KFinished extends Kont {
-    def execute(v: SValue) = {
+    def execute(v: SValue) =
       throw SpeedyHungry(SResultFinalValue(v))
-    }
   }
 
   private[speedy] final case class KOverApp(machine: Machine, newArgs: Array[SExprAtomic])
@@ -1184,7 +1173,7 @@ private[lf] object Speedy {
     private[this] val frame = machine.frame
     private[this] val actuals = machine.actuals
 
-    def execute(acc: SValue) = {
+    def execute(acc: SValue) =
       list.pop match {
         case None =>
           machine.returnValue = acc
@@ -1196,7 +1185,6 @@ private[lf] object Speedy {
           machine.pushKont(this)
           machine.enterApplication(func, Array(SEValue(acc), SEValue(item)))
       }
-    }
   }
 
   private[speedy] final case class KFoldr(
@@ -1210,7 +1198,7 @@ private[lf] object Speedy {
     private[this] val frame = machine.frame
     private[this] val actuals = machine.actuals
 
-    def execute(acc: SValue) = {
+    def execute(acc: SValue) =
       if (lastIndex > 0) {
         machine.restoreFrameAndActuals(frame, actuals)
         val currentIndex = lastIndex - 1
@@ -1221,7 +1209,6 @@ private[lf] object Speedy {
       } else {
         machine.returnValue = acc
       }
-    }
   }
 
   // NOTE: See the explanation above the definition of `SBFoldr` on why we need
@@ -1264,7 +1251,7 @@ private[lf] object Speedy {
     private[this] val frame = machine.frame
     private[this] val actuals = machine.actuals
 
-    def execute(acc: SValue) = {
+    def execute(acc: SValue) =
       revClosures.pop match {
         case None =>
           machine.returnValue = acc
@@ -1274,7 +1261,6 @@ private[lf] object Speedy {
           machine.pushKont(this) // NOTE: We've updated `revClosures`.
           machine.enterApplication(closure, Array(SEValue(acc)))
       }
-    }
   }
 
   /** Store the evaluated value in the definition and in the 'SEVal' from which the
@@ -1359,14 +1345,13 @@ private[lf] object Speedy {
     }
   }
 
-  private[speedy] def throwUnhandledException(payload: SValue) = {
+  private[speedy] def throwUnhandledException(payload: SValue) =
     payload match {
       case exec: SValue.SException =>
         throw DamlEUnhandledException(exec)
       case v =>
         crash(s"throwUnhandledException, applied to non-AnyException: $v")
     }
-  }
 
   /** unwindToHandler is called when an exception is thrown by the builtin SBThrow or
     * re-thrown by the builtin SBTryHandler. If a catch-handler is found, we initiate
@@ -1376,7 +1361,7 @@ private[lf] object Speedy {
     * In addition to exception handlers, we also stop unwinding at submitMustFail.
     */
   private[speedy] def unwindToHandler(machine: Machine, payload: SValue): Unit = {
-    @tailrec def unwind(): Option[Either[KTryCatchHandler, KCatchSubmitMustFail]] = {
+    @tailrec def unwind(): Option[Either[KTryCatchHandler, KCatchSubmitMustFail]] =
       if (machine.kontDepth() == 0) {
         None
       } else {
@@ -1394,7 +1379,6 @@ private[lf] object Speedy {
             unwind()
         }
       }
-    }
     unwind() match {
       case Some(Left(kh)) =>
         kh.restore()
@@ -1421,16 +1405,14 @@ private[lf] object Speedy {
 
     private[Speedy] val envSize = machine.env.size // used by: tryHandleSubmitMustFail
 
-    def execute(v: SValue) = {
+    def execute(v: SValue) =
       machine.returnValue = SValue.SValue.False
-    }
   }
 
   /** A location frame stores a location annotation found in the AST. */
   final case class KLocation(machine: Machine, location: Location) extends Kont {
-    def execute(v: SValue) = {
+    def execute(v: SValue) =
       machine.returnValue = v
-    }
   }
 
   /** Continuation produced by [[SELabelClsoure]] expressions. This is only
@@ -1439,14 +1421,13 @@ private[lf] object Speedy {
     */
   private[speedy] final case class KLabelClosure(machine: Machine, label: Profile.Label)
       extends Kont {
-    def execute(v: SValue) = {
+    def execute(v: SValue) =
       v match {
         case SValue.SPAP(SValue.PClosure(_, expr, closure), args, arity) =>
           machine.returnValue = SValue.SPAP(SValue.PClosure(label, expr, closure), args, arity)
         case _ =>
           machine.returnValue = v
       }
-    }
   }
 
   /** Continuation marking the exit of a closure. This is only used during

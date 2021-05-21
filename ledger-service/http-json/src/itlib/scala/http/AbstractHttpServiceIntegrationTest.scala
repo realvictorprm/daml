@@ -327,13 +327,12 @@ trait AbstractHttpServiceIntegrationTestFuns extends StrictLogging {
     )
   }
 
-  protected def assertStatus(jsObj: JsValue, expectedStatus: StatusCode): Assertion = {
+  protected def assertStatus(jsObj: JsValue, expectedStatus: StatusCode): Assertion =
     inside(jsObj) { case JsObject(fields) =>
       inside(fields.get("status")) { case Some(JsNumber(status)) =>
         status shouldBe BigDecimal(expectedStatus.intValue)
       }
     }
-  }
 
   protected def expectedOneErrorMessage(output: JsValue): String =
     inside(output) { case JsObject(fields) =>
@@ -491,9 +490,8 @@ trait AbstractHttpServiceIntegrationTestFuns extends StrictLogging {
       uri: Uri,
       encoder: DomainJsonEncoder,
       headers: List[HttpHeader] = headersWithAuth,
-  ): Future[List[domain.ActiveContract[JsValue]]] = {
+  ): Future[List[domain.ActiveContract[JsValue]]] =
     search(commands, query, uri, encoder, headers).map(expectOk(_))
-  }
 
   protected def search(
       commands: List[domain.CreateCommand[v.Record]],
@@ -503,7 +501,7 @@ trait AbstractHttpServiceIntegrationTestFuns extends StrictLogging {
       headers: List[HttpHeader] = headersWithAuth,
   ): Future[
     domain.SyncResponse[List[domain.ActiveContract[JsValue]]]
-  ] = {
+  ] =
     commands.traverse(c => postCreateCommand(c, encoder, uri, headers)).flatMap { rs =>
       rs.map(_._1) shouldBe List.fill(commands.size)(StatusCodes.OK)
       postJsonRequest(uri.withPath(Uri.Path("/v1/query")), query, headers).flatMap {
@@ -512,7 +510,6 @@ trait AbstractHttpServiceIntegrationTestFuns extends StrictLogging {
             .toFuture(decode1[domain.SyncResponse, List[domain.ActiveContract[JsValue]]](output))
       }
     }
-  }
 
   private[http] def expectOk[R](resp: domain.SyncResponse[R]): R = resp match {
     case ok: domain.OkResponse[_] =>
@@ -643,9 +640,7 @@ abstract class AbstractHttpServiceIntegrationTest
         headers = headersWithPartyAuth(List("Alice", "Bob")),
       )
         .map(acl => acl.size shouldBe 2)
-    } yield {
-      assert(true)
-    }
+    } yield assert(true)
   }
 
   "query with query, one field" in withHttpService { (uri, encoder, _) =>
@@ -804,14 +799,13 @@ abstract class AbstractHttpServiceIntegrationTest
   protected def searchAll(
       uri: Uri,
       headers: List[HttpHeader],
-  ): Future[domain.SyncResponse[List[domain.ActiveContract[JsValue]]]] = {
+  ): Future[domain.SyncResponse[List[domain.ActiveContract[JsValue]]]] =
     getRequest(uri = uri.withPath(Uri.Path("/v1/query")), headers)
       .flatMap { case (_, output) =>
         FutureUtil.toFuture(
           decode1[domain.SyncResponse, List[domain.ActiveContract[JsValue]]](output)
         )
       }
-  }
 
   "create IOU" in withHttpService { (uri, encoder, _) =>
     val command: domain.CreateCommand[v.Record] = iouCreateCommand()
@@ -944,9 +938,9 @@ abstract class AbstractHttpServiceIntegrationTest
       exerciseCmd: domain.ExerciseCommand[v.Value, domain.EnrichedContractId],
       decoder: DomainJsonDecoder,
       uri: Uri,
-  ): Future[Assertion] = {
+  ): Future[Assertion] =
     inside(SprayJson.decode[domain.ExerciseResponse[JsValue]](exerciseResponse)) {
-      case \/-(domain.ExerciseResponse(JsString(exerciseResult), List(contract1, contract2))) => {
+      case \/-(domain.ExerciseResponse(JsString(exerciseResult), List(contract1, contract2))) =>
         // checking contracts
         inside(contract1) { case domain.Contract(-\/(archivedContract)) =>
           (archivedContract.contractId.unwrap: String) shouldBe (exerciseCmd.reference.contractId.unwrap: String)
@@ -955,7 +949,7 @@ abstract class AbstractHttpServiceIntegrationTest
           assertActiveContract(decoder, activeContract, createCmd, exerciseCmd)
         }
         // checking exerciseResult
-        exerciseResult.length should be > (0)
+        exerciseResult.length should be > 0
         val newContractLocator = domain.EnrichedContractId(
           Some(domain.TemplateId(None, "Iou", "IouTransfer")),
           domain.ContractId(exerciseResult),
@@ -965,9 +959,7 @@ abstract class AbstractHttpServiceIntegrationTest
           assertStatus(output, StatusCodes.OK)
           getContractId(getResult(output)) shouldBe newContractLocator.contractId
         }: Future[Assertion]
-      }
     }
-  }
 
   "exercise IOU_Transfer with unknown contractId should return proper error" in withHttpService {
     (uri, encoder, _) =>
@@ -1062,7 +1054,7 @@ abstract class AbstractHttpServiceIntegrationTest
   private def assertExerciseResponseArchivedContract(
       exerciseResponse: JsValue,
       exercise: domain.ExerciseCommand[v.Value, domain.EnrichedContractId],
-  ): Assertion = {
+  ): Assertion =
     inside(exerciseResponse) { case result @ JsObject(_) =>
       inside(SprayJson.decode[domain.ExerciseResponse[JsValue]](result)) {
         case \/-(domain.ExerciseResponse(exerciseResult, List(contract1))) =>
@@ -1072,7 +1064,6 @@ abstract class AbstractHttpServiceIntegrationTest
           }
       }
     }
-  }
 
   "should be able to serialize and deserialize domain commands" in withLedger { client =>
     instanceUUIDLogCtx(implicit lc =>

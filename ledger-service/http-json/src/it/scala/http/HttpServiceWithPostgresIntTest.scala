@@ -33,10 +33,10 @@ class HttpServiceWithPostgresIntTest
       uri,
       encoder,
     ).flatMap { searchResult: List[domain.ActiveContract[JsValue]] =>
-      discard { searchResult should have size 2 }
-      discard { searchResult.map(getField("currency")) shouldBe List.fill(2)(JsString("EUR")) }
+      discard(searchResult should have size 2)
+      discard(searchResult.map(getField("currency")) shouldBe List.fill(2)(JsString("EUR")))
       selectAllDbContracts.flatMap { listFromDb =>
-        discard { listFromDb should have size searchDataSet.size.toLong }
+        discard(listFromDb should have size searchDataSet.size.toLong)
         val actualCurrencyValues: List[String] = listFromDb
           .flatMap { case (_, _, _, payload, _, _, _) =>
             payload.asJsObject().getFields("currency")

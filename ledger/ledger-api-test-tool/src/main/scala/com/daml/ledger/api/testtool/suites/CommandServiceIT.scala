@@ -155,9 +155,7 @@ final class CommandServiceIT extends LedgerTestSuite {
     for {
       _ <- ledger.submitAndWait(request)
       failure <- ledger.submitAndWait(request).mustFail("submitting a duplicate request")
-    } yield {
-      assertGrpcError(failure, Status.Code.ALREADY_EXISTS, "")
-    }
+    } yield assertGrpcError(failure, Status.Code.ALREADY_EXISTS, "")
   })
 
   test(
@@ -171,9 +169,7 @@ final class CommandServiceIT extends LedgerTestSuite {
       failure <- ledger
         .submitAndWaitForTransactionId(request)
         .mustFail("submitting a duplicate request")
-    } yield {
-      assertGrpcError(failure, Status.Code.ALREADY_EXISTS, "")
-    }
+    } yield assertGrpcError(failure, Status.Code.ALREADY_EXISTS, "")
   })
 
   test(
@@ -187,9 +183,7 @@ final class CommandServiceIT extends LedgerTestSuite {
       failure <- ledger
         .submitAndWaitForTransaction(request)
         .mustFail("submitting a duplicate request")
-    } yield {
-      assertGrpcError(failure, Status.Code.ALREADY_EXISTS, "")
-    }
+    } yield assertGrpcError(failure, Status.Code.ALREADY_EXISTS, "")
   })
 
   test(
@@ -203,9 +197,7 @@ final class CommandServiceIT extends LedgerTestSuite {
       failure <- ledger
         .submitAndWaitForTransactionTree(request)
         .mustFail("submitting a duplicate request")
-    } yield {
-      assertGrpcError(failure, Status.Code.ALREADY_EXISTS, "")
-    }
+    } yield assertGrpcError(failure, Status.Code.ALREADY_EXISTS, "")
   })
 
   test(
@@ -280,9 +272,7 @@ final class CommandServiceIT extends LedgerTestSuite {
       failure <- ledger
         .submitAndWait(badRequest)
         .mustFail("submitting a request with a bad parameter label")
-    } yield {
-      assertGrpcError(failure, Status.Code.INVALID_ARGUMENT, s"Missing record label")
-    }
+    } yield assertGrpcError(failure, Status.Code.INVALID_ARGUMENT, s"Missing record label")
   })
 
   test(
@@ -295,17 +285,15 @@ final class CommandServiceIT extends LedgerTestSuite {
       failure <- ledger
         .exercise(party, dummy.exerciseFailingClone)
         .mustFail("submitting a request with an interpretation error")
-    } yield {
-      assertGrpcError(
-        failure,
-        Status.Code.INVALID_ARGUMENT,
-        Some(
-          Pattern.compile(
-            "Command interpretation error in LF-DAMLe: Interpretation error: Error: (User abort: Assertion failed\\.|unhandled exception: [0-9a-zA-Z\\.:]*@[0-9a-f]*\\{ message = \"Assertion failed\" \\}\\.) Details: Last location: \\[[^\\]]*\\], partial transaction: root node"
-          )
-        ),
-      )
-    }
+    } yield assertGrpcError(
+      failure,
+      Status.Code.INVALID_ARGUMENT,
+      Some(
+        Pattern.compile(
+          "Command interpretation error in LF-DAMLe: Interpretation error: Error: (User abort: Assertion failed\\.|unhandled exception: [0-9a-zA-Z\\.:]*@[0-9a-f]*\\{ message = \"Assertion failed\" \\}\\.) Details: Last location: \\[[^\\]]*\\], partial transaction: root node"
+        )
+      ),
+    )
   })
 
   test(
@@ -386,12 +374,10 @@ final class CommandServiceIT extends LedgerTestSuite {
     for {
       _ <- ledger.submitAndWait(request)
       acs <- ledger.activeContracts(party)
-    } yield {
-      assert(
-        acs.size == target,
-        s"Expected $target contracts to be created, got ${acs.size} instead",
-      )
-    }
+    } yield assert(
+      acs.size == target,
+      s"Expected $target contracts to be created, got ${acs.size} instead",
+    )
   })
 
   test(
@@ -501,9 +487,7 @@ final class CommandServiceIT extends LedgerTestSuite {
       failure <- ledger
         .submitAndWait(request)
         .mustFail("submitting a request with bad create arguments")
-    } yield {
-      assertGrpcError(failure, Status.Code.INVALID_ARGUMENT, "Expecting 1 field for record")
-    }
+    } yield assertGrpcError(failure, Status.Code.INVALID_ARGUMENT, "Expecting 1 field for record")
   })
 
   test(
@@ -520,9 +504,7 @@ final class CommandServiceIT extends LedgerTestSuite {
       failure <- ledger
         .submitAndWait(request)
         .mustFail("submitting a request with bad choice arguments")
-    } yield {
-      assertGrpcError(failure, Status.Code.INVALID_ARGUMENT, "mismatching type")
-    }
+    } yield assertGrpcError(failure, Status.Code.INVALID_ARGUMENT, "mismatching type")
   })
 
   test(
@@ -540,13 +522,11 @@ final class CommandServiceIT extends LedgerTestSuite {
       failure <- ledger
         .submitAndWait(request)
         .mustFail("submitting a request with an invalid choice")
-    } yield {
-      assertGrpcError(
-        failure,
-        Status.Code.INVALID_ARGUMENT,
-        s"Couldn't find requested choice $missingChoice",
-      )
-    }
+    } yield assertGrpcError(
+      failure,
+      Status.Code.INVALID_ARGUMENT,
+      s"Couldn't find requested choice $missingChoice",
+    )
   })
 
 }

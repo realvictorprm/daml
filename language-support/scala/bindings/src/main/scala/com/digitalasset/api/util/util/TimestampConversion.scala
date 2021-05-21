@@ -19,7 +19,7 @@ object TimestampConversion {
     Instant.ofEpochSecond(seconds, TimeUnit.MICROSECONDS.toNanos(deltaMicros))
   }
 
-  def instantToMicros(t: Instant): Value.Sum.Timestamp = {
+  def instantToMicros(t: Instant): Value.Sum.Timestamp =
     if (t.getNano % 1000 != 0)
       throw new IllegalArgumentException(
         s"Conversion of Instant $t to microsecond granularity would result in loss of precision."
@@ -30,13 +30,9 @@ object TimestampConversion {
           .toMicros(t.getNano.toLong)
       )
 
-  }
-
-  def toInstant(protoTimestamp: Timestamp): Instant = {
+  def toInstant(protoTimestamp: Timestamp): Instant =
     Instant.ofEpochSecond(protoTimestamp.seconds, protoTimestamp.nanos.toLong)
-  }
 
-  def fromInstant(instant: Instant): Timestamp = {
+  def fromInstant(instant: Instant): Timestamp =
     new Timestamp().withSeconds(instant.getEpochSecond).withNanos(instant.getNano)
-  }
 }

@@ -41,20 +41,16 @@ final class ResourceOwnerSpec extends AsyncWordSpec with Matchers {
 
       val resource = for {
         value <- owner.acquire()
-      } yield {
-        withClue("after acquiring,") {
-          owner.hasBeenAcquired should be(true)
-          value should be(42)
-        }
+      } yield withClue("after acquiring,") {
+        owner.hasBeenAcquired should be(true)
+        value should be(42)
       }
 
       for {
         _ <- resource.asFuture
         _ <- resource.release()
-      } yield {
-        withClue("after releasing,") {
-          owner.hasBeenAcquired should be(false)
-        }
+      } yield withClue("after releasing,") {
+        owner.hasBeenAcquired should be(false)
       }
     }
 
@@ -76,11 +72,9 @@ final class ResourceOwnerSpec extends AsyncWordSpec with Matchers {
       for {
         _ <- resource.asFuture
         _ <- resource.release()
-      } yield {
-        withClue("after releasing,") {
-          ownerA.hasBeenAcquired should be(false)
-          ownerB.hasBeenAcquired should be(false)
-        }
+      } yield withClue("after releasing,") {
+        ownerA.hasBeenAcquired should be(false)
+        ownerB.hasBeenAcquired should be(false)
       }
     }
 
@@ -93,9 +87,7 @@ final class ResourceOwnerSpec extends AsyncWordSpec with Matchers {
         _ <- resource.release()
         // if `TestResourceOwner`'s release function is called twice, it'll fail
         _ <- resource.release()
-      } yield {
-        owner.hasBeenAcquired should be(false)
-      }
+      } yield owner.hasBeenAcquired should be(false)
     }
 
     "treat nested releases idempotently, only releasing once regardless of the number of calls" in {
@@ -152,9 +144,7 @@ final class ResourceOwnerSpec extends AsyncWordSpec with Matchers {
       for {
         throwable <- resource.asFuture.failed
         _ <- resource.release()
-      } yield {
-        throwable should be(a[FailingResourceOwner.FailingResourceFailedToOpen])
-      }
+      } yield throwable should be(a[FailingResourceOwner.FailingResourceFailedToOpen])
     }
 
     "on failure, release any acquired sub-resources" in {
@@ -241,11 +231,9 @@ final class ResourceOwnerSpec extends AsyncWordSpec with Matchers {
       for {
         _ <- resource.asFuture
         _ <- resource.release()
-      } yield {
-        withClue("after releasing,") {
-          innerResourceOwner.hasBeenAcquired should be(false)
-          outerResourceOwner.hasBeenAcquired should be(false)
-        }
+      } yield withClue("after releasing,") {
+        innerResourceOwner.hasBeenAcquired should be(false)
+        outerResourceOwner.hasBeenAcquired should be(false)
       }
     }
 
@@ -263,10 +251,8 @@ final class ResourceOwnerSpec extends AsyncWordSpec with Matchers {
       for {
         value <- transformedResource.asFuture
         _ <- transformedResource.release()
-      } yield {
-        withClue("after releasing,") {
-          value should be(6)
-        }
+      } yield withClue("after releasing,") {
+        value should be(6)
       }
     }
 
@@ -284,10 +270,8 @@ final class ResourceOwnerSpec extends AsyncWordSpec with Matchers {
       for {
         exception <- transformedResource.asFuture.failed
         _ <- transformedResource.release()
-      } yield {
-        withClue("after releasing,") {
-          exception.getMessage should be("Oh no! The value was 9.")
-        }
+      } yield withClue("after releasing,") {
+        exception.getMessage should be("Oh no! The value was 9.")
       }
     }
 
@@ -308,10 +292,8 @@ final class ResourceOwnerSpec extends AsyncWordSpec with Matchers {
       for {
         value <- transformedResource.asFuture
         _ <- transformedResource.release()
-      } yield {
-        withClue("after releasing,") {
-          value should be("This one didn't work.")
-        }
+      } yield withClue("after releasing,") {
+        value should be("This one didn't work.")
       }
     }
 
@@ -332,10 +314,8 @@ final class ResourceOwnerSpec extends AsyncWordSpec with Matchers {
       for {
         exception <- transformedResource.asFuture.failed
         _ <- transformedResource.release()
-      } yield {
-        withClue("after releasing,") {
-          exception.getMessage should be("This also didn't work. Boo.")
-        }
+      } yield withClue("after releasing,") {
+        exception.getMessage should be("This also didn't work. Boo.")
       }
     }
 
@@ -363,12 +343,10 @@ final class ResourceOwnerSpec extends AsyncWordSpec with Matchers {
       for {
         value <- transformedResource.asFuture
         _ <- transformedResource.release()
-      } yield {
-        withClue("after releasing,") {
-          value should be(4)
-          ownerA.hasBeenAcquired should be(false)
-          ownerB.hasBeenAcquired should be(false)
-        }
+      } yield withClue("after releasing,") {
+        value should be(4)
+        ownerA.hasBeenAcquired should be(false)
+        ownerB.hasBeenAcquired should be(false)
       }
     }
 
@@ -395,11 +373,9 @@ final class ResourceOwnerSpec extends AsyncWordSpec with Matchers {
       for {
         value <- transformedResource.asFuture
         _ <- transformedResource.release()
-      } yield {
-        withClue("after releasing,") {
-          value should be("something")
-          ownerA.hasBeenAcquired should be(false)
-        }
+      } yield withClue("after releasing,") {
+        value should be("something")
+        ownerA.hasBeenAcquired should be(false)
       }
     }
 
@@ -429,12 +405,10 @@ final class ResourceOwnerSpec extends AsyncWordSpec with Matchers {
       for {
         _ <- resource.asFuture
         _ <- resource.release()
-      } yield {
-        withClue("after releasing,") {
-          ownerA.hasBeenAcquired should be(false)
-          ownerB.hasBeenAcquired should be(false)
-          ownerC.hasBeenAcquired should be(false)
-        }
+      } yield withClue("after releasing,") {
+        ownerA.hasBeenAcquired should be(false)
+        ownerB.hasBeenAcquired should be(false)
+        ownerC.hasBeenAcquired should be(false)
       }
     }
   }
@@ -489,16 +463,12 @@ final class ResourceOwnerSpec extends AsyncWordSpec with Matchers {
     "convert to a ResourceOwner" in {
       val resource = for {
         value <- Factories.successful("Hello!").acquire()
-      } yield {
-        value should be("Hello!")
-      }
+      } yield value should be("Hello!")
 
       for {
         _ <- resource.asFuture
         _ <- resource.release()
-      } yield {
-        succeed
-      }
+      } yield succeed
     }
   }
 
@@ -511,9 +481,7 @@ final class ResourceOwnerSpec extends AsyncWordSpec with Matchers {
       for {
         throwable <- resource.asFuture.failed
         _ <- resource.release()
-      } yield {
-        throwable should be(ExampleThrowable)
-      }
+      } yield throwable should be(ExampleThrowable)
     }
   }
 
@@ -521,16 +489,12 @@ final class ResourceOwnerSpec extends AsyncWordSpec with Matchers {
     "convert to a ResourceOwner" in {
       val resource = for {
         value <- Factories.forTry(() => Success(49)).acquire()
-      } yield {
-        value should be(49)
-      }
+      } yield value should be(49)
 
       for {
         _ <- resource.asFuture
         _ <- resource.release()
-      } yield {
-        succeed
-      }
+      } yield succeed
     }
   }
 
@@ -538,16 +502,12 @@ final class ResourceOwnerSpec extends AsyncWordSpec with Matchers {
     "convert to a ResourceOwner" in {
       val resource = for {
         value <- Factories.forFuture(() => Future.successful(54)).acquire()
-      } yield {
-        value should be(54)
-      }
+      } yield value should be(54)
 
       for {
         _ <- resource.asFuture
         _ <- resource.release()
-      } yield {
-        succeed
-      }
+      } yield succeed
     }
   }
 
@@ -557,16 +517,12 @@ final class ResourceOwnerSpec extends AsyncWordSpec with Matchers {
         value <- Factories
           .forCompletionStage(() => completedFuture(63))
           .acquire()
-      } yield {
-        value should be(63)
-      }
+      } yield value should be(63)
 
       for {
         _ <- resource.asFuture
         _ <- resource.release()
-      } yield {
-        succeed
-      }
+      } yield succeed
     }
   }
 
@@ -575,20 +531,16 @@ final class ResourceOwnerSpec extends AsyncWordSpec with Matchers {
       val newCloseable = new MockConstructor(acquired => new TestCloseable(42, acquired))
       val resource = for {
         closeable <- Factories.forCloseable(newCloseable.apply _).acquire()
-      } yield {
-        withClue("after acquiring,") {
-          newCloseable.hasBeenAcquired should be(true)
-          closeable.value should be(42)
-        }
+      } yield withClue("after acquiring,") {
+        newCloseable.hasBeenAcquired should be(true)
+        closeable.value should be(42)
       }
 
       for {
         _ <- resource.asFuture
         _ <- resource.release()
-      } yield {
-        withClue("after releasing,") {
-          newCloseable.hasBeenAcquired should be(false)
-        }
+      } yield withClue("after releasing,") {
+        newCloseable.hasBeenAcquired should be(false)
       }
     }
   }
@@ -599,20 +551,16 @@ final class ResourceOwnerSpec extends AsyncWordSpec with Matchers {
         new MockConstructor(acquired => Future.successful(new TestCloseable(93, acquired)))
       val resource = for {
         closeable <- Factories.forFutureCloseable(newCloseable.apply _).acquire()
-      } yield {
-        withClue("after acquiring,") {
-          newCloseable.hasBeenAcquired should be(true)
-          closeable.value should be(93)
-        }
+      } yield withClue("after acquiring,") {
+        newCloseable.hasBeenAcquired should be(true)
+        closeable.value should be(93)
       }
 
       for {
         _ <- resource.asFuture
         _ <- resource.release()
-      } yield {
-        withClue("after releasing,") {
-          newCloseable.hasBeenAcquired should be(false)
-        }
+      } yield withClue("after releasing,") {
+        newCloseable.hasBeenAcquired should be(false)
       }
     }
   }
@@ -634,9 +582,7 @@ final class ResourceOwnerSpec extends AsyncWordSpec with Matchers {
         _ <- testPromise.future
         _ <- resource.release()
         executor <- resource.asFuture
-      } yield {
-        an[RejectedExecutionException] should be thrownBy executor.submit(() => 7)
-      }
+      } yield an[RejectedExecutionException] should be thrownBy executor.submit(() => 7)
     }
 
     "cause an exception if the result is the execution context, to avoid deadlock upon release" in {
@@ -649,9 +595,7 @@ final class ResourceOwnerSpec extends AsyncWordSpec with Matchers {
       for {
         throwable <- resource.asFuture.failed
         _ <- resource.release()
-      } yield {
-        throwable should be(a[ExecutorServiceResourceOwner.CannotAcquireExecutionContext])
-      }
+      } yield throwable should be(a[ExecutorServiceResourceOwner.CannotAcquireExecutionContext])
     }
 
     "cause an exception if the result is wrapping the execution context, to avoid deadlock upon release" in {
@@ -665,9 +609,7 @@ final class ResourceOwnerSpec extends AsyncWordSpec with Matchers {
       for {
         throwable <- resource.asFuture.failed
         _ <- resource.release()
-      } yield {
-        throwable should be(a[ExecutorServiceResourceOwner.CannotAcquireExecutionContext])
-      }
+      } yield throwable should be(a[ExecutorServiceResourceOwner.CannotAcquireExecutionContext])
     }
   }
 
@@ -691,14 +633,12 @@ final class ResourceOwnerSpec extends AsyncWordSpec with Matchers {
         _ <- testPromise.future
         _ <- resource.release()
         timer <- resource.asFuture
-      } yield {
-        an[IllegalStateException] should be thrownBy timer.schedule(
-          new TimerTask {
-            override def run(): Unit = ()
-          },
-          0,
-        )
-      }
+      } yield an[IllegalStateException] should be thrownBy timer.schedule(
+        new TimerTask {
+          override def run(): Unit = ()
+        },
+        0,
+      )
     }
   }
 
@@ -733,10 +673,8 @@ final class ResourceOwnerSpec extends AsyncWordSpec with Matchers {
       for {
         _ <- resource.asFuture
         _ <- resource.release()
-      } yield {
-        withClue("after releasing,") {
-          released.toSet should be((1 to 10).toSet)
-        }
+      } yield withClue("after releasing,") {
+        released.toSet should be((1 to 10).toSet)
       }
     }
 
@@ -771,10 +709,8 @@ final class ResourceOwnerSpec extends AsyncWordSpec with Matchers {
       for {
         _ <- resource.asFuture
         _ <- resource.release()
-      } yield {
-        withClue("after releasing,") {
-          released.toSet should be((1 to 10).toSet)
-        }
+      } yield withClue("after releasing,") {
+        released.toSet should be((1 to 10).toSet)
       }
     }
 
@@ -782,14 +718,13 @@ final class ResourceOwnerSpec extends AsyncWordSpec with Matchers {
       val releaseOrder = mutable.Buffer[Int]()
       val owners = (1 to 4).map(value =>
         new AbstractResourceOwner[TestContext, Int] {
-          override def acquire()(implicit context: TestContext): Resource[Int] = {
+          override def acquire()(implicit context: TestContext): Resource[Int] =
             Resource(Future(value)) { v =>
               Delayed.by((v * 200).milliseconds) {
                 releaseOrder += v
                 ()
               }
             }
-          }
         }
       )
       val resources = owners.map(_.acquire())
@@ -806,10 +741,8 @@ final class ResourceOwnerSpec extends AsyncWordSpec with Matchers {
       for {
         _ <- resource.asFuture
         _ <- resource.release()
-      } yield {
-        withClue("after releasing,") {
-          releaseOrder should be(1 to 4)
-        }
+      } yield withClue("after releasing,") {
+        releaseOrder should be(1 to 4)
       }
     }
   }

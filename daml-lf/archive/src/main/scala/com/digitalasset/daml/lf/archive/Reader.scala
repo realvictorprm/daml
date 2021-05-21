@@ -41,7 +41,7 @@ abstract class Reader[+Pkg] {
     readArchiveAndVersion(is)._1
 
   @throws[ParseError]
-  final def readArchiveAndVersion(lf: DamlLf.Archive): (Pkg, LanguageMajorVersion) = {
+  final def readArchiveAndVersion(lf: DamlLf.Archive): (Pkg, LanguageMajorVersion) =
     lf.getHashFunction match {
       case DamlLf.HashFunction.SHA256 =>
         val payload = lf.getPayload.toByteArray
@@ -61,7 +61,6 @@ abstract class Reader[+Pkg] {
       case DamlLf.HashFunction.UNRECOGNIZED =>
         throw ParseError("Unrecognized hash function")
     }
-  }
 
   @throws[ParseError]
   final def decodeArchive(lf: DamlLf.Archive): Pkg =

@@ -93,7 +93,7 @@ sealed trait PerformanceEnvelope[E <: Envelope] {
       }
       for {
         // wait for our turn
-        _ <- blocking { promise.future }
+        _ <- blocking(promise.future)
         // build request
         request = submitRequest(
           participantAlice,
@@ -125,16 +125,14 @@ sealed trait PerformanceEnvelope[E <: Envelope] {
       started = Instant.now
       _ <- Future.traverse(workflowIds)(sendPing)
       res <- awaiter
-    } yield {
-      res match {
-        case Left(err) => Assertions.fail(err)
-        case Right(_) =>
-          val finished = Instant.now
-          (
-            Duration.between(started, finished),
-            timings.values.flatMap(_.toOption.toList).toList,
-          )
-      }
+    } yield res match {
+      case Left(err) => Assertions.fail(err)
+      case Right(_) =>
+        val finished = Instant.now
+        (
+          Duration.between(started, finished),
+          timings.values.flatMap(_.toOption.toList).toList,
+        )
     }
   }
 
@@ -143,7 +141,7 @@ sealed trait PerformanceEnvelope[E <: Envelope] {
       party: P.Party,
       command: Command,
       commandAndWorkflowId: String,
-  ) = {
+  ) =
     new SubmitRequest(
       Some(
         new Commands(
@@ -156,7 +154,6 @@ sealed trait PerformanceEnvelope[E <: Envelope] {
         )
       )
     )
-  }
 
   private def waitForAllTransactions(
       observedAll: Promise[Either[String, Unit]],
@@ -173,65 +170,61 @@ sealed trait PerformanceEnvelope[E <: Envelope] {
 
     for {
       offset <- participant.currentEnd()
-    } yield {
-      context.run(() =>
-        participant.transactionStream(
-          GetTransactionsRequest(
-            ledgerId = participant.ledgerId,
-            begin = Some(offset),
-            end = None,
-            verbose = false,
-            filter = Some(
-              TransactionFilter(filtersByParty = Map(party.unwrap -> Filters(inclusive = None)))
-            ),
+    } yield context.run(() =>
+      participant.transactionStream(
+        GetTransactionsRequest(
+          ledgerId = participant.ledgerId,
+          begin = Some(offset),
+          end = None,
+          verbose = false,
+          filter = Some(
+            TransactionFilter(filtersByParty = Map(party.unwrap -> Filters(inclusive = None)))
           ),
-          new StreamObserver[GetTransactionsResponse] {
-            // find workflow ids and signal if we observed all expected
-            @SuppressWarnings(Array("org.wartremover.warts.AnyVal"))
-            override def onNext(value: GetTransactionsResponse): Unit = {
-              value.transactions.foreach { tr: Transaction =>
-                timings.get(tr.workflowId) match {
-                  case Some(Left(started)) =>
-                    val finished = Instant.now()
-                    val inf = inflight.decrementAndGet()
-                    val obs = observed.incrementAndGet()
-                    // start next ping
-                    Option(queue.poll()).foreach(_.success(()))
-                    logger.info(s"Observed ping ${tr.workflowId} (observed=$obs, inflight=$inf)")
-                    timings.update(tr.workflowId, Right(Duration.between(started, finished)))
-                    // signal via future that we are done
-                    if (observed.get() == numPings && !observedAll.isCompleted)
-                      observedAll.trySuccess(Right(()))
-                  // there shouldn't be running anything concurrently
-                  case None =>
-                    logger.error(
-                      s"Observed transaction with un-expected workflowId ${tr.workflowId}"
-                    )
-                  case Some(Right(_)) =>
-                    logger.error(s"Observed transaction with workflowId ${tr.workflowId} twice!")
-                }
+        ),
+        new StreamObserver[GetTransactionsResponse] {
+          // find workflow ids and signal if we observed all expected
+          @SuppressWarnings(Array("org.wartremover.warts.AnyVal"))
+          override def onNext(value: GetTransactionsResponse): Unit =
+            value.transactions.foreach { tr: Transaction =>
+              timings.get(tr.workflowId) match {
+                case Some(Left(started)) =>
+                  val finished = Instant.now()
+                  val inf = inflight.decrementAndGet()
+                  val obs = observed.incrementAndGet()
+                  // start next ping
+                  Option(queue.poll()).foreach(_.success(()))
+                  logger.info(s"Observed ping ${tr.workflowId} (observed=$obs, inflight=$inf)")
+                  timings.update(tr.workflowId, Right(Duration.between(started, finished)))
+                  // signal via future that we are done
+                  if (observed.get() == numPings && !observedAll.isCompleted)
+                    observedAll.trySuccess(Right(()))
+                // there shouldn't be running anything concurrently
+                case None =>
+                  logger.error(
+                    s"Observed transaction with un-expected workflowId ${tr.workflowId}"
+                  )
+                case Some(Right(_)) =>
+                  logger.error(s"Observed transaction with workflowId ${tr.workflowId} twice!")
               }
             }
 
-            override def onError(t: Throwable): Unit = t match {
-              case ex: io.grpc.StatusRuntimeException
-                  if ex.getStatus.getCode == io.grpc.Status.CANCELLED.getCode =>
-              case _ => logger.error("GetTransactionResponse stopped due to an error", t)
+          override def onError(t: Throwable): Unit = t match {
+            case ex: io.grpc.StatusRuntimeException
+                if ex.getStatus.getCode == io.grpc.Status.CANCELLED.getCode =>
+            case _ => logger.error("GetTransactionResponse stopped due to an error", t)
+          }
+
+          override def onCompleted(): Unit =
+            if (observed.get() != numPings) {
+              logger.error(
+                s"Transaction stream closed before I've observed all transactions. Missing are ${numPings - observed
+                  .get()}."
+              )
             }
 
-            override def onCompleted(): Unit = {
-              if (observed.get() != numPings) {
-                logger.error(
-                  s"Transaction stream closed before I've observed all transactions. Missing are ${numPings - observed
-                    .get()}."
-                )
-              }
-
-            }
-          },
-        )
+        },
       )
-    }
+    )
     // ensure we cancel the stream once we've observed everything
     observedAll.future.map { x =>
       Try(context.cancel(Status.CANCELLED.asException())) match {
@@ -261,7 +254,7 @@ sealed trait PerformanceEnvelope[E <: Envelope] {
         ),
         new StreamObserver[CompletionStreamResponse] {
           @SuppressWarnings(Array("org.wartremover.warts.AnyVal"))
-          override def onNext(value: CompletionStreamResponse): Unit = {
+          override def onNext(value: CompletionStreamResponse): Unit =
             value.completions.foreach { completion =>
               completion.status.foreach { status =>
                 // TODO(rv) maybe, add re-submission logic once systems are smart enough to back-pressure
@@ -280,7 +273,6 @@ sealed trait PerformanceEnvelope[E <: Envelope] {
                 }
               }
             }
-          }
           override def onError(t: Throwable): Unit = {}
           override def onCompleted(): Unit = {}
         },

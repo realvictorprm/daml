@@ -68,7 +68,7 @@ class ConfigSpec extends AnyFreeSpec with Matchers with OptionValues {
       "--party Alice" in {
         val args = defaultRequiredArgs ++ Array("--party", "Alice")
         val optConfig = Config.parse(args)
-        optConfig.value.parties should contain only ("Alice")
+        optConfig.value.parties should contain only "Alice"
       }
       "--party Alice --party Bob" in {
         val args = defaultRequiredArgs ++ Array("--party", "Alice", "--party", "Bob")
@@ -102,15 +102,10 @@ class ConfigSpec extends AnyFreeSpec with Matchers with OptionValues {
         val tokenFile: Path = Files.createTempFile("token", ".jwt")
         try {
           val writer = new PrintWriter(tokenFile.toFile)
-          try {
-            writer.print(token)
-          } finally {
-            writer.close
-          }
+          try writer.print(token)
+          finally writer.close
           f(tokenFile)
-        } finally {
-          Files.delete(tokenFile)
-        }
+        } finally Files.delete(tokenFile)
       }
       "--access-token-file" in withTokenFile { tokenFile =>
         val args = defaultRequiredArgs ++ Array("--access-token-file", tokenFile.toString)

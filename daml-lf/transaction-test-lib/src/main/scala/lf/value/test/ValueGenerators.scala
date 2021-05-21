@@ -209,8 +209,8 @@ object ValueGenerators {
   def coidValueGen: Gen[ValueContractId[ContractId]] =
     coidGen.map(ValueContractId(_))
 
-  private def valueGen(nesting: Int): Gen[Value[ContractId]] = {
-    Gen.sized(sz => {
+  private def valueGen(nesting: Int): Gen[Value[ContractId]] =
+    Gen.sized { sz =>
       val newNesting = nesting + 1
       val nested = List(
         (sz / 2 + 1, Gen.resize(sz / 5, valueListGen(newNesting))),
@@ -233,26 +233,24 @@ object ValueGenerators {
       )
       val all =
         if (nesting >= MAXIMUM_NESTING) { List() }
-        else { nested } ++
-          flat
+        else
+          nested ++
+            flat
       Gen.frequency(all: _*)
-    })
-  }
+    }
 
   private val simpleChars =
     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_ ".toVector
 
-  def simpleStr: Gen[PackageId] = {
+  def simpleStr: Gen[PackageId] =
     Gen
       .nonEmptyListOf(Gen.oneOf(simpleChars))
       .map(s => PackageId.assertFromString(s.mkString))
-  }
 
-  def party: Gen[Party] = {
+  def party: Gen[Party] =
     Gen
       .nonEmptyListOf(Gen.oneOf(simpleChars))
       .map(s => Party.assertFromString(s.take(255).mkString))
-  }
 
   def valueGen: Gen[Value[ContractId]] = valueGen(0)
 
@@ -311,7 +309,7 @@ object ValueGenerators {
     */
   def malformedCreateNodeGenWithVersion(
       version: TransactionVersion
-  ): Gen[NodeCreate[Value.ContractId]] = {
+  ): Gen[NodeCreate[Value.ContractId]] =
     for {
       coid <- coidGen
       templateId <- idGen
@@ -331,7 +329,6 @@ object ValueGenerators {
       key,
       version,
     )
-  }
 
   val fetchNodeGen: Gen[NodeFetch[ContractId]] = {
     for {

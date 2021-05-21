@@ -64,7 +64,7 @@ private[lf] final class ConcurrentCompiledPackages(compilerConfig: Compiler.Conf
           }
 
           // Load dependencies of this package and transitively its dependencies.
-          for (dependency <- pkg.directDeps) {
+          for (dependency <- pkg.directDeps)
             if (!_signatures.contains(dependency) && !state.seenDependencies.contains(dependency)) {
               return ResultNeedPackage(
                 dependency,
@@ -81,7 +81,6 @@ private[lf] final class ConcurrentCompiledPackages(compilerConfig: Compiler.Conf
                 },
               )
             }
-          }
 
           // At this point all dependencies have been loaded. Update the packages
           // map using 'computeIfAbsent' which will ensure we only compile the
@@ -94,10 +93,9 @@ private[lf] final class ConcurrentCompiledPackages(compilerConfig: Compiler.Conf
             }
             // Compile the speedy definitions for this package.
             val defns =
-              try {
-                new speedy.Compiler(signatureLookup orElse _signatures, compilerConfig)
-                  .unsafeCompilePackage(pkgId, pkg)
-              } catch {
+              try new speedy.Compiler(signatureLookup orElse _signatures, compilerConfig)
+                .unsafeCompilePackage(pkgId, pkg)
+              catch {
                 case CompilationError(msg) =>
                   return ResultError(Error(s"Compilation Error: $msg"))
                 case e: validation.ValidationError =>

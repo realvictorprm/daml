@@ -8,12 +8,11 @@ import scalaz.syntax.show._
 import scala.concurrent.Future
 
 object FutureUtil {
-  def toFuture[E: Show, A](a: E \/ A): Future[A] = {
+  def toFuture[E: Show, A](a: E \/ A): Future[A] =
     a.fold(
       e => Future.failed(new RuntimeException(e.shows)),
       a => Future.successful(a),
     )
-  }
 
   def toFuture[E: Show, A](a: ValidationNel[E, A]): Future[A] =
     a.fold(
@@ -21,7 +20,6 @@ object FutureUtil {
       a => Future.successful(a),
     )
 
-  private def formatErrors[E: Show](es: NonEmptyList[E]): String = {
+  private def formatErrors[E: Show](es: NonEmptyList[E]): String =
     es.map(e => e.shows).list.toList.mkString(", ")
-  }
 }

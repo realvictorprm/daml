@@ -116,9 +116,7 @@ class KVUtilsTransactionSpec extends AnyWordSpec with Matchers with Inside {
           transaction = transaction2,
           submissionSeed = seed1,
         )
-      } yield {
-        submission.getInputDamlStateList.asScala.filter(_.hasContractKey) should not be empty
-      }
+      } yield submission.getInputDamlStateList.asScala.filter(_.hasContractKey) should not be empty
     }
 
     "be able to submit a transaction" in KVTest.runTestWithSimplePackage(alice, bob, eve) {
@@ -159,9 +157,7 @@ class KVUtilsTransactionSpec extends AnyWordSpec with Matchers with Inside {
           _ <- preExecuteCreateSimpleContract(alice, seed(0), simplePackage)
           preparedSubmission <- prepareExerciseReplaceByKey(alice, simplePackage)(seed(1))
           result <- preExecute(preparedSubmission).map(_._2)
-        } yield {
-          result.successfulLogEntry.getPayloadCase shouldEqual DamlLogEntry.PayloadCase.TRANSACTION_ENTRY
-        }
+        } yield result.successfulLogEntry.getPayloadCase shouldEqual DamlLogEntry.PayloadCase.TRANSACTION_ENTRY
       }
 
     "reject a pre-executed exercise by key referring to a replaced key" in
@@ -228,15 +224,13 @@ class KVUtilsTransactionSpec extends AnyWordSpec with Matchers with Inside {
               submissionSeed = seed,
             )
             (entryId, preExecutionResult) = holderContractId
-          } yield {
-            contractIdOfCreateTransaction(
-              KeyValueConsumption.logEntryToUpdate(
-                entryId,
-                preExecutionResult.successfulLogEntry,
-                Some(recordTime),
-              )
+          } yield contractIdOfCreateTransaction(
+            KeyValueConsumption.logEntryToUpdate(
+              entryId,
+              preExecutionResult.successfulLogEntry,
+              Some(recordTime),
             )
-          }
+          )
 
         def prepareExerciseReplaceHeldByKey(
             holderContractId: ContractId
@@ -371,7 +365,7 @@ class KVUtilsTransactionSpec extends AnyWordSpec with Matchers with Inside {
         }
     }
 
-    for ((testDar, additionalContractValue) <- templateArgs) {
+    for ((testDar, additionalContractValue) <- templateArgs)
       s"accept transactions with unallocated parties in values: $testDar" in {
         val simplePackage = new SimplePackage(testDar)
         val command = simplePackage.simpleCreateCmd(
@@ -386,12 +380,9 @@ class KVUtilsTransactionSpec extends AnyWordSpec with Matchers with Inside {
               transaction = transaction,
               submissionSeed = seed,
             ).map(_._2)
-          } yield {
-            txEntry.getPayloadCase shouldEqual DamlLogEntry.PayloadCase.TRANSACTION_ENTRY
-          }
+          } yield txEntry.getPayloadCase shouldEqual DamlLogEntry.PayloadCase.TRANSACTION_ENTRY
         }
       }
-    }
 
     "reject transactions with unallocated informee" in KVTest.runTestWithSimplePackage(alice, bob) {
       simplePackage =>

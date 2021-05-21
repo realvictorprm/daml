@@ -328,9 +328,7 @@ class ProtoTest extends AnyWordSpec with Matchers with TableDrivenPropertyChecks
       try {
         val cos: CodedInputStream = com.google.protobuf.CodedInputStream.newInstance(inputStream)
         test(cos)
-      } finally {
-        inputStream.close()
-      }
+      } finally inputStream.close()
     }
   }
 

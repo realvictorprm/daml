@@ -213,17 +213,16 @@ private[kvutils] class ConfigCommitter(
   private def setOutOfTimeBoundsLogEntry(
       submission: DamlConfigurationSubmission,
       commitContext: CommitContext,
-  ): Unit = {
+  ): Unit =
     commitContext.outOfTimeBoundsLogEntry = Some(
       buildRejectionLogEntry(recordTime = None, submission, identity)
     )
-  }
 
   private def buildRejectionLogEntry(
       recordTime: Option[Timestamp],
       submission: DamlConfigurationSubmission,
       addErrorDetails: DamlConfigurationRejectionEntry.Builder => DamlConfigurationRejectionEntry.Builder,
-  ): DamlLogEntry = {
+  ): DamlLogEntry =
     buildLogEntryWithOptionalRecordTime(
       recordTime,
       _.setConfigurationRejectionEntry(
@@ -235,7 +234,6 @@ private[kvutils] class ConfigCommitter(
         )
       ),
     )
-  }
 
   override protected val steps: Steps[Result] = Iterable(
     "check_ttl" -> checkTtl,

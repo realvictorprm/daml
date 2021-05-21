@@ -38,30 +38,25 @@ class ServerSubscriberStressTest
 
   "ServerSubscriber" should {
 
-    for (i <- 1.to(testRunCount)) {
-
+    for (i <- 1.to(testRunCount))
       s"work with $elemCount elements when they are requested one by one (test run #$i)" in {
         helperPublisher.subscribe(sut)
         expectedElemRange.foreach(_ => serverCallStreamObserver.demandResponse())
         verifyExpectedElementsArrivedInOrder()
       }
 
-    }
-    for (i <- 1.to(testRunCount)) {
-
+    for (i <- 1.to(testRunCount))
       s"work with $elemCount elements when they are requested in bulk (isReady stays true) (test run #$i)" in {
         helperPublisher.subscribe(sut)
         serverCallStreamObserver.demandResponse(elemCount)
         verifyExpectedElementsArrivedInOrder()
       }
-    }
   }
 
-  private def verifyExpectedElementsArrivedInOrder(): Future[Assertion] = {
+  private def verifyExpectedElementsArrivedInOrder(): Future[Assertion] =
     serverCallStreamObserver.elementsWhenCompleted.map { receivedElements =>
       receivedElements should contain theSameElementsInOrderAs expectedElemRange
     }
-  }
 
   override def timeLimit: Span = 10.seconds
 }

@@ -252,7 +252,7 @@ final class NonRepudiationApiSpec
 
     val baseUrl = s"http://${address.getAddress.getHostAddress}:${address.getPort}"
 
-    api.use { _ => test(baseUrl, certificates, signedPayloads) }
+    api.use(_ => test(baseUrl, certificates, signedPayloads))
 
   }
 

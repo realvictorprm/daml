@@ -88,11 +88,12 @@ private[apiserver] final class ApiCommandService private (
         ledgerConfigProvider.latestConfiguration.fold[Future[Completion]](
           Future.failed(ErrorFactories.missingLedgerConfig())
         )(ledgerConfig => track(request, ledgerConfig))
-      } else {
-        Future.failed(
-          new ApiException(Status.UNAVAILABLE.withDescription("Service has been shut down."))
-        )
-      }.andThen(logger.logErrorsOnCall[Completion])
+      } else
+        Future
+          .failed(
+            new ApiException(Status.UNAVAILABLE.withDescription("Service has been shut down."))
+          )
+          .andThen(logger.logErrorsOnCall[Completion])
     }
 
   private def track(

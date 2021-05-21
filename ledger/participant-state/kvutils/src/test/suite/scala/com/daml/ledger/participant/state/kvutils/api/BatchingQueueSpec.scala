@@ -165,10 +165,8 @@ class BatchingQueueSpec
           maxWaitDuration = maxWaitDuration,
           maxConcurrentCommits = 1,
         ).run { batch =>
-          {
-            batches += batch
-            Future.unit
-          }
+          batches += batch
+          Future.unit
         }
 
       for {

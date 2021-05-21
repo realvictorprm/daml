@@ -21,20 +21,18 @@ abstract class InsertOrdSetCompanion extends IterableFactory[InsertOrdSet] {
 
   protected def canBuildFrom[A]: Factory[A] = ()
 
-  def from[T](it: IterableOnce[T]): InsertOrdSet[T] = {
+  def from[T](it: IterableOnce[T]): InsertOrdSet[T] =
     it match {
       case s: InsertOrdSet[T] => s
       case _ => (newBuilder[T] ++= it).result()
     }
-  }
 
   def newBuilder[T]: ReusableBuilder[T, InsertOrdSet[T]] = new InsertOrdSetBuilder[T]
 
   private final class InsertOrdSetBuilder[T] extends ReusableBuilder[T, InsertOrdSet[T]] {
     var m: InsertOrdSet[T] = empty;
-    override def clear(): Unit = {
+    override def clear(): Unit =
       m = empty;
-    }
     override def result(): InsertOrdSet[T] = m
     override def addOne(elem: T): this.type = {
       m = m.incl(elem)

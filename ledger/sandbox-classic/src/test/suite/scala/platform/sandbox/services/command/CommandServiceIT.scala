@@ -93,9 +93,7 @@ class CommandServiceIT
           start = Instant.now
           _ <- submissionService.submit(request)
           end = Instant.now
-        } yield {
-          assertExpectedDelay(start, end, minLedgerTimeRel, timeModel)
-        }
+        } yield assertExpectedDelay(start, end, minLedgerTimeRel, timeModel)
       }
     }
   }
@@ -115,9 +113,7 @@ class CommandServiceIT
           start = Instant.now
           _ <- commandService.submitAndWait(request)
           end = Instant.now
-        } yield {
-          assertExpectedDelay(start, end, minLedgerTimeRel, timeModel)
-        }
+        } yield assertExpectedDelay(start, end, minLedgerTimeRel, timeModel)
       }
     }
   }

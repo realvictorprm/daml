@@ -171,9 +171,8 @@ object PostgresStorageBackend extends StorageBackend[PostgresDbBatch] {
 
   private def fetch[T](resultSet: ResultSet)(parse: ResultSet => T): Vector[T] = {
     val buffer = mutable.ArrayBuffer.empty[T]
-    while (resultSet.next()) {
+    while (resultSet.next())
       buffer += parse(resultSet)
-    }
     resultSet.close()
     buffer.toVector
   }

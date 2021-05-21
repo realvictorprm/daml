@@ -22,11 +22,10 @@ object UpdateNormalizer {
     ConfigurationChangeRejectionNormalizer,
   )
 
-  def normalize(initialUpdate: Update, normalizers: Iterable[UpdateNormalizer]): Update = {
+  def normalize(initialUpdate: Update, normalizers: Iterable[UpdateNormalizer]): Update =
     (normalizers ++ MandatoryNormalizers).foldLeft(initialUpdate) { case (update, normalizer) =>
       normalizer.normalize(update)
     }
-  }
 }
 
 /** Ignores the record time set later by post-execution because it's unimportant.

@@ -180,10 +180,9 @@ object ScenarioLedger {
       case pview: ParticipantView => !pview.readers.intersect(disclosures.keySet).isEmpty
     }
 
-    def addDisclosures(newDisclosures: Map[Party, Disclosure]): LedgerNodeInfo = {
+    def addDisclosures(newDisclosures: Map[Party, Disclosure]): LedgerNodeInfo =
       // NOTE(MH): Earlier disclosures take precedence (`++` is right biased).
       copy(disclosures = newDisclosures ++ disclosures)
-    }
   }
 
   type LedgerNodeInfos = Map[EventId, LedgerNodeInfo]
@@ -418,7 +417,7 @@ object ScenarioLedger {
         case Right(cache0) =>
           enps match {
             case Nil => Right(cache0)
-            case ProcessingNode(_, Nil, optPrevState) :: restENPs => {
+            case ProcessingNode(_, Nil, optPrevState) :: restENPs =>
               val cache1 = optPrevState.fold(cache0) { case prevState =>
                 cache0.copy(
                   activeContracts = prevState.activeContracts,
@@ -426,7 +425,6 @@ object ScenarioLedger {
                 )
               }
               processNodes(Right(cache1), restENPs)
-            }
             case (processingNode @ ProcessingNode(
                   mbParentId,
                   nodeId :: restOfNodeIds,
@@ -618,13 +616,12 @@ case class ScenarioLedger(
   def query(
       view: View,
       effectiveAt: Time.Timestamp,
-  ): Seq[LookupOk] = {
+  ): Seq[LookupOk] =
     ledgerData.activeContracts.toList
       .map(cid => lookupGlobalContract(view, effectiveAt, cid))
       .collect { case l @ LookupOk(_, _, _) =>
         l
       }
-  }
 
   /** Focusing on a specific view of the ledger, lookup the
     * contract-instance associated to a specific contract-id.
@@ -633,7 +630,7 @@ case class ScenarioLedger(
       view: View,
       effectiveAt: Time.Timestamp,
       coid: ContractId,
-  ): LookupResult = {
+  ): LookupResult =
     ledgerData.coidToNodeId.get(coid).flatMap(ledgerData.nodeInfos.get) match {
       case None => LookupContractNotFound(coid)
       case Some(info) =>
@@ -662,7 +659,6 @@ case class ScenarioLedger(
             LookupContractNotFound(coid)
         }
     }
-  }
 
   // Given a ledger and the node index of a node in a partial transaction
   // turn it into a event id that can be used in scenario error messages.

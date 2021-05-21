@@ -191,7 +191,7 @@ object TransactionEq {
           }
       } yield ()
 
-    def unifyParty(p1: Party, p2: Party): Either[String, Unit] = {
+    def unifyParty(p1: Party, p2: Party): Either[String, Unit] =
       (partiesLR.get(p1), partiesRL.get(p2)) match {
         case (None, None) =>
           partiesLR += p1 -> p2
@@ -202,9 +202,8 @@ object TransactionEq {
         case (p2_, p1_) =>
           Left(s"Tried to unify $p1 and $p2 but found existing mapping $p1 -> $p2_, $p2 -> $p1_")
       }
-    }
 
-    def unifyCid(c1: ContractId, c2: ContractId): Either[String, Unit] = {
+    def unifyCid(c1: ContractId, c2: ContractId): Either[String, Unit] =
       (contractIdsLR.get(c1), contractIdsRL.get(c2)) match {
         case (None, None) =>
           contractIdsLR += c1 -> c2
@@ -215,6 +214,5 @@ object TransactionEq {
         case (c2_, c1_) =>
           Left(s"Tried to unify $c1 and $c2 but found existing mapping $c1 -> $c2_, $c2 -> $c1_")
       }
-    }
   }
 }

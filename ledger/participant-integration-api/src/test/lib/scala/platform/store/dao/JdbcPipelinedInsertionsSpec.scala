@@ -35,28 +35,26 @@ trait JdbcPipelinedInsertionsSpec extends Inside with OptionValues with Matchers
       _ <- store(create) // The whole transaction insertion succeeds
       result <- ledgerDao.transactionsReader
         .lookupFlatTransactionById(tx.transactionId, tx.actAs.toSet)
-    } yield {
-      inside(result.value.transaction) { case Some(transaction) =>
-        transaction.commandId shouldBe tx.commandId.get
-        transaction.offset shouldBe ApiOffset.toApiString(offset)
-        transaction.effectiveAt.value.seconds shouldBe tx.ledgerEffectiveTime.getEpochSecond
-        transaction.effectiveAt.value.nanos shouldBe tx.ledgerEffectiveTime.getNano
-        transaction.transactionId shouldBe tx.transactionId
-        transaction.workflowId shouldBe tx.workflowId.getOrElse("")
-        inside(transaction.events.loneElement.event.created) { case Some(created) =>
-          val (nodeId, createNode: NodeCreate[ContractId]) =
-            tx.transaction.nodes.head
-          created.eventId shouldBe EventId(tx.transactionId, nodeId).toLedgerString
-          created.witnessParties should contain only (tx.actAs: _*)
-          created.agreementText.getOrElse("") shouldBe createNode.coinst.agreementText
-          created.contractKey shouldNot be(None)
-          created.createArguments shouldNot be(None)
-          created.signatories should contain theSameElementsAs createNode.signatories
-          created.observers should contain theSameElementsAs createNode.stakeholders.diff(
-            createNode.signatories
-          )
-          created.templateId shouldNot be(None)
-        }
+    } yield inside(result.value.transaction) { case Some(transaction) =>
+      transaction.commandId shouldBe tx.commandId.get
+      transaction.offset shouldBe ApiOffset.toApiString(offset)
+      transaction.effectiveAt.value.seconds shouldBe tx.ledgerEffectiveTime.getEpochSecond
+      transaction.effectiveAt.value.nanos shouldBe tx.ledgerEffectiveTime.getNano
+      transaction.transactionId shouldBe tx.transactionId
+      transaction.workflowId shouldBe tx.workflowId.getOrElse("")
+      inside(transaction.events.loneElement.event.created) { case Some(created) =>
+        val (nodeId, createNode: NodeCreate[ContractId]) =
+          tx.transaction.nodes.head
+        created.eventId shouldBe EventId(tx.transactionId, nodeId).toLedgerString
+        created.witnessParties should contain only (tx.actAs: _*)
+        created.agreementText.getOrElse("") shouldBe createNode.coinst.agreementText
+        created.contractKey shouldNot be(None)
+        created.createArguments shouldNot be(None)
+        created.signatories should contain theSameElementsAs createNode.signatories
+        created.observers should contain theSameElementsAs createNode.stakeholders.diff(
+          createNode.signatories
+        )
+        created.templateId shouldNot be(None)
       }
     }
   }

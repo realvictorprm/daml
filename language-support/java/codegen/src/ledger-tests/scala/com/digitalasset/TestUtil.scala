@@ -67,7 +67,7 @@ object TestUtil {
   val Charlie = "Charlie"
   val allTemplates = new FiltersByParty(Map[String, Filter](Alice -> NoFilter.instance).asJava)
 
-  def sendCmd(channel: Channel, cmds: Command*): Empty = {
+  def sendCmd(channel: Channel, cmds: Command*): Empty =
     CommandServiceGrpc
       .newBlockingStub(channel)
       .withDeadlineAfter(40, TimeUnit.SECONDS)
@@ -89,14 +89,13 @@ object TestUtil {
           )
           .build
       )
-  }
 
   def sendCmd(
       channel: Channel,
       actAs: java.util.List[String],
       readAs: java.util.List[String],
       cmds: Command*
-  ): Empty = {
+  ): Empty =
     CommandServiceGrpc
       .newBlockingStub(channel)
       .withDeadlineAfter(40, TimeUnit.SECONDS)
@@ -119,7 +118,6 @@ object TestUtil {
           )
           .build
       )
-  }
 
   def sendCmd(channel: Channel, party: String, cmds: Command*): Empty =
     sendCmd(channel, asList(party), asList[String](), cmds: _*)

@@ -97,7 +97,6 @@ private[dao] trait JdbcLedgerDaoCommandDeduplicationSpec {
   }
 
   private[this] val t0 = Instant.now()
-  private[this] def t(ms: Long): Instant = {
+  private[this] def t(ms: Long): Instant =
     t0.plusMillis(ms)
-  }
 }

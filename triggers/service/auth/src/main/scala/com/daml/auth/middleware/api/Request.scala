@@ -88,7 +88,7 @@ object Request {
     implicit val marshalRequestEntity: Marshaller[Claims, String] =
       Marshaller.opaque(_.toQueryString())
     implicit val unmarshalHttpEntity: Unmarshaller[String, Claims] =
-      Unmarshaller { _ => s => Future.fromTry(Try(apply(s))) }
+      Unmarshaller(_ => s => Future.fromTry(Try(apply(s))))
   }
 
   /** Auth endpoint query parameters
@@ -166,32 +166,28 @@ object JsonProtocol extends DefaultJsonProtocol {
     def write(uri: Uri) = JsString(uri.toString)
   }
   implicit object AccessTokenJsonFormat extends JsonFormat[AccessToken] {
-    def write(x: AccessToken) = {
+    def write(x: AccessToken) =
       JsString(AccessToken.unwrap(x))
-    }
     def read(value: JsValue) = value match {
       case JsString(x) => AccessToken(x)
       case x => deserializationError(s"Expected AccessToken as JsString, but got $x")
     }
   }
   implicit object RefreshTokenJsonFormat extends JsonFormat[RefreshToken] {
-    def write(x: RefreshToken) = {
+    def write(x: RefreshToken) =
       JsString(RefreshToken.unwrap(x))
-    }
     def read(value: JsValue) = value match {
       case JsString(x) => RefreshToken(x)
       case x => deserializationError(s"Expected RefreshToken as JsString, but got $x")
     }
   }
   implicit object RequestClaimsFormat extends JsonFormat[Request.Claims] {
-    def write(claims: Request.Claims) = {
+    def write(claims: Request.Claims) =
       JsString(claims.toQueryString())
-    }
     def read(value: JsValue) = value match {
       case JsString(s) =>
-        try {
-          Request.Claims(s)
-        } catch {
+        try Request.Claims(s)
+        catch {
           case ex: IllegalArgumentException =>
             deserializationError(ex.getMessage, ex)
         }

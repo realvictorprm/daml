@@ -150,7 +150,7 @@ private[events] object EventsTable {
 
     def toGetActiveContractsResponse(
         events: Vector[Entry[Event]]
-    ): Vector[GetActiveContractsResponse] = {
+    ): Vector[GetActiveContractsResponse] =
       events.map {
         case entry if entry.event.isCreated =>
           GetActiveContractsResponse(
@@ -164,7 +164,6 @@ private[events] object EventsTable {
             s"Non-create event ${entry.event.eventId} fetched as part of the active contracts"
           )
       }
-    }
 
     private def treeOf(
         events: Vector[Entry[TreeEvent]]

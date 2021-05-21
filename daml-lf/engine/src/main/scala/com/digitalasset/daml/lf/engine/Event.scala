@@ -178,8 +178,8 @@ object Event extends value.CidContainer2[Event] {
     // filters from the leaves upwards: if any any exercise node returns false all its children will be purged, too
     def filter(f: Event[Nid, Cid] => Boolean): Events[Nid, Cid] = {
       val liveEvts = scala.collection.mutable.Map[Nid, Event[Nid, Cid]]()
-      def go(evtids: ImmArray[Nid]): Unit = {
-        evtids.foreach((evtid: Nid) => {
+      def go(evtids: ImmArray[Nid]): Unit =
+        evtids.foreach { (evtid: Nid) =>
           val evt = events(evtid)
           evt match {
             case ce: CreateEvent[Cid] =>
@@ -192,8 +192,7 @@ object Event extends value.CidContainer2[Event] {
                 liveEvts += (evtid -> ee.copy(children = ee.children.filter(liveEvts.contains)))
               }
           }
-        })
-      }
+        }
       go(roots)
 
       Events(roots.filter(liveEvts.contains), Map() ++ liveEvts)

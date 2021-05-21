@@ -40,12 +40,12 @@ private[testtool] final class LedgerTestContext private[infrastructure] (
     */
   def allocate(allocation: ParticipantAllocation): Future[Participants] =
     Future
-      .sequence(allocation.partyCounts.map(partyCount => {
+      .sequence(allocation.partyCounts.map { partyCount =>
         val participant = nextParticipant()
         participant
           .preallocateParties(partyCount.count, participants)
           .map(parties => Participant(participant, parties: _*))
-      }))
+      })
       .map(Participants(_: _*))
 
   private[this] def nextParticipant(): ParticipantTestContext =

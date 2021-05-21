@@ -267,9 +267,8 @@ private[lf] case class PartialTransaction(
         ()
       }
 
-      def removeTrailingComma(): Unit = {
+      def removeTrailingComma(): Unit =
         if (sb.length >= 2) sb.setLength(sb.length - 2) // remove trailing ", "
-      }
 
       // roots field is not initialized when this method is executed on a failed transaction,
       // so we need to compute them.
@@ -669,7 +668,7 @@ private[lf] case class PartialTransaction(
   private def smallestContainedVersion(top: Node): TxVersion = {
     // This is somewhat inefficient. We are retraversing everything under the rollback node. We could instead keep track of the minimum below each subtree as we build up the transaction and avoid retraversing anything.
     import scala.Ordering.Implicits.infixOrderingOps
-    def loop(smallest0: TxVersion, todo: List[Node]): TxVersion = {
+    def loop(smallest0: TxVersion, todo: List[Node]): TxVersion =
       todo match {
         case Nil => smallest0
         case node :: todo =>
@@ -686,7 +685,6 @@ private[lf] case class PartialTransaction(
               loop(smallest, more ++ todo)
           }
       }
-    }
     val max = TxVersion.VDev
     loop(max, List(top))
   }
@@ -696,13 +694,12 @@ private[lf] case class PartialTransaction(
       nid: NodeId,
       f: Authorize => List[FailedAuthorization],
       auth: Authorize,
-  ): PartialTransaction = {
+  ): PartialTransaction =
     f(auth) match {
       case Nil => this
       case fa :: _ => // take just the first failure //TODO: dont compute all!
         noteAbort(Tx.AuthFailureDuringExecution(nid, fa))
     }
-  }
 
   /** Note that the transaction building failed due to the given error */
   private def noteAbort(err: Tx.TransactionError): PartialTransaction =

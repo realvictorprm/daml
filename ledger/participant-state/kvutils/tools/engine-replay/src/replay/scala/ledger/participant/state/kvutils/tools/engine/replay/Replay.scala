@@ -221,9 +221,7 @@ private[replay] object Replay {
       }
 
       new Benchmarks(benchmarks.groupBy(_.name).view.mapValues(_.toVector).toMap)
-    } finally {
-      importer.close()
-    }
+    } finally importer.close()
   }
 
   def adapt(

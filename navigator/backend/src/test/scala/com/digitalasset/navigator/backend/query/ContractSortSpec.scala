@@ -150,7 +150,7 @@ class ContractSortSpec extends AnyFlatSpec with Matchers {
 
   val contracts = List(contract1, contract2, contract3, contract4)
 
-  def test(criteria: List[(String, SortDirection.Value)], expected: List[Contract]): Unit = {
+  def test(criteria: List[(String, SortDirection.Value)], expected: List[Contract]): Unit =
     it should s"return $expected on sort (${criteria.map { case (k, v) => s"$k($v)" }.mkString(" and ")})" in {
       val sorter = new ContractSorter(
         criteria.map { case (k, v) => new SortCriterion(k, v) },
@@ -159,7 +159,6 @@ class ContractSortSpec extends AnyFlatSpec with Matchers {
       )
       sorter.sort(contracts) should contain theSameElementsInOrderAs expected
     }
-  }
 
   implicit val sortParties: Ordering[List[ApiTypes.Party]] =
     Ordering

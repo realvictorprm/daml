@@ -43,7 +43,7 @@ final class TrackLineageSpec extends AnyFlatSpec with Matchers {
   }
 
   it should "correctly track lineages on a per-thread basis" in {
-    val t1 = new Thread(() => {
+    val t1 = new Thread(() =>
       for (_ <- 1 to 10000) {
         TrackLineage.of("someEntity1", "someName1") {
           MDC.get("entityType") shouldEqual "someEntity1"
@@ -53,8 +53,8 @@ final class TrackLineageSpec extends AnyFlatSpec with Matchers {
         MDC.get("entityType") shouldBe null
         MDC.get("entityName") shouldBe null
       }
-    })
-    val t2 = new Thread(() => {
+    )
+    val t2 = new Thread(() =>
       for (_ <- 1 to 10000) {
         TrackLineage.of("someEntity2", "someName2") {
           MDC.get("entityType") shouldEqual "someEntity2"
@@ -64,7 +64,7 @@ final class TrackLineageSpec extends AnyFlatSpec with Matchers {
         MDC.get("entityType") shouldBe null
         MDC.get("entityName") shouldBe null
       }
-    })
+    )
     t1.start()
     t2.start()
     t1.join()
@@ -73,10 +73,8 @@ final class TrackLineageSpec extends AnyFlatSpec with Matchers {
 
   it should "work correctly in the face of exceptions" in {
     TrackLineage.of("someEntity", "someName") {
-      try {
-        TrackLineage.of("someNestedEntity", "someNestedName") {
-          throw new RuntimeException
-        }
+      try TrackLineage.of("someNestedEntity", "someNestedName") {
+        throw new RuntimeException
       } catch {
         case _: Exception => // expected, do nothing
           MDC.get("entityType") shouldEqual "someEntity"

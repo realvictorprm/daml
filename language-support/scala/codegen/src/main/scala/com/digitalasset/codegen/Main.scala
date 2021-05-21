@@ -35,7 +35,7 @@ object Main extends StrictLogging {
       CodeGen.generateCode(dars, packageName, outputDir.toFile, CodeGen.Novel, roots)
   }
 
-  private def setGlobalLogLevel(verbosity: Level): Unit = {
+  private def setGlobalLogLevel(verbosity: Level): Unit =
     LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) match {
       case a: ch.qos.logback.classic.Logger =>
         a.setLevel(verbosity)
@@ -43,7 +43,6 @@ object Main extends StrictLogging {
       case _ =>
         logger.warn(s"${codegenId: String} cannot set requested verbosity: ${verbosity.toString}")
     }
-  }
 
   private def logUnsupportedEventDecoderOverride(mapping: Option[(String, String)]): Unit =
     mapping.foreach { case (a, b) =>

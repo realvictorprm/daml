@@ -58,12 +58,11 @@ class LargeTransactionBench {
     timeUnit = TimeUnit.MINUTES,
   ) // we have a rare issue where this test runs extremely long with 100k contracts, making the test fail due to JMH timeout
   @Benchmark
-  def manySmallContracts(state: RangeOfIntsCreatedState): Unit = {
+  def manySmallContracts(state: RangeOfIntsCreatedState): Unit =
     Await.result(
       rangeOfIntsExerciseCommand(state, state.workflowId, "ToListOfIntContainers", None),
       perfTestTimeout,
     )
-  }
 
   @Benchmark
   def listOfNInts(state: ListOfNIntsCreatedState): Unit =

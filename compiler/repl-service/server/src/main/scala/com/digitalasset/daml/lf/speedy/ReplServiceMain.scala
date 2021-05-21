@@ -279,13 +279,11 @@ class ReplService(
                 case _ => ""
               }
             case RunScriptRequest.Format.JSON =>
-              try {
-                LfValueCodec.apiValueToJsValue(v.toValue).compactPrint
-              } catch {
-                case e @ SError.SErrorCrash(_) => {
+              try LfValueCodec.apiValueToJsValue(v.toValue).compactPrint
+              catch {
+                case e @ SError.SErrorCrash(_) =>
                   logger.error(s"Cannot convert non-serializable value to JSON")
                   throw e
-                }
               }
             case RunScriptRequest.Format.UNRECOGNIZED =>
               throw new RuntimeException("Unrecognized response format")

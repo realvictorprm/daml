@@ -32,17 +32,15 @@ object LfEngineToApi {
 
   private[this] type LfValue[+Cid] = Lf[Cid]
 
-  def toApiIdentifier(identifier: Identifier): api.Identifier = {
+  def toApiIdentifier(identifier: Identifier): api.Identifier =
     api.Identifier(
       identifier.packageId,
       identifier.qualifiedName.module.toString(),
       identifier.qualifiedName.name.toString(),
     )
-  }
 
-  def toTimestamp(instant: Instant): Timestamp = {
+  def toTimestamp(instant: Instant): Timestamp =
     Timestamp.apply(instant.getEpochSecond, instant.getNano)
-  }
 
   def lfVersionedValueToApiRecord(
       verbose: Boolean,
@@ -53,7 +51,7 @@ object LfEngineToApi {
   def lfValueToApiRecord(
       verbose: Boolean,
       recordValue: LfValue[Lf.ContractId],
-  ): Either[String, api.Record] = {
+  ): Either[String, api.Record] =
     recordValue match {
       case Lf.ValueRecord(tycon, fields) =>
         val fs = fields.foldLeft[Either[String, Vector[api.RecordField]]](Right(Vector.empty)) {
@@ -73,8 +71,6 @@ object LfEngineToApi {
       case other =>
         Left(s"Expected value to be record, but got $other")
     }
-
-  }
 
   def lfVersionedValueToApiValue(
       verbose: Boolean,
@@ -280,27 +276,25 @@ object LfEngineToApi {
     for {
       arg <- lfVersionedValueToApiValue(verbose, node.versionedChosenValue)
       result <- lfVersionedValueToApiValue(verbose, node.versionedExerciseResult)
-    } yield {
-      TreeEvent(
-        TreeEvent.Kind.Exercised(
-          ExercisedEvent(
-            eventId = eventId.toLedgerString,
-            contractId = node.targetCoid.coid,
-            templateId = Some(toApiIdentifier(node.templateId)),
-            choice = node.choiceId,
-            choiceArgument = Some(arg),
-            actingParties = node.actingParties.toSeq,
-            consuming = node.consuming,
-            witnessParties = witnessParties.toSeq,
-            childEventIds = node.children.iterator
-              .filter(filterChildren)
-              .map(EventId(trId, _).toLedgerString)
-              .toSeq,
-            exerciseResult = result,
-          )
+    } yield TreeEvent(
+      TreeEvent.Kind.Exercised(
+        ExercisedEvent(
+          eventId = eventId.toLedgerString,
+          contractId = node.targetCoid.coid,
+          templateId = Some(toApiIdentifier(node.templateId)),
+          choice = node.choiceId,
+          choiceArgument = Some(arg),
+          actingParties = node.actingParties.toSeq,
+          consuming = node.consuming,
+          witnessParties = witnessParties.toSeq,
+          childEventIds = node.children.iterator
+            .filter(filterChildren)
+            .map(EventId(trId, _).toLedgerString)
+            .toSeq,
+          exerciseResult = result,
         )
       )
-    }
+    )
 
   @throws[RuntimeException]
   def assertOrRuntimeEx[A](failureContext: String, ea: Either[String, A]): A =

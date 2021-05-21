@@ -38,12 +38,11 @@ object ContractsTablePostgres extends ContractsTable {
       info: TransactionIndexing.ContractsInfo,
       tx: TransactionIndexing.TransactionInfo,
       serialized: TransactionIndexing.Compressed.Contracts,
-  ): ContractsTable.Executables = {
+  ): ContractsTable.Executables =
     ContractsTable.Executables(
       deleteContracts = buildDeletes(info),
       insertContracts = buildInserts(tx, info, serialized),
     )
-  }
 
   private def buildInserts(
       tx: TransactionIndexing.TransactionInfo,

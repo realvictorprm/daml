@@ -76,7 +76,7 @@ private[platform] object TransactionConversion {
       )
   }
 
-  private def permanent(events: Seq[Event]): Set[String] = {
+  private def permanent(events: Seq[Event]): Set[String] =
     events.foldLeft(Set.empty[String]) { (contractIds, event) =>
       if (event.isCreated || !contractIds.contains(event.contractId)) {
         contractIds + event.contractId
@@ -84,7 +84,6 @@ private[platform] object TransactionConversion {
         contractIds - event.contractId
       }
     }
-  }
 
   // `events` must be in creation order
   private[platform] def removeTransient(events: Seq[Event]): Seq[Event] = {
@@ -130,13 +129,12 @@ private[platform] object TransactionConversion {
         }
     ).filter(_.nonEmpty)
 
-  private def isCreateOrExercise(n: Node): Boolean = {
+  private def isCreateOrExercise(n: Node): Boolean =
     n match {
       case _: Exercise => true
       case _: Create => true
       case _ => false
     }
-  }
   private def toTreeEvent(
       verbose: Boolean,
       trId: Ref.LedgerString,

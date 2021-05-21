@@ -48,7 +48,7 @@ object RetryHelper extends LazyLogging {
 
   def retry[T](
       retryConfig: Option[(Scheduler, IRetryConfig)]
-  )(retryStrategy: RetryStrategy)(f: => Future[T])(implicit ec: ExecutionContext): Future[T] = {
+  )(retryStrategy: RetryStrategy)(f: => Future[T])(implicit ec: ExecutionContext): Future[T] =
     retryConfig match {
       case None =>
         f
@@ -56,11 +56,10 @@ object RetryHelper extends LazyLogging {
         implicit val scheduler: Scheduler = rc._1
         retry(Option(rc._2))(retryStrategy)(f)
     }
-  }
 
   def retry[T](retryConfig: Option[IRetryConfig])(
       retryStrategy: RetryStrategy
-  )(f: => Future[T])(implicit ec: ExecutionContext, s: Scheduler): Future[T] = {
+  )(f: => Future[T])(implicit ec: ExecutionContext, s: Scheduler): Future[T] =
     retryConfig match {
       case None =>
         f
@@ -68,7 +67,6 @@ object RetryHelper extends LazyLogging {
         val maxAttempts = floor(rc.timeout / rc.interval).toInt
         retry(maxAttempts, rc.interval)(retryStrategy)(f)
     }
-  }
 
   def retry[T](maxAttempts: Int, delay: FiniteDuration)(
       retryStrategy: RetryStrategy
@@ -86,9 +84,8 @@ object RetryHelper extends LazyLogging {
     }
   }
 
-  private def logWarning(remainingAttempts: Int, e: Throwable): Unit = {
+  private def logWarning(remainingAttempts: Int, e: Throwable): Unit =
     logger.warn(
       s"Retrying after failure. Attempts remaining: $remainingAttempts. Error: ${e.getMessage}"
     )
-  }
 }

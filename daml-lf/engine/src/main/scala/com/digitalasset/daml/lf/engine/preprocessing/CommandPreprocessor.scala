@@ -131,7 +131,7 @@ private[lf] final class CommandPreprocessor(compiledPackages: CompiledPackages) 
   // returns the speedy translation of an LF command together with all the contract IDs contains inside.
   private[preprocessing] def unsafePreprocessCommand(
       cmd: command.Command
-  ): (speedy.Command, Set[Value.ContractId]) = {
+  ): (speedy.Command, Set[Value.ContractId]) =
     cmd match {
       case command.CreateCommand(templateId, argument) =>
         unsafePreprocessCreate(templateId, argument)
@@ -164,7 +164,6 @@ private[lf] final class CommandPreprocessor(compiledPackages: CompiledPackages) 
         assert(cids.isEmpty)
         (speedy.Command.LookupByKey(templateId, sKey), Set.empty)
     }
-  }
 
   @throws[PreprocessorException]
   def unsafePreprocessCommands(
@@ -176,7 +175,7 @@ private[lf] final class CommandPreprocessor(compiledPackages: CompiledPackages) 
         toProcess: FrontStack[command.ApiCommand],
         processed: BackStack[speedy.Command],
         acc: Set[Value.ContractId],
-    ): (ImmArray[speedy.Command], Set[Value.ContractId]) = {
+    ): (ImmArray[speedy.Command], Set[Value.ContractId]) =
       toProcess match {
         case FrontStackCons(cmd, rest) =>
           val (speedyCmd, newCids) = unsafePreprocessCommand(cmd)
@@ -184,7 +183,6 @@ private[lf] final class CommandPreprocessor(compiledPackages: CompiledPackages) 
         case FrontStack() =>
           (processed.toImmArray, acc)
       }
-    }
 
     go(FrontStack(cmds), BackStack.empty, Set.empty)
   }

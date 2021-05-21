@@ -112,11 +112,10 @@ class CommandService(
 
   private def createCommand(
       input: CreateCommand[lav1.value.Record]
-  ): Error \/ lav1.commands.Command.Command.Create = {
+  ): Error \/ lav1.commands.Command.Command.Create =
     resolveTemplateId(input.templateId)
       .toRightDisjunction(Error(Symbol("createCommand"), cannotResolveTemplateId(input.templateId)))
       .map(tpId => Commands.create(refApiIdentifier(tpId), input.payload))
-  }
 
   private def exerciseCommand(
       input: ExerciseCommand[lav1.value.Value, ExerciseCommandRef]
@@ -193,12 +192,11 @@ class CommandService(
 
   private def activeContracts(
       tx: lav1.transaction.Transaction
-  ): Error \/ ImmArraySeq[ActiveContract[lav1.value.Value]] = {
+  ): Error \/ ImmArraySeq[ActiveContract[lav1.value.Value]] =
     Transactions
       .allCreatedEvents(tx)
       .traverse(ActiveContract.fromLedgerApi(_))
       .leftMap(e => Error(Symbol("activeContracts"), e.shows))
-  }
 
   private def contracts(
       response: lav1.command_service.SubmitAndWaitForTransactionTreeResponse

@@ -137,7 +137,7 @@ final class ValueEnricher(engine: Engine) {
         } yield exe.copy(chosenValue = choiceArg, exerciseResult = result, key = key)
     }
 
-  def enrichTransaction(tx: CommittedTransaction): Result[CommittedTransaction] = {
+  def enrichTransaction(tx: CommittedTransaction): Result[CommittedTransaction] =
     for {
       normalizedNodes <-
         tx.nodes.foldLeft[Result[Map[NodeId, GenNode[NodeId, ContractId]]]](ResultDone(Map.empty)) {
@@ -154,6 +154,5 @@ final class ValueEnricher(engine: Engine) {
         roots = tx.roots,
       )
     )
-  }
 
 }

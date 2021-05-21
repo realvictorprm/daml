@@ -37,10 +37,9 @@ private[oauth2] class RequestTemplates(
       optFilePath: Option[Path],
       resourcePath: String,
   ): (String, sjsonnet.Path) = {
-    def readSource(source: BufferedSource): String = {
-      try { source.mkString }
-      finally { source.close() }
-    }
+    def readSource(source: BufferedSource): String =
+      try source.mkString
+      finally source.close()
     optFilePath match {
       case Some(filePath) =>
         val content: String = readSource(Source.fromFile(filePath.toString))
@@ -129,9 +128,8 @@ private[oauth2] class RequestTemplates(
       claims: Request.Claims,
       requestId: UUID,
       redirectUri: Uri,
-  ): Try[Map[String, String]] = {
+  ): Try[Map[String, String]] =
     createRequest(authJsonnetSource, authArguments(claims, requestId, redirectUri))
-  }
 
   private lazy val tokenJsonnetSource: (String, sjsonnet.Path) =
     jsonnetSource(tokenTemplate, tokenResourcePath)

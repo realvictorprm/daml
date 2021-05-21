@@ -25,11 +25,10 @@ object MetricsReporterOwner {
       period: FiniteDuration,
       reporter: Delegate,
   ) extends MetricsReporterOwner[Context] {
-    override def acquire()(implicit context: Context): Resource[Context, Unit] = {
+    override def acquire()(implicit context: Context): Resource[Context, Unit] =
       ReleasableResource(Future(reporter.start(period.length, period.unit)))(_ =>
         Future(reporter.stop())
       )
-    }
   }
 
 }

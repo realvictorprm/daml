@@ -52,10 +52,8 @@ final class MetricsInterceptorSpec
         _ <- Future.sequence(
           (1 to 3).map(reqInt => HelloServiceGrpc.stub(channel).single(HelloRequest(reqInt)))
         )
-      } yield {
-        eventually {
-          metrics.registry.timer("daml.lapi.hello_service.single").getCount shouldBe 3
-        }
+      } yield eventually {
+        metrics.registry.timer("daml.lapi.hello_service.single").getCount shouldBe 3
       }
     }
   }
@@ -65,15 +63,13 @@ final class MetricsInterceptorSpec
     serverWithMetrics(metrics, new DelayedHelloService(1.second)).use { channel =>
       for {
         _ <- HelloServiceGrpc.stub(channel).single(HelloRequest(reqInt = 7))
-      } yield {
-        eventually {
-          val metric = metrics.registry.timer("daml.lapi.hello_service.single")
-          metric.getCount should be > 0L
+      } yield eventually {
+        val metric = metrics.registry.timer("daml.lapi.hello_service.single")
+        metric.getCount should be > 0L
 
-          val snapshot = metric.getSnapshot
-          val values = Seq(snapshot.getMin, snapshot.getMean.toLong, snapshot.getMax)
-          all(values) should (be >= 1.second.toNanos and be <= 3.seconds.toNanos)
-        }
+        val snapshot = metric.getSnapshot
+        val values = Seq(snapshot.getMin, snapshot.getMean.toLong, snapshot.getMax)
+        all(values) should (be >= 1.second.toNanos and be <= 3.seconds.toNanos)
       }
     }
   }
@@ -85,15 +81,13 @@ final class MetricsInterceptorSpec
         _ <- new StreamConsumer[HelloResponse](observer =>
           HelloServiceGrpc.stub(channel).serverStreaming(HelloRequest(reqInt = 3), observer)
         ).all()
-      } yield {
-        eventually {
-          val metric = metrics.registry.timer("daml.lapi.hello_service.server_streaming")
-          metric.getCount should be > 0L
+      } yield eventually {
+        val metric = metrics.registry.timer("daml.lapi.hello_service.server_streaming")
+        metric.getCount should be > 0L
 
-          val snapshot = metric.getSnapshot
-          val values = Seq(snapshot.getMin, snapshot.getMean.toLong, snapshot.getMax)
-          all(values) should (be >= 3.seconds.toNanos and be <= 6.seconds.toNanos)
-        }
+        val snapshot = metric.getSnapshot
+        val values = Seq(snapshot.getMin, snapshot.getMean.toLong, snapshot.getMax)
+        all(values) should (be >= 3.seconds.toNanos and be <= 6.seconds.toNanos)
       }
     }
   }

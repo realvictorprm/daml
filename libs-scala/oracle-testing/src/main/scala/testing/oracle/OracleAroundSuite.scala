@@ -19,7 +19,6 @@ trait OracleAroundSuite extends OracleAround {
     user = createNewRandomUser()
   }
 
-  protected def dropUser(): Unit = {
+  protected def dropUser(): Unit =
     dropUser(oracleUser)
-  }
 }

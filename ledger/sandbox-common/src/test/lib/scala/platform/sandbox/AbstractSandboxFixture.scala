@@ -54,11 +54,10 @@ trait AbstractSandboxFixture extends AkkaBeforeAndAfterAll {
   protected def getTimeProviderForClient(implicit
       mat: Materializer,
       esf: ExecutionSequencerFactory,
-  ): TimeProvider = {
+  ): TimeProvider =
     Try(TimeServiceGrpc.stub(channel))
       .map(StaticTime.updatedVia(_, ledgerId().unwrap)(mat, esf))
       .fold[TimeProvider](_ => TimeProvider.UTC, Await.result(_, 30.seconds))
-  }
 
   protected def config: SandboxConfig =
     SandboxConfig.defaultConfig.copy(

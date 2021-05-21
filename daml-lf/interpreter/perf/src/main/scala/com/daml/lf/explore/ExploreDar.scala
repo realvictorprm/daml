@@ -23,11 +23,10 @@ object ExploreDar extends App {
 
 object PlaySpeedy {
 
-  def usage(): Unit = {
+  def usage(): Unit =
     println("""
      |usage: explore-dar [NAME] [--arg INT]
     """.stripMargin)
-  }
 
   def parseArgs(args0: List[String]): Config = {
     var moduleName: String = "Examples"
@@ -35,7 +34,7 @@ object PlaySpeedy {
     var argValue: Long = 10
     var stacktracing: Compiler.StackTraceMode = Compiler.NoStackTrace
     def loop(args: List[String]): Unit = args match {
-      case Nil => {}
+      case Nil =>
       case "-h" :: _ => usage()
       case "--help" :: _ => usage()
       case "--arg" :: x :: args =>

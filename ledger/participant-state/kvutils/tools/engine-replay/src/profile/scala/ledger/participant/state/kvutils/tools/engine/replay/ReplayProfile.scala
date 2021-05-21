@@ -62,12 +62,11 @@ object Config {
 
 object ReplayProfile {
 
-  def main(args: Array[String]) = {
+  def main(args: Array[String]) =
     Config.parse(args) match {
       case None => sys.exit(1)
       case Some(config) => run(config)
     }
-  }
 
   def run(config: Config) = {
     val loadedPackages = Replay.loadDar(config.darFile)

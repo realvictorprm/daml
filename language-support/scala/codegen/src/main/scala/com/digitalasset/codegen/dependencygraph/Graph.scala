@@ -27,7 +27,7 @@ object Graph {
         stack: Set[K],
         id: K,
         node: NKA,
-    ): (Seen, Vector[(K, NKA)], Boolean, List[UnsopportedTypeError]) = {
+    ): (Seen, Vector[(K, NKA)], Boolean, List[UnsopportedTypeError]) =
       if (seen.isDefinedAt(id) || stack(id)) (seen, Vector(), seen.getOrElse(id, false), List())
       else {
         val Node(_, deps, collectError @ _) = node
@@ -46,7 +46,6 @@ object Graph {
         else
           (newSeen, newEnts :+ ((id, node)), false, utes)
       }
-    }
 
     def visitN(
         seen: Seen,

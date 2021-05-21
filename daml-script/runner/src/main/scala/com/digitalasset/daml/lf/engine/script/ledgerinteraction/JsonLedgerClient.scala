@@ -127,7 +127,7 @@ class JsonLedgerClient(
   override def query(parties: OneAnd[Set, Ref.Party], templateId: Identifier)(implicit
       ec: ExecutionContext,
       mat: Materializer,
-  ) = {
+  ) =
     for {
       () <- validateTokenParties(parties, "query")
       queryResponse <- requestSuccess[QueryArgs, QueryResponse](
@@ -137,21 +137,20 @@ class JsonLedgerClient(
     } yield {
       val ctx = templateId.qualifiedName
       val ifaceType = Converter.toIfaceType(ctx, TTyCon(templateId)).toOption.get
-      val parsedResults = queryResponse.results.map(r => {
+      val parsedResults = queryResponse.results.map { r =>
         val payload = r.payload.convertTo[Value[ContractId]](
           LfValueCodec.apiValueJsonReader(ifaceType, damlLfTypeLookup(_))
         )
         val cid = ContractId.assertFromString(r.contractId)
         ScriptLedgerClient.ActiveContract(templateId, cid, payload)
-      })
+      }
       parsedResults
     }
-  }
   override def queryContractId(
       parties: OneAnd[Set, Ref.Party],
       templateId: Identifier,
       cid: ContractId,
-  )(implicit ec: ExecutionContext, mat: Materializer) = {
+  )(implicit ec: ExecutionContext, mat: Materializer) =
     for {
       () <- validateTokenParties(parties, "queryContractId")
       fetchResponse <- requestSuccess[FetchArgs, FetchResponse](
@@ -161,21 +160,20 @@ class JsonLedgerClient(
     } yield {
       val ctx = templateId.qualifiedName
       val ifaceType = Converter.toIfaceType(ctx, TTyCon(templateId)).toOption.get
-      fetchResponse.result.map(r => {
+      fetchResponse.result.map { r =>
         val payload = r.payload.convertTo[Value[ContractId]](
           LfValueCodec.apiValueJsonReader(ifaceType, damlLfTypeLookup(_))
         )
         val cid = ContractId.assertFromString(r.contractId)
         ScriptLedgerClient.ActiveContract(templateId, cid, payload)
-      })
+      }
     }
-  }
   override def queryContractKey(
       parties: OneAnd[Set, Ref.Party],
       templateId: Identifier,
       key: SValue,
       translateKey: (Identifier, Value[ContractId]) => Either[String, SValue],
-  )(implicit ec: ExecutionContext, mat: Materializer) = {
+  )(implicit ec: ExecutionContext, mat: Materializer) =
     for {
       _ <- validateTokenParties(parties, "queryContractKey")
       fetchResponse <- requestSuccess[FetchKeyArgs, FetchResponse](
@@ -185,15 +183,14 @@ class JsonLedgerClient(
     } yield {
       val ctx = templateId.qualifiedName
       val ifaceType = Converter.toIfaceType(ctx, TTyCon(templateId)).toOption.get
-      fetchResponse.result.map(r => {
+      fetchResponse.result.map { r =>
         val payload = r.payload.convertTo[Value[ContractId]](
           LfValueCodec.apiValueJsonReader(ifaceType, damlLfTypeLookup(_))
         )
         val cid = ContractId.assertFromString(r.contractId)
         ScriptLedgerClient.ActiveContract(templateId, cid, payload)
-      })
+      }
     }
-  }
   override def submit(
       actAs: OneAnd[Set, Ref.Party],
       readAs: Set[Ref.Party],
@@ -202,12 +199,12 @@ class JsonLedgerClient(
   )(implicit
       ec: ExecutionContext,
       mat: Materializer,
-  ): Future[Either[StatusRuntimeException, Seq[ScriptLedgerClient.CommandResult]]] = {
+  ): Future[Either[StatusRuntimeException, Seq[ScriptLedgerClient.CommandResult]]] =
     for {
       () <- validateSubmitParties(actAs, readAs)
 
       result <- commands match {
-        case Nil => Future { Right(List()) }
+        case Nil => Future(Right(List()))
         case cmd :: Nil =>
           cmd match {
             case command.CreateCommand(tplId, argument) =>
@@ -227,18 +224,16 @@ class JsonLedgerClient(
           )
       }
     } yield result
-  }
   override def submitMustFail(
       actAs: OneAnd[Set, Ref.Party],
       readAs: Set[Ref.Party],
       commands: List[command.ApiCommand],
       optLocation: Option[Location],
-  )(implicit ec: ExecutionContext, mat: Materializer) = {
+  )(implicit ec: ExecutionContext, mat: Materializer) =
     submit(actAs, readAs, commands, optLocation).map({
       case Right(_) => Left(())
       case Left(_) => Right(())
     })
-  }
 
   override def submitTree(
       actAs: OneAnd[Set, Ref.Party],
@@ -248,51 +243,44 @@ class JsonLedgerClient(
   )(implicit
       ec: ExecutionContext,
       mat: Materializer,
-  ): Future[ScriptLedgerClient.TransactionTree] = {
+  ): Future[ScriptLedgerClient.TransactionTree] =
     Future.failed(
       new RuntimeException(
         "submitTree is not supported when running Daml Script over the JSON API."
       )
     )
-  }
 
   override def allocateParty(partyIdHint: String, displayName: String)(implicit
       ec: ExecutionContext,
       mat: Materializer,
-  ) = {
+  ) =
     for {
       response <- requestSuccess[AllocatePartyArgs, AllocatePartyResponse](
         uri.path./("v1")./("parties")./("allocate"),
         AllocatePartyArgs(partyIdHint, displayName),
       )
-    } yield {
-      response.identifier
-    }
-  }
+    } yield response.identifier
 
-  override def listKnownParties()(implicit ec: ExecutionContext, mat: Materializer) = {
+  override def listKnownParties()(implicit ec: ExecutionContext, mat: Materializer) =
     requestSuccess[List[PartyDetails]](uri.path./("v1")./("parties"))
-  }
 
   override def getStaticTime()(implicit
       ec: ExecutionContext,
       esf: ExecutionSequencerFactory,
       mat: Materializer,
-  ): Future[Time.Timestamp] = {
+  ): Future[Time.Timestamp] =
     // There is no time service in the JSON API so we default to the Unix epoch.
-    Future { Time.Timestamp.assertFromInstant(Instant.EPOCH) }
-  }
+    Future(Time.Timestamp.assertFromInstant(Instant.EPOCH))
 
   override def setStaticTime(time: Time.Timestamp)(implicit
       ec: ExecutionContext,
       esf: ExecutionSequencerFactory,
       mat: Materializer,
-  ): Future[Unit] = {
+  ): Future[Unit] =
     // No time service in the JSON API
     Future.failed(
       new RuntimeException("setTime is not supported when running Daml Script over the JSON API.")
     )
-  }
 
   // Check that the parties in the token match the given parties.
   private def validateTokenParties(parties: OneAnd[Set, Ref.Party], what: String): Future[Unit] = {
@@ -316,11 +304,10 @@ class JsonLedgerClient(
   private def validateSubmitParties(
       actAs: OneAnd[Set, Ref.Party],
       readAs: Set[Ref.Party],
-  ): Future[Unit] = {
+  ): Future[Unit] =
     JsonLedgerClient
       .validateSubmitParties(actAs, readAs, tokenPayload)
       .fold(s => Future.failed(new RuntimeException(s)), Future.successful(_))
-  }
 
   private def create(
       tplId: Identifier,
@@ -428,7 +415,7 @@ class JsonLedgerClient(
   def commandRequest[In, Out](endpoint: String, argument: In)(implicit
       argumentWriter: JsonWriter[In],
       outputReader: RootJsonReader[Out],
-  ): Future[Either[StatusRuntimeException, Out]] = {
+  ): Future[Either[StatusRuntimeException, Out]] =
     request[In, Out](uri.path./("v1")./(endpoint), argument).flatMap {
       case ErrorResponse(errors, status) if status == StatusCodes.InternalServerError =>
         // TODO (MK) Using a grpc exception here doesn’t make that much sense.
@@ -450,7 +437,6 @@ class JsonLedgerClient(
         )
       case SuccessResponse(result, _) => Future.successful(Right(result))
     }
-  }
 
   override def tracelogIterator = Iterator.empty
   override def clearTracelog = ()

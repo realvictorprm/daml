@@ -43,21 +43,19 @@ class DomainJsonDecoder(
 
   def decodeUnderlyingValues[F[_]: Traverse: domain.HasTemplateId](
       fa: F[JsValue]
-  ): JsonError \/ F[lav1.value.Value] = {
+  ): JsonError \/ F[lav1.value.Value] =
     for {
       damlLfId <- lookupLfType(fa)
       apiValue <- fa.traverse(jsValue => jsValueToApiValue(damlLfId, jsValue))
     } yield apiValue
-  }
 
   def decodeUnderlyingValuesToLf[F[_]: Traverse: domain.HasTemplateId](
       fa: F[JsValue]
-  ): JsonError \/ F[domain.LfValue] = {
+  ): JsonError \/ F[domain.LfValue] =
     for {
       lfType <- lookupLfType(fa)
       lfValue <- fa.traverse(jsValue => jsValueToLfValue(lfType, jsValue))
     } yield lfValue
-  }
 
   private def lookupLfType[F[_]: domain.HasTemplateId](fa: F[_]): JsonError \/ domain.LfType = {
     val H: HasTemplateId[F] = implicitly

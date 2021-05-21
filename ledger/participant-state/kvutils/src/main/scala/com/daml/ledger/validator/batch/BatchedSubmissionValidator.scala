@@ -62,11 +62,10 @@ object BatchedSubmissionValidator {
 
   private def withCorrelationIdLogged[T](
       correlationId: CorrelationId
-  )(f: LoggingContext => T): T = {
+  )(f: LoggingContext => T): T =
     newLoggingContext("correlationId" -> correlationId) { loggingContext =>
       f(loggingContext)
     }
-  }
 
   private def withSubmissionLoggingContext[T](correlatedSubmission: CorrelatedSubmission)(
       f: LoggingContext => T
@@ -372,30 +371,29 @@ class BatchedSubmissionValidator[CommitResult] private[validator] (
     val (logEntry, outputState) = logEntryAndState
     withSubmissionLoggingContext(correlatedSubmission) { implicit loggingContext =>
       Timed.value(
-        metrics.detectConflicts, {
-          conflictDetection
-            .detectConflictsAndRecover(
-              invalidatedKeys,
+        metrics.detectConflicts,
+        conflictDetection
+          .detectConflictsAndRecover(
+            invalidatedKeys,
+            inputState,
+            logEntry,
+            outputState,
+          )
+          .map { case (newInvalidatedKeys, (newLogEntry, newState)) =>
+            invalidatedKeys ++= newInvalidatedKeys
+            ValidatedSubmission(
+              correlatedSubmission,
               inputState,
-              logEntry,
-              outputState,
+              (newLogEntry, newState),
+              exporterWriteSet,
+            ) :: Nil
+          }
+          .getOrElse {
+            logger.info(
+              s"Submission ${correlatedSubmission.correlationId} dropped as it conflicted and recovery was not possible"
             )
-            .map { case (newInvalidatedKeys, (newLogEntry, newState)) =>
-              invalidatedKeys ++= newInvalidatedKeys
-              ValidatedSubmission(
-                correlatedSubmission,
-                inputState,
-                (newLogEntry, newState),
-                exporterWriteSet,
-              ) :: Nil
-            }
-            .getOrElse {
-              logger.info(
-                s"Submission ${correlatedSubmission.correlationId} dropped as it conflicted and recovery was not possible"
-              )
-              Nil
-            }
-        },
+            Nil
+          },
       )
     }
   }

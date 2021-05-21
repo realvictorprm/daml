@@ -61,7 +61,7 @@ class LargeTransactionTest extends AnyWordSpec with Matchers with BazelRunfiles 
 
     def get(submitter: Party, effectiveAt: Time.Timestamp)(
         id: ContractId
-    ): Option[ContractInst[VersionedValue[ContractId]]] = {
+    ): Option[ContractInst[VersionedValue[ContractId]]] =
       ledger.lookupGlobalContract(
         ParticipantView(Set(submitter), Set.empty),
         effectiveAt,
@@ -72,7 +72,6 @@ class LargeTransactionTest extends AnyWordSpec with Matchers with BazelRunfiles 
             _: LookupContractNotVisible | _: LookupContractNotFound =>
           None
       }
-    }
   }
 
   private def hash(s: String, i: Int) =
@@ -282,12 +281,8 @@ class LargeTransactionTest extends AnyWordSpec with Matchers with BazelRunfiles 
       .consume(
         ledger.get(submitter, effectiveAt),
         lookupPackage,
-        { _ =>
-          sys.error("TODO keys for LargeTransactionTest")
-        },
-        { _ =>
-          sys.error("TODO keys for LargeTransactionTest")
-        },
+        _ => sys.error("TODO keys for LargeTransactionTest"),
+        _ => sys.error("TODO keys for LargeTransactionTest"),
       ) match {
       case Left(err) =>
         fail(s"Unexpected error: $err")
@@ -317,7 +312,7 @@ class LargeTransactionTest extends AnyWordSpec with Matchers with BazelRunfiles 
   ): ExerciseCommand = {
     val choice = "ToListContainer"
     val emptyArgs = ValueRecord(None, ImmArray.empty)
-    ExerciseCommand(templateId, contractId, choice, (emptyArgs))
+    ExerciseCommand(templateId, contractId, choice, emptyArgs)
   }
 
   private def toListOfIntContainers(
@@ -326,7 +321,7 @@ class LargeTransactionTest extends AnyWordSpec with Matchers with BazelRunfiles 
   ): ExerciseCommand = {
     val choice = "ToListOfIntContainers"
     val emptyArgs = ValueRecord(None, ImmArray.empty)
-    ExerciseCommand(templateId, contractId, choice, (emptyArgs))
+    ExerciseCommand(templateId, contractId, choice, emptyArgs)
   }
 
   private def listUtilCreateCmd(templateId: Identifier): CreateCommand = {

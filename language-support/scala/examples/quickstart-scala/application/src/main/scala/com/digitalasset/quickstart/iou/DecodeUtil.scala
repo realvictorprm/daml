@@ -38,10 +38,9 @@ object DecodeUtil {
     )
   }
 
-  def decodeArchived[A <: Template[A]](transaction: Transaction): Option[P.ContractId[A]] = {
+  def decodeArchived[A <: Template[A]](transaction: Transaction): Option[P.ContractId[A]] =
     for {
       event <- transaction.events.headOption: Option[Event]
       archived <- event.event.archived: Option[ArchivedEvent]
     } yield P.ContractId(archived.contractId)
-  }
 }

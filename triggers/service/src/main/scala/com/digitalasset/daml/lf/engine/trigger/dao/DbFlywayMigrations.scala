@@ -18,7 +18,7 @@ private[trigger] class DbFlywayMigrations(private val ds: DataSource, migrations
 
   var flyway: Flyway = _
 
-  def migrate(allowExistingSchema: Boolean = false): ConnectionIO[Unit] = {
+  def migrate(allowExistingSchema: Boolean = false): ConnectionIO[Unit] =
     doobie.free.connection.delay {
       flyway = configurationBase(migrationsDir)
         .dataSource(ds)
@@ -29,7 +29,6 @@ private[trigger] class DbFlywayMigrations(private val ds: DataSource, migrations
       val stepsTaken = flyway.migrate()
       logger.info(s"Flyway schema migration finished successfully, applying $stepsTaken steps.")
     }
-  }
 
   def clean(): ConnectionIO[Unit] =
     doobie.free.connection.delay {

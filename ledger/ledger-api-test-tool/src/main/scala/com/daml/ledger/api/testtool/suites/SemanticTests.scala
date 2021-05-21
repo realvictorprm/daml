@@ -58,9 +58,7 @@ final class SemanticTests extends LedgerTestSuite {
         failure <- alpha
           .exercise(owner, iou.exerciseTransfer(_, leftWithNothing))
           .mustFail("consuming a contract twice")
-      } yield {
-        assertGrpcError(failure, Status.Code.ABORTED, "Contract could not be found")
-      }
+      } yield assertGrpcError(failure, Status.Code.ABORTED, "Contract could not be found")
   })
 
   test(
@@ -119,13 +117,11 @@ final class SemanticTests extends LedgerTestSuite {
           iou.exerciseTransfer(owner, newOwner2).command,
         )
         failure <- alpha.submitAndWait(doubleSpend).mustFail("consuming a contract twice")
-      } yield {
-        assertGrpcError(
-          failure,
-          Status.Code.INVALID_ARGUMENT,
-          "Update failed due to fetch of an inactive contract",
-        )
-      }
+      } yield assertGrpcError(
+        failure,
+        Status.Code.INVALID_ARGUMENT,
+        "Update failed due to fetch of an inactive contract",
+      )
   })
 
   test(
@@ -141,9 +137,7 @@ final class SemanticTests extends LedgerTestSuite {
         failure <- beta
           .exercise(owner2, shared.exerciseSharedContract_Consume2)
           .mustFail("consuming a contract twice")
-      } yield {
-        assertGrpcError(failure, Status.Code.ABORTED, "Contract could not be found")
-      }
+      } yield assertGrpcError(failure, Status.Code.ABORTED, "Contract could not be found")
   })
 
   /*
@@ -165,7 +159,7 @@ final class SemanticTests extends LedgerTestSuite {
       for {
         iou <- alpha.create(bank, Iou(bank, houseOwner, onePound))
         offer <- beta.create(painter, PaintOffer(painter, houseOwner, bank, onePound))
-        tree <- eventually { alpha.exercise(houseOwner, offer.exercisePaintOffer_Accept(_, iou)) }
+        tree <- eventually(alpha.exercise(houseOwner, offer.exercisePaintOffer_Accept(_, iou)))
       } yield {
         val agreement = assertSingleton(
           "SemanticPaintOffer",
@@ -200,7 +194,7 @@ final class SemanticTests extends LedgerTestSuite {
             offer.exercisePaintOffer_Counter(_, iou),
           )
         }
-        tree <- eventually { beta.exercise(painter, counter.exercisePaintCounterOffer_Accept) }
+        tree <- eventually(beta.exercise(painter, counter.exercisePaintCounterOffer_Accept))
       } yield {
         val agreement = assertSingleton(
           "SemanticPaintCounterOffer",
@@ -229,9 +223,7 @@ final class SemanticTests extends LedgerTestSuite {
       failure <- alpha
         .create(houseOwner, PaintAgree(painter, houseOwner))
         .mustFail("creating a contract on behalf of two parties")
-    } yield {
-      assertGrpcError(failure, Status.Code.INVALID_ARGUMENT, "requires authorizers")
-    }
+    } yield assertGrpcError(failure, Status.Code.INVALID_ARGUMENT, "requires authorizers")
   })
 
   test(
@@ -246,9 +238,7 @@ final class SemanticTests extends LedgerTestSuite {
         failure <- beta
           .exercise(painter, offer.exercisePaintOffer_Accept(_, iou))
           .mustFail("exercising a choice without consent")
-      } yield {
-        assertGrpcError(failure, Status.Code.INVALID_ARGUMENT, "requires authorizers")
-      }
+      } yield assertGrpcError(failure, Status.Code.INVALID_ARGUMENT, "requires authorizers")
   })
 
   /*
@@ -383,9 +373,7 @@ final class SemanticTests extends LedgerTestSuite {
           _ <- eventually {
             beta.exercise(delegate, delegation.exerciseDelegation_Token_Consume(_, token))
           }
-        } yield {
-          assertGrpcError(failure, Status.Code.ABORTED, "Contract could not be found")
-        }
+        } yield assertGrpcError(failure, Status.Code.ABORTED, "Contract could not be found")
     }
   )
 }

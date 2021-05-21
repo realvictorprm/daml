@@ -95,11 +95,10 @@ class Server(
   // Uploads of packages that already exist are considered harmless and are ignored.
   private def addDar(
       encodedDar: Dar[(PackageId, DamlLf.ArchivePayload)]
-  )(implicit ec: ExecutionContext): Future[Unit] = {
-    Future { addPackagesInMemory(encodedDar.all) }.flatMap { _ =>
+  )(implicit ec: ExecutionContext): Future[Unit] =
+    Future(addPackagesInMemory(encodedDar.all)).flatMap { _ =>
       triggerDao.persistPackages(encodedDar)
     }
-  }
 
   private def restartTriggers(
       triggers: Vector[RunningTrigger]
@@ -180,7 +179,7 @@ class Server(
 
   private def stopTrigger(
       uuid: UUID
-  )(implicit ec: ExecutionContext, sys: ActorSystem): Future[Option[JsValue]] = {
+  )(implicit ec: ExecutionContext, sys: ActorSystem): Future[Option[JsValue]] =
     triggerDao.removeRunningTrigger(uuid).flatMap {
       case false => Future.successful(None)
       case true =>
@@ -192,7 +191,6 @@ class Server(
           Some(JsObject(("triggerId", uuid.toString.toJson)))
         }
     }
-  }
 
   // Left for errors, None for not found, Right(Some(_)) for everything else
   private def triggerStatus(
@@ -218,11 +216,10 @@ class Server(
     }
   }
 
-  private def listTriggers(party: Party)(implicit ec: ExecutionContext): Future[JsValue] = {
+  private def listTriggers(party: Party)(implicit ec: ExecutionContext): Future[JsValue] =
     triggerDao.listRunningTriggers(party) map { triggerInstances =>
       JsObject(("triggerIds", triggerInstances.map(_.toString).toJson))
     }
-  }
 
   // This directive requires authorization for the given claims via the auth middleware, if configured.
   // If no auth middleware is configured, then the request will proceed without attempting authorization.
@@ -420,7 +417,7 @@ class Server(
       complete((StatusCodes.OK, JsObject(("status", "pass".toJson))))
     },
     // Authorization callback endpoint
-    authClient.fold(reject: Route)(client => path("cb") { get { client.callbackHandler } }),
+    authClient.fold(reject: Route)(client => path("cb")(get(client.callbackHandler))),
   )
 }
 
@@ -576,14 +573,13 @@ object Server {
         triggerRunnerName(runningTrigger.triggerInstance),
       )
 
-    def startTrigger(req: StartTrigger): Unit = {
+    def startTrigger(req: StartTrigger): Unit =
       Try(spawnTrigger(req.trigger, req.runningTrigger, req.compiledPackages)) match {
         case Failure(exception) => req.replyTo ! StatusReply.error(exception)
         case Success(_) => req.replyTo ! StatusReply.success(())
       }
-    }
 
-    def restartTrigger(req: RestartTrigger): Unit = {
+    def restartTrigger(req: RestartTrigger): Unit =
       // If the trigger is still running we need to shut it down first
       // and wait for it to terminate before we can spawn it again.
       // Otherwise, akka will raise an error due to a non-unique actor name.
@@ -594,17 +590,14 @@ object Server {
         case None =>
           discard(spawnTrigger(req.trigger, req.runningTrigger, req.compiledPackages))
       }
-    }
 
-    def getRunnerRef(triggerInstance: UUID): Option[ActorRef[TriggerRunner.Message]] = {
+    def getRunnerRef(triggerInstance: UUID): Option[ActorRef[TriggerRunner.Message]] =
       ctx
         .child(triggerRunnerName(triggerInstance))
         .asInstanceOf[Option[ActorRef[TriggerRunner.Message]]]
-    }
 
-    def getRunner(req: GetRunner) = {
+    def getRunner(req: GetRunner) =
       req.replyTo ! getRunnerRef(req.uuid)
-    }
 
     def refreshAccessToken(triggerInstance: UUID): Future[RunningTrigger] = {
       def getOrFail[T](result: Option[T], ex: => Throwable): Future[T] = result match {

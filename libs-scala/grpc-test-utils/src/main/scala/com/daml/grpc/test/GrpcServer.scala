@@ -100,9 +100,8 @@ trait GrpcServer { this: AsyncFlatSpec =>
   ): Future[Assertion] = {
     val serverName = InProcessServerBuilder.generateName()
     val serverBuilder = InProcessServerBuilder.forName(serverName).addService(service)
-    for (additionalService <- services) {
+    for (additionalService <- services)
       serverBuilder.addService(additionalService)
-    }
     val channelBuilder = InProcessChannelBuilder.forName(serverName)
     val channelOwner =
       for {

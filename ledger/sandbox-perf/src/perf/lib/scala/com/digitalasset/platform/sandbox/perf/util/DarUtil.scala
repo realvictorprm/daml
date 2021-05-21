@@ -9,7 +9,6 @@ import com.daml.lf.archive.UniversalArchiveReader
 import com.daml.lf.data.Ref.PackageId
 
 object DarUtil {
-  def getPackageId(dalf: File): PackageId = {
+  def getPackageId(dalf: File): PackageId =
     UniversalArchiveReader().readFile(dalf).get.main._1
-  }
 }

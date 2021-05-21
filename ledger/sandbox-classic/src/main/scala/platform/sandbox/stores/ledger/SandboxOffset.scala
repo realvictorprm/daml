@@ -13,11 +13,9 @@ private[ledger] object SandboxOffset {
 
   def numBytes = 8
 
-  def toOffset(value: BigInt): Offset = {
+  def toOffset(value: BigInt): Offset =
     Offset.fromByteArray(value.toByteArray.reverse.padTo(numBytes, 0: Byte).reverse)
-  }
 
-  def fromOffset(offset: Offset): BigInt = {
+  def fromOffset(offset: Offset): BigInt =
     BigInt(offset.toByteArray)
-  }
 }

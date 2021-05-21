@@ -28,11 +28,10 @@ private[middleware] class RequestStore[K, V](
 
   /** Check whether the given [[timestamp]] timed out relative to the current time [[now]].
     */
-  private def timedOut(now: Long, timestamp: Long): Boolean = {
+  private def timedOut(now: Long, timestamp: Long): Boolean =
     now - timestamp >= timeout.toNanos
-  }
 
-  private def evictTimedOut(now: Long): Unit = {
+  private def evictTimedOut(now: Long): Unit =
     // Remove items until their timestamp is more recent than the configured timeout.
     store.iterator
       .takeWhile { case (_, (t, _)) =>
@@ -41,13 +40,12 @@ private[middleware] class RequestStore[K, V](
       .foreach { case (k, _) =>
         store.remove(k)
       }
-  }
 
   /** Insert a new key-value pair unless the maximum capacity is reached.
     * Evicts timed out elements before attempting insertion.
     * @return whether the key-value pair was inserted.
     */
-  def put(key: K, value: => V): Boolean = {
+  def put(key: K, value: => V): Boolean =
     synchronized {
       val now = monotonicClock()
       evictTimedOut(now)
@@ -58,16 +56,14 @@ private[middleware] class RequestStore[K, V](
         true
       }
     }
-  }
 
   /** Remove and return the value under the given key, if present and not timed out.
     */
-  def pop(key: K): Option[V] = {
+  def pop(key: K): Option[V] =
     synchronized {
       store.remove(key).flatMap {
         case (t, _) if timedOut(monotonicClock(), t) => None
         case (_, v) => Some(v)
       }
     }
-  }
 }

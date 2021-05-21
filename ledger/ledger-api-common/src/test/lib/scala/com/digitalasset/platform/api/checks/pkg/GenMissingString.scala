@@ -8,9 +8,8 @@ import java.util.UUID
 object GenMissingString {
   def apply(collection: Set[String]): String = {
     var candidate = UUID.randomUUID().toString
-    while (collection.contains(candidate)) {
+    while (collection.contains(candidate))
       candidate = UUID.randomUUID().toString
-    }
     candidate
   }
 

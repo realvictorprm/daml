@@ -30,7 +30,7 @@ private[platform] object PaginatingAsyncStream {
     * @param queryPage takes the offset from which to start the next page and returns that page
     * @tparam T the type of the items returned in each call
     */
-  def apply[T](pageSize: Int)(queryPage: Long => Future[Vector[T]]): Source[T, NotUsed] = {
+  def apply[T](pageSize: Int)(queryPage: Long => Future[Vector[T]]): Source[T, NotUsed] =
     Source
       .unfoldAsync(Option(0L)) {
         case None => Future.successful(None)
@@ -42,7 +42,6 @@ private[platform] object PaginatingAsyncStream {
           }(DirectExecutionContext)
       }
       .flatMapConcat(Source(_))
-  }
 
   /** Concatenates the results of multiple asynchronous calls into
     * a single [[Source]], passing the last seen event's offset to the
@@ -64,7 +63,7 @@ private[platform] object PaginatingAsyncStream {
     */
   def streamFrom[Off, T](startFromOffset: Off, getOffset: T => Off)(
       query: Off => Future[Vector[T]]
-  ): Source[T, NotUsed] = {
+  ): Source[T, NotUsed] =
     Source
       .unfoldAsync(Option(startFromOffset)) {
         case None =>
@@ -78,5 +77,4 @@ private[platform] object PaginatingAsyncStream {
           ) // run in the same thread as the query, avoid context switch for a cheap operation
       }
       .flatMapConcat(Source(_))
-  }
 }

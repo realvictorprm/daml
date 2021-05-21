@@ -20,7 +20,7 @@ trait SubmitMultiPartyDummyCommand extends TestCommands { self: ServiceCallAuthT
       party: String,
       actAs: Seq[String],
       readAs: Seq[String],
-  ): SubmitRequest = {
+  ): SubmitRequest =
     SubmitRequest(
       dummyMultiPartyCommands(
         wrappedLedgerId,
@@ -32,7 +32,6 @@ trait SubmitMultiPartyDummyCommand extends TestCommands { self: ServiceCallAuthT
         .update(_.commands.applicationId := serviceCallName)
         .commands
     )
-  }
 
   protected def submit(
       token: Option[String],

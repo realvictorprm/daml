@@ -189,7 +189,7 @@ private[daml] object ApiServices {
         ledgerConfigProvider: LedgerConfigProvider,
         apiCompletionService: GrpcCommandCompletionService,
         apiTransactionService: GrpcTransactionService,
-    )(implicit executionContext: ExecutionContext): List[BindableService] = {
+    )(implicit executionContext: ExecutionContext): List[BindableService] =
       optWriteService.toList.flatMap { writeService =>
         val commandExecutor = new TimedCommandExecutor(
           new LedgerTimeAwareCommandExecutor(
@@ -281,7 +281,6 @@ private[daml] object ApiServices {
           new ParticipantPruningServiceAuthorization(apiParticipantPruningService, authorizer),
         )
       }
-    }
   }
 
 }

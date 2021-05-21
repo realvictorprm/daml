@@ -78,15 +78,13 @@ object ScriptF {
     val utcClock = Clock.systemUTC()
     // Copy the tracelog from the client to the off-ledger machine.
     def copyTracelog(client: ScriptLedgerClient) = {
-      for ((msg, optLoc) <- client.tracelogIterator) {
+      for ((msg, optLoc) <- client.tracelogIterator)
         machine.traceLog.add(msg, optLoc)
-      }
       client.clearTracelog
     }
-    def addPartyParticipantMapping(party: Party, participant: Participant) = {
+    def addPartyParticipantMapping(party: Party, participant: Participant) =
       _clients =
         _clients.copy(party_participants = _clients.party_participants + (party -> participant))
-    }
     def compiledPackages = machine.compiledPackages
     def lookupChoice(id: Identifier, choice: Name): Either[String, TemplateChoiceSignature] =
       for {
@@ -377,7 +375,7 @@ object ScriptF {
     ): Future[SExpr] =
       for {
         time <- env.timeMode match {
-          case ScriptTimeMode.Static => {
+          case ScriptTimeMode.Static =>
             // We don’t parametrize this by participant since this
             // is only useful in static time mode and using the time
             // service with multiple participants is very dodgy.
@@ -385,7 +383,6 @@ object ScriptF {
               client <- Converter.toFuture(env.clients.getParticipant(None))
               t <- client.getStaticTime()
             } yield t
-          }
           case ScriptTimeMode.WallClock =>
             Future {
               Timestamp.assertFromInstant(env.utcClock.instant())
@@ -634,11 +631,10 @@ object ScriptF {
   }
 
   private def parseSleep(ctx: Ctx, v: SValue): Either[String, Sleep] = {
-    def convert(micros: Long, stackTrace: Option[SValue], continue: SValue) = {
+    def convert(micros: Long, stackTrace: Option[SValue], continue: SValue) =
       for {
         stackTrace <- toStackTrace(ctx, stackTrace)
       } yield Sleep(micros, stackTrace, continue)
-    }
 
     v match {
       case SRecord(_, _, JavaList(SRecord(_, _, JavaList(SInt64(micros))), continue)) =>
@@ -650,23 +646,19 @@ object ScriptF {
 
   }
 
-  private def parseCatch(v: SValue): Either[String, Catch] = {
+  private def parseCatch(v: SValue): Either[String, Catch] =
     v match {
       case SRecord(_, _, JavaList(act, handle)) =>
         Right(Catch(act, handle))
       case _ => Left(s"Expected Catch payload but got $v")
     }
 
-  }
-
-  private def parseThrow(v: SValue): Either[String, Throw] = {
+  private def parseThrow(v: SValue): Either[String, Throw] =
     v match {
       case SRecord(_, _, JavaList(exc: SAnyException)) =>
         Right(Throw(exc))
       case _ => Left(s"Expected Throw payload but got $v")
     }
-
-  }
 
   def parse(ctx: Ctx, constr: Ast.VariantConName, v: SValue): Either[String, ScriptF] =
     constr match {

@@ -26,17 +26,15 @@ trait ExpiringStreamServiceCallAuthTests[T]
     val promise = Promise[Unit]()
     stream(Option(token))(new StreamObserver[T] {
       @volatile private[this] var gotSomething = false
-      def onNext(value: T): Unit = {
+      def onNext(value: T): Unit =
         gotSomething = true
-      }
-      def onError(t: Throwable): Unit = {
+      def onError(t: Throwable): Unit =
         t match {
           case GrpcException(GrpcStatus(Status.Code.PERMISSION_DENIED, _), _) if gotSomething =>
             val _ = promise.trySuccess(())
           case NonFatal(e) =>
             val _ = promise.tryFailure(e)
         }
-      }
       def onCompleted(): Unit = {
         val _ = promise.tryFailure(new RuntimeException("stream completed before token expiration"))
       }

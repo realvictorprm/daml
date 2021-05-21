@@ -54,14 +54,12 @@ class TransactionNormalizerSpec
         )
 
         // Does a Nid reference a create/exercise node (in the before tx) ?
-        def isNidCE(nid: NodeId): Boolean = {
+        def isNidCE(nid: NodeId): Boolean =
           isCreateOrExercise(tx.nodes(nid))
-        }
 
         // Is a Nid kept in the after transaction ?
-        def isKept(nid: NodeId): Boolean = {
+        def isKept(nid: NodeId): Boolean =
           nidsAfter.contains(nid)
-        }
 
         // Create/exercise root nodes are kept
         assert(
@@ -82,26 +80,23 @@ class TransactionNormalizerSpec
     }
   }
 
-  def isCreateOrExercise[N, C](node: GenNode[N, C]): Boolean = {
+  def isCreateOrExercise[N, C](node: GenNode[N, C]): Boolean =
     node match {
       case _: NodeExercises[_, _] => true
       case _: NodeCreate[_] => true
       case _ => false
     }
-  }
 
-  def nodeSansChildren[N, C](node: GenNode[N, C]): GenNode[N, C] = {
+  def nodeSansChildren[N, C](node: GenNode[N, C]): GenNode[N, C] =
     node match {
       case exe: NodeExercises[_, _] => exe.copy(children = ImmArray.empty)
       case _ => node
     }
-  }
 
-  def nodeChildren[N, C](node: GenNode[N, C]): List[N] = {
+  def nodeChildren[N, C](node: GenNode[N, C]): List[N] =
     node match {
       case exe: NodeExercises[_, _] => exe.children.toList
       case _ => List()
     }
-  }
 
 }

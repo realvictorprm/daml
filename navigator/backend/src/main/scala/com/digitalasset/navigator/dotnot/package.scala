@@ -134,7 +134,7 @@ package dotnot {
       onTree.copy(nameMatcherToActions = onTree.nameMatcherToActions :+ nameMatcherToAction)
     }
 
-    def run(t: T, cursor: PropertyCursor, value: String, context: C): Either[DotNotFailure, R] = {
+    def run(t: T, cursor: PropertyCursor, value: String, context: C): Either[DotNotFailure, R] =
       onTree.nameMatcherToActions
         .find(_.matcher(cursor.current))
         .map(_.action)
@@ -144,7 +144,6 @@ package dotnot {
         case Some(action) =>
           action(t, cursor, value, context)
       }
-    }
   }
 
   final case class OnTree[T, R, C](target: String) extends OnTreeBase[T, R, C] {

@@ -178,11 +178,11 @@ abstract class UIBackend extends LazyLogging with ApplicationInfoJsonSupport {
                   }
               } ~
               path("info") {
-                mutableResource { complete(info.getInfo) }
+                mutableResource(complete(info.getInfo))
               } ~
               path("graphql") {
                 get {
-                  versionETag { mutableResource { getFromResource("graphiql.html") } }
+                  versionETag(mutableResource(getFromResource("graphiql.html")))
                 } ~
                   post {
                     authorize(session.isDefined) {
@@ -205,21 +205,21 @@ abstract class UIBackend extends LazyLogging with ApplicationInfoJsonSupport {
                 // Serve assets from resource directory at /assets
                 pathPrefix("assets") {
                   // Webpack makes sure all files use content hashing
-                  immutableResource { withoutFileETag { getFromResourceDirectory("frontend") } }
+                  immutableResource(withoutFileETag(getFromResourceDirectory("frontend")))
                 } ~
                   // Serve index on root and anything else to allow History API to behave
                   // as expected on reloading.
                   versionETag {
-                    mutableResource { withoutFileETag { getFromResource("frontend/index.html") } }
+                    mutableResource(withoutFileETag(getFromResource("frontend/index.html")))
                   }
               case Some(folder) =>
                 // Serve assets under /assets
                 pathPrefix("assets") {
-                  mutableResource { getFromDirectory(folder) }
+                  mutableResource(getFromDirectory(folder))
                 } ~
                   // Serve index on root and anything else to allow History API to behave
                   // as expected on reloading.
-                  mutableResource { getFromFile(folder + "/index.html") }
+                  mutableResource(getFromFile(folder + "/index.html"))
             }
           }
       }
@@ -234,9 +234,8 @@ abstract class UIBackend extends LazyLogging with ApplicationInfoJsonSupport {
     // Read from the access token file or crash
     val token =
       arguments.accessTokenFile.map { path =>
-        try {
-          Files.readAllLines(path).stream.collect(Collectors.joining("\n"))
-        } catch {
+        try Files.readAllLines(path).stream.collect(Collectors.joining("\n"))
+        catch {
           case NonFatal(e) =>
             throw new RuntimeException(s"Unable to read the access token from $path", e)
         }

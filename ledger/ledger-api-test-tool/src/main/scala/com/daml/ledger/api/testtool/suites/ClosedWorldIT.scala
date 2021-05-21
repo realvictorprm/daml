@@ -27,8 +27,6 @@ class ClosedWorldIT extends LedgerTestSuite {
       failure <- alpha
         .create(payer, Iou(payer, binding.Primitive.Party("unallocated"), onePound))
         .mustFail("referencing an unallocated party")
-    } yield {
-      assertGrpcError(failure, Status.Code.INVALID_ARGUMENT, "Party not known on ledger")
-    }
+    } yield assertGrpcError(failure, Status.Code.INVALID_ARGUMENT, "Party not known on ledger")
   })
 }

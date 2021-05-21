@@ -881,14 +881,12 @@ final class GraphQLSchema(customEndpoints: Set[CustomEndpoint[_]]) {
     case _ => error
   }
 
-  private def wrapError[T](value: Try[T]): Try[T] = {
+  private def wrapError[T](value: Try[T]): Try[T] =
     value.recoverWith({ case e: Throwable => Failure(mapError(e)) })
-  }
 
-  private def wrapError[T](value: Future[Try[T]]): Future[T] = {
+  private def wrapError[T](value: Future[Try[T]]): Future[T] =
     value
       .recoverWith({ case e: Throwable => Future.failed(mapError(e)) })
       .flatMap(v => Future.fromTry(wrapError(v)))
-  }
 
 }

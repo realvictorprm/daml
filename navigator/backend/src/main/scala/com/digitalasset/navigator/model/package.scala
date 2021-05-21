@@ -86,7 +86,7 @@ package object model extends NavigatorModelAliases[String] {
     s"$qualifiedName@$packageId"
 
   private[this] val opaqueIdentifierRegex = "([^@]*)@([^@]*)".r
-  def parseOpaqueIdentifier(id: String): Option[DamlLfRef.Identifier] = {
+  def parseOpaqueIdentifier(id: String): Option[DamlLfRef.Identifier] =
     id match {
       case opaqueIdentifierRegex(qualifiedName, packageId) =>
         Some(
@@ -98,7 +98,6 @@ package object model extends NavigatorModelAliases[String] {
       case _ =>
         None
     }
-  }
 
   def parseOpaqueIdentifier(id: TemplateStringId): Option[DamlLfRef.Identifier] =
     parseOpaqueIdentifier(TemplateStringId.unwrap(id))

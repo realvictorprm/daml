@@ -49,9 +49,8 @@ final class AuthorizationTest extends AsyncFlatSpec with BeforeAndAfterAll with 
 
   override protected def afterAll(): Unit = {
     super.afterAll()
-    try {
-      Files.delete(accessTokenFile)
-    } catch {
+    try Files.delete(accessTokenFile)
+    catch {
       case NonFatal(e) =>
         LoggerFactory
           .getLogger(classOf[AuthorizationTest])

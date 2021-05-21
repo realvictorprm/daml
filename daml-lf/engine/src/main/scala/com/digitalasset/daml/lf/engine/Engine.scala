@@ -197,7 +197,7 @@ class Engine(val config: EngineConfig = new EngineConfig(LanguageVersion.StableV
       participantId: Ref.ParticipantId,
       submissionTime: Time.Timestamp,
       submissionSeed: crypto.Hash,
-  ): Result[Unit] = {
+  ): Result[Unit] =
     //reinterpret
     for {
       result <- replay(
@@ -214,7 +214,6 @@ class Engine(val config: EngineConfig = new EngineConfig(LanguageVersion.StableV
           .isReplayedBy(tx, rtx)
           .fold(e => ResultError(ReplayMismatch(e)), _ => ResultDone.Unit)
     } yield validationResult
-  }
 
   private[engine] def loadPackages(pkgIds: List[PackageId]): Result[Unit] =
     pkgIds.dropWhile(compiledPackages.signatures.isDefinedAt) match {
@@ -237,9 +236,8 @@ class Engine(val config: EngineConfig = new EngineConfig(LanguageVersion.StableV
       handleMissingDependencies: => Result[Unit]
   )(run: => Result[X]): Result[X] = {
     def start: Result[X] =
-      try {
-        run
-      } catch {
+      try run
+      catch {
         case speedy.Compiler.PackageNotFound(_) =>
           handleMissingDependencies.flatMap(_ => start)
         case speedy.Compiler.CompilationError(error) =>
@@ -289,7 +287,7 @@ class Engine(val config: EngineConfig = new EngineConfig(LanguageVersion.StableV
       time: Time.Timestamp,
   ): Result[(SubmittedTransaction, Tx.Metadata)] = machine.withOnLedger("DAML Engine") { onLedger =>
     var finished: Boolean = false
-    while (!finished) {
+    while (!finished)
       machine.run() match {
         case SResultFinalValue(_) => finished = true
 
@@ -309,12 +307,11 @@ class Engine(val config: EngineConfig = new EngineConfig(LanguageVersion.StableV
         case SResultNeedPackage(pkgId, callback) =>
           return Result.needPackage(
             pkgId,
-            pkg => {
+            pkg =>
               compiledPackages.addPackage(pkgId, pkg).flatMap { _ =>
                 callback(compiledPackages)
                 interpretLoop(machine, time)
-              }
-            },
+              },
           )
 
         case SResultNeedContract(contractId, _, _, _, cbPresent) =>
@@ -361,7 +358,6 @@ class Engine(val config: EngineConfig = new EngineConfig(LanguageVersion.StableV
         case _: SResultScenarioGetParty =>
           return ResultError(Error("unexpected ScenarioGetParty"))
       }
-    }
 
     onLedger.ptx.finish match {
       case PartialTransaction.CompleteTransaction(tx) =>
@@ -445,7 +441,7 @@ class Engine(val config: EngineConfig = new EngineConfig(LanguageVersion.StableV
           ),
         )
       }
-      _ <- {
+      _ <-
         pkgs.iterator
           // we trust already loaded packages
           .collect {
@@ -453,7 +449,7 @@ class Engine(val config: EngineConfig = new EngineConfig(LanguageVersion.StableV
               Validation.checkPackage(allSignatures, pkgId, pkg)
           }
           .collectFirst { case Left(err) => Error(err.pretty) }
-      }.toLeft(())
+          .toLeft(())
 
     } yield ()
   }
@@ -476,7 +472,7 @@ object Engine {
       crypto.Hash.deriveTransactionSeed(submissionSeed, participant, submissionTime)
     )
 
-  private def profileDesc(tx: Tx.Transaction): String = {
+  private def profileDesc(tx: Tx.Transaction): String =
     if (tx.roots.length == 1) {
       val makeDesc = (kind: String, tmpl: Ref.Identifier, extra: Option[String]) =>
         s"$kind:${tmpl.qualifiedName.name}${extra.map(extra => s":$extra").getOrElse("")}"
@@ -491,7 +487,6 @@ object Engine {
     } else {
       s"compound:${tx.roots.length}"
     }
-  }
 
   def DevEngine(): Engine = new Engine(new EngineConfig(LanguageVersion.DevVersions))
 

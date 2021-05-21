@@ -41,13 +41,11 @@ private[platform] object TransactionsWriter {
 
       // Delete the witnesses of contracts that being removed first, to
       // respect the foreign key constraint of the underlying storage
-      for (deleteWitnesses <- contractWitnessesTableExecutables.deleteWitnesses) {
+      for (deleteWitnesses <- contractWitnessesTableExecutables.deleteWitnesses)
         Timed.value(deleteContractWitnessesBatch, deleteWitnesses.execute())
-      }
 
-      for (deleteContracts <- contractsTableExecutables.deleteContracts) {
+      for (deleteContracts <- contractsTableExecutables.deleteContracts)
         Timed.value(deleteContractsBatch, deleteContracts.execute())
-      }
 
       Timed.value(insertContractsBatch, contractsTableExecutables.insertContracts.execute())
 

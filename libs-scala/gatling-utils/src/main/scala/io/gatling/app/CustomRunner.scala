@@ -28,7 +28,7 @@ object CustomRunner extends StrictLogging {
     logger.trace("Starting")
 
     // workaround for deadlock issue, see https://github.com/gatling/gatling/issues/3411
-    discard { FileSystems.getDefault }
+    discard(FileSystems.getDefault)
 
     val configuration = GatlingConfiguration.load(overrides)
     logger.trace("Configuration loaded")

@@ -28,7 +28,7 @@ object Synchronize {
     */
   final def synchronize(alpha: ParticipantTestContext, beta: ParticipantTestContext)(implicit
       ec: ExecutionContext
-  ): Future[Unit] = {
+  ): Future[Unit] =
     for {
       alice <- alpha.allocateParty()
       bob <- beta.allocateParty()
@@ -46,13 +46,12 @@ object Synchronize {
       // the two participants are synchronized up to the
       // point before invoking this method
     }
-  }
 
   final def waitForContract[T](
       participant: ParticipantTestContext,
       party: Party,
       contractId: Primitive.ContractId[T],
-  )(implicit ec: ExecutionContext): Future[Unit] = {
+  )(implicit ec: ExecutionContext): Future[Unit] =
     Eventually.eventually {
       participant.activeContracts(party).map { events =>
         assert(
@@ -61,6 +60,5 @@ object Synchronize {
         )
       }
     }
-  }
 
 }

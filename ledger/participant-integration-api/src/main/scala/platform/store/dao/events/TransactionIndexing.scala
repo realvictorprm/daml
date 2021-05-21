@@ -141,9 +141,8 @@ object TransactionIndexing {
     private val disclosure = Map.newBuilder[NodeId, Set[Party]]
     private val visibility = Vector.newBuilder[(ContractId, Set[Party])]
 
-    for (contractId <- blinding.divulgence.keys) {
+    for (contractId <- blinding.divulgence.keys)
       addDivulgence(contractId)
-    }
 
     private def addEventAndDisclosure(event: (NodeId, Node)): Unit = {
       events += event
@@ -157,9 +156,8 @@ object TransactionIndexing {
       archives += contractId
 
     private def addDivulgence(contractId: ContractId): Unit =
-      for (divulgees <- blinding.divulgence.get(contractId)) {
+      for (divulgees <- blinding.divulgence.get(contractId))
         visibility += ((contractId, divulgees))
-      }
 
     private def addVisibility(contractId: ContractId, parties: Set[Party]): Unit =
       visibility += ((contractId, parties))
@@ -333,7 +331,7 @@ object TransactionIndexing {
       offset: Offset,
       transaction: CommittedTransaction,
       divulgedContracts: Iterable[DivulgedContract],
-  ): TransactionIndexing = {
+  ): TransactionIndexing =
     transaction
       .foldInExecutionOrder(new Builder(blindingInfo))(
         exerciseBegin = (acc, nid, node) => (acc.add((nid, node)), true),
@@ -352,6 +350,5 @@ object TransactionIndexing {
         divulgedContracts = divulgedContracts,
         inactiveContracts = transaction.inactiveContracts,
       )
-  }
 
 }

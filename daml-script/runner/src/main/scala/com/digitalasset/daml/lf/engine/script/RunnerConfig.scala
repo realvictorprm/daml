@@ -136,7 +136,7 @@ object RunnerConfig {
 
     help("help").text("Print this usage text")
 
-    checkConfig(c => {
+    checkConfig { c =>
       if (c.ledgerHost.isDefined != c.ledgerPort.isDefined) {
         failure("Must specify both --ledger-host and --ledger-port")
       } else if (c.ledgerHost.isDefined && c.participantConfig.isDefined) {
@@ -146,7 +146,7 @@ object RunnerConfig {
       } else {
         success
       }
-    })
+    }
 
   }
 

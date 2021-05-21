@@ -20,11 +20,10 @@ final class TlsIT
     with SuiteResourceManagementAroundAll {
   val (dar, envIface) = readDar(stableDarFile)
 
-  val List(serverCrt, serverPem, caCrt, clientCrt, clientPem) = {
+  val List(serverCrt, serverPem, caCrt, clientCrt, clientPem) =
     List("server.crt", "server.pem", "ca.crt", "client.crt", "client.pem").map { src =>
       Some(new File(rlocation("ledger/test-common/test-certificates/" + src)))
     }
-  }
 
   override def timeMode = ScriptTimeMode.WallClock
 

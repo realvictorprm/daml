@@ -49,11 +49,10 @@ object ValueConversions {
 
     def asRecordValueOf(identifier: Identifier) = Value(Value.Sum.Record(asRecordOf(identifier)))
 
-    private def recordFields: Seq[RecordField] = {
+    private def recordFields: Seq[RecordField] =
       labeledValues.map { case (k, v) =>
         RecordField(k, Some(v))
       }
-    }
   }
 
   implicit class ValueSequences(val values: Seq[Value]) extends AnyVal {

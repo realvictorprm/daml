@@ -97,8 +97,8 @@ private[daml] class EncodeV1(minor: LV.Minor) {
           .setDontDiscloseNonConsumingChoicesToObservers(true)
       )
       builder.accumulateLeft(module.definitions.sortByKey)(addDefinition)
-      builder.accumulateLeft(module.templates.sortByKey) { (a, b) => a.addTemplates(b) }
-      builder.accumulateLeft(module.exceptions.sortByKey) { (a, b) => a.addExceptions(b) }
+      builder.accumulateLeft(module.templates.sortByKey)((a, b) => a.addTemplates(b))
+      builder.accumulateLeft(module.exceptions.sortByKey)((a, b) => a.addExceptions(b))
       builder.build()
     }
 

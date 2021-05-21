@@ -36,7 +36,7 @@ class KeyValueParticipantStateReader private[api] (
   override def getLedgerInitialConditions(): Source[LedgerInitialConditions, NotUsed] =
     Source.single(createLedgerInitialConditions())
 
-  override def stateUpdates(beginAfter: Option[Offset]): Source[(Offset, Update), NotUsed] = {
+  override def stateUpdates(beginAfter: Option[Offset]): Source[(Offset, Update), NotUsed] =
     Source
       .single(beginAfter.map(OffsetBuilder.dropLowestIndex))
       .flatMapConcat(reader.events)
@@ -67,7 +67,6 @@ class KeyValueParticipantStateReader private[api] (
             throw new IllegalArgumentException(s"Invalid log entry received at offset $offset")
           )
       }
-  }
 
   override def currentHealth(): HealthStatus =
     reader.currentHealth()

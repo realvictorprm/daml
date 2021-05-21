@@ -99,11 +99,10 @@ object CommandTrackerFlow {
 
   private def delayedEmptySource(
       delay: FiniteDuration
-  ): Source[CompletionStreamElement, NotUsed] = {
+  ): Source[CompletionStreamElement, NotUsed] =
     Source
       .single(1)
       .delay(delay, DelayOverflowStrategy.backpressure)
       .flatMapConcat(_ => Source.empty[CompletionStreamElement])
-  }
 
 }

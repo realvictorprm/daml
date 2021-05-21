@@ -25,9 +25,7 @@ final class PartyManagementServiceIT extends LedgerTestSuite {
   )(implicit ec => { case Participants(Participant(ledger)) =>
     for {
       participantId <- ledger.participantId()
-    } yield {
-      assert(participantId.nonEmpty, "The ledger returned an empty participant identifier")
-    }
+    } yield assert(participantId.nonEmpty, "The ledger returned an empty participant identifier")
   })
 
   private val pMAllocateWithHint = "PMAllocateWithHint"
@@ -105,9 +103,7 @@ final class PartyManagementServiceIT extends LedgerTestSuite {
           displayName = None,
         )
         .mustFail("allocating a party with a very long identifier")
-    } yield {
-      assertGrpcError(error, Status.Code.INVALID_ARGUMENT, "Party is too long")
-    }
+    } yield assertGrpcError(error, Status.Code.INVALID_ARGUMENT, "Party is too long")
   })
 
   test(
@@ -123,9 +119,7 @@ final class PartyManagementServiceIT extends LedgerTestSuite {
           displayName = None,
         )
         .mustFail("allocating a party with invalid characters")
-    } yield {
-      assertGrpcError(error, Status.Code.INVALID_ARGUMENT, "non expected character")
-    }
+    } yield assertGrpcError(error, Status.Code.INVALID_ARGUMENT, "non expected character")
   })
 
   test(

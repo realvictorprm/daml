@@ -72,10 +72,9 @@ final class GrpcTransactionService(
           logger.debug("Request validation failed for {}. Message: {}", request: Any, t.getMessage)
           Source.failed(t)
         },
-        req => {
+        req =>
           if (req.parties.isEmpty) Source.empty
-          else service.getTransactionTrees(req)
-        },
+          else service.getTransactionTrees(req),
       )
     }
   }
@@ -89,43 +88,39 @@ final class GrpcTransactionService(
 
   override def getTransactionByEventId(
       request: GetTransactionByEventIdRequest
-  ): Future[GetTransactionResponse] = {
+  ): Future[GetTransactionResponse] =
     getSingleTransaction(
       request,
       validator.validateTransactionByEventId,
       service.getTransactionByEventId,
     )
-  }
 
   override def getTransactionById(
       request: GetTransactionByIdRequest
-  ): Future[GetTransactionResponse] = {
+  ): Future[GetTransactionResponse] =
     getSingleTransaction(
       request,
       validator.validateTransactionById,
       service.getTransactionById,
     )
-  }
 
   override def getFlatTransactionByEventId(
       request: GetTransactionByEventIdRequest
-  ): Future[GetFlatTransactionResponse] = {
+  ): Future[GetFlatTransactionResponse] =
     getSingleTransaction(
       request,
       validator.validateTransactionByEventId,
       service.getFlatTransactionByEventId,
     )
-  }
 
   override def getFlatTransactionById(
       request: GetTransactionByIdRequest
-  ): Future[GetFlatTransactionResponse] = {
+  ): Future[GetFlatTransactionResponse] =
     getSingleTransaction(
       request,
       validator.validateTransactionById,
       service.getFlatTransactionById,
     )
-  }
 
   override def getLedgerEnd(request: GetLedgerEndRequest): Future[GetLedgerEndResponse] = {
     val validation = validator.validateLedgerEnd(request)

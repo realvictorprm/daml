@@ -29,10 +29,10 @@ object RunnerMain {
 
   def listTriggers(darPath: File, dar: Dar[(PackageId, Package)]) = {
     println(s"Listing triggers in $darPath:")
-    for ((modName, mod) <- dar.main._2.modules) {
-      for ((defName, defVal) <- mod.definitions) {
+    for ((modName, mod) <- dar.main._2.modules)
+      for ((defName, defVal) <- mod.definitions)
         defVal match {
-          case DValue(TApp(TTyCon(tcon), _), _, _, _) => {
+          case DValue(TApp(TTyCon(tcon), _), _, _, _) =>
             val triggerIds = TriggerIds(tcon.packageId)
             if (
               tcon == triggerIds.damlTrigger("Trigger")
@@ -40,18 +40,14 @@ object RunnerMain {
             ) {
               println(s"  $modName:$defName")
             }
-          }
-          case _ => {}
+          case _ =>
         }
-      }
-    }
   }
 
-  def main(args: Array[String]): Unit = {
-
+  def main(args: Array[String]): Unit =
     RunnerConfig.parse(args) match {
       case None => sys.exit(1)
-      case Some(config) => {
+      case Some(config) =>
         val encodedDar: Dar[(PackageId, DamlLf.ArchivePayload)] =
           DarReader().readArchiveFromFile(config.darPath.toFile).get
         val dar: Dar[(PackageId, Package)] = encodedDar.map { case (pkgId, pkgArchive) =>
@@ -107,7 +103,5 @@ object RunnerMain {
         flow.onComplete(_ => system.terminate())
 
         Await.result(flow, Duration.Inf)
-      }
     }
-  }
 }

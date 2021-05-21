@@ -89,6 +89,6 @@ class GraphSpec extends AnyFlatSpec with Matchers {
     val node4 = intNode(4, List(5, 6))
     val result = orderedDependencies(Seq(node1, node2, node3, node4))
     result.deps should contain theSameElementsInOrderAs Seq(node2, node1)
-    result.errors should have length (2)
+    result.errors should have length 2
   }
 }

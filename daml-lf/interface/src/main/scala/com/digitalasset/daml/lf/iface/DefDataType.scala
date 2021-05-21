@@ -37,21 +37,18 @@ object DefDataType {
 
       override def bimap[A, B, C, D](
           fab: DefDataType[A, B]
-      )(f: A => C, g: B => D): DefDataType[C, D] = {
+      )(f: A => C, g: B => D): DefDataType[C, D] =
         DefDataType(fab.typeVars, Bifunctor[DataType].bimap(fab.dataType)(f, g))
-      }
 
-      override def bifoldMap[A, B, M: Monoid](fab: DefDataType[A, B])(f: A => M)(g: B => M): M = {
+      override def bifoldMap[A, B, M: Monoid](fab: DefDataType[A, B])(f: A => M)(g: B => M): M =
         Bifoldable[DataType].bifoldMap(fab.dataType)(f)(g)
-      }
 
       override def bitraverseImpl[G[_]: Applicative, A, B, C, D](
           fab: DefDataType[A, B]
-      )(f: A => G[C], g: B => G[D]): G[DefDataType[C, D]] = {
+      )(f: A => G[C], g: B => G[D]): G[DefDataType[C, D]] =
         Applicative[G].map(Bitraverse[DataType].bitraverse(fab.dataType)(f)(g))(dataTyp =>
           DefDataType(fab.typeVars, dataTyp)
         )
-      }
     }
 }
 
@@ -90,10 +87,9 @@ object DataType {
             Foldable[Record].foldMap(r)(f)
           case v @ Variant(_) =>
             Foldable[Variant].foldMap(v)(g)
-          case Enum(_) => {
+          case Enum(_) =>
             val m = implicitly[Monoid[M]]
             m.zero
-          }
         }
 
       override def bitraverseImpl[G[_]: Applicative, A, B, C, D](

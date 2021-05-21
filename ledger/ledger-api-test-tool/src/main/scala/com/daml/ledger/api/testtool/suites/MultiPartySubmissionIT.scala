@@ -70,13 +70,11 @@ final class MultiPartySubmissionIT extends LedgerTestSuite {
           template = MultiPartyContract(PList(alice, bob, charlie), ""),
         )
         .mustFail("submitting a contract with a missing authorizers")
-    } yield {
-      assertGrpcError(
-        failure,
-        Status.Code.INVALID_ARGUMENT,
-        None,
-      )
-    }
+    } yield assertGrpcError(
+      failure,
+      Status.Code.INVALID_ARGUMENT,
+      None,
+    )
   })
 
   test(
@@ -117,13 +115,11 @@ final class MultiPartySubmissionIT extends LedgerTestSuite {
             contract.exerciseMPAddSignatories(unusedActor, PList(alice, bob, charlie, david)),
         )
         .mustFail("exercising a choice with a missing authorizers")
-    } yield {
-      assertGrpcError(
-        failure,
-        Status.Code.INVALID_ARGUMENT,
-        None,
-      )
-    }
+    } yield assertGrpcError(
+      failure,
+      Status.Code.INVALID_ARGUMENT,
+      None,
+    )
   })
 
   test(
@@ -168,13 +164,11 @@ final class MultiPartySubmissionIT extends LedgerTestSuite {
           exercise = contractB.exerciseMPFetchOther(unusedActor, contractA, PList(charlie, david)),
         )
         .mustFail("exercising a choice without authorization to fetch another contract")
-    } yield {
-      assertGrpcError(
-        failure,
-        Status.Code.INVALID_ARGUMENT,
-        Some(Pattern.compile("of the fetched contract to be an authorizer, but authorizers were")),
-      )
-    }
+    } yield assertGrpcError(
+      failure,
+      Status.Code.INVALID_ARGUMENT,
+      Some(Pattern.compile("of the fetched contract to be an authorizer, but authorizers were")),
+    )
   })
 
   test(
@@ -198,13 +192,11 @@ final class MultiPartySubmissionIT extends LedgerTestSuite {
           exercise = contractB.exerciseMPFetchOther(unusedActor, contractA, PList(charlie, david)),
         )
         .mustFail("exercising a choice without authorization to fetch another contract")
-    } yield {
-      assertGrpcError(
-        failure,
-        Status.Code.ABORTED,
-        Some(Pattern.compile("Contract could not be found")),
-      )
-    }
+    } yield assertGrpcError(
+      failure,
+      Status.Code.ABORTED,
+      Some(Pattern.compile("Contract could not be found")),
+    )
   })
 
   test(
@@ -249,13 +241,11 @@ final class MultiPartySubmissionIT extends LedgerTestSuite {
           exercise = contractB.exerciseMPFetchOtherByKey(unusedActor, keyA, PList(charlie, david)),
         )
         .mustFail("exercising a choice without authorization to fetch another contract by key")
-    } yield {
-      assertGrpcError(
-        failure,
-        Status.Code.INVALID_ARGUMENT,
-        Some(Pattern.compile("of the fetched contract to be an authorizer, but authorizers were")),
-      )
-    }
+    } yield assertGrpcError(
+      failure,
+      Status.Code.INVALID_ARGUMENT,
+      Some(Pattern.compile("of the fetched contract to be an authorizer, but authorizers were")),
+    )
   })
 
   test(
@@ -279,13 +269,11 @@ final class MultiPartySubmissionIT extends LedgerTestSuite {
           exercise = contractB.exerciseMPFetchOtherByKey(unusedActor, keyA, PList(charlie, david)),
         )
         .mustFail("exercising a choice without authorization to fetch another contract by key")
-    } yield {
-      assertGrpcError(
-        failure,
-        Status.Code.INVALID_ARGUMENT,
-        Some(Pattern.compile("dependency error: couldn't find key")),
-      )
-    }
+    } yield assertGrpcError(
+      failure,
+      Status.Code.INVALID_ARGUMENT,
+      Some(Pattern.compile("dependency error: couldn't find key")),
+    )
   })
 
   test(
@@ -332,13 +320,11 @@ final class MultiPartySubmissionIT extends LedgerTestSuite {
             .exerciseMPLookupOtherByKey(unusedActor, keyA, PList(charlie, david), Some(contractA)),
         )
         .mustFail("exercising a choice without authorization to look up another contract by key")
-    } yield {
-      assertGrpcError(
-        failure,
-        Status.Code.INVALID_ARGUMENT,
-        Some(Pattern.compile("requires authorizers (.*) for lookup by key, but it only has")),
-      )
-    }
+    } yield assertGrpcError(
+      failure,
+      Status.Code.INVALID_ARGUMENT,
+      Some(Pattern.compile("requires authorizers (.*) for lookup by key, but it only has")),
+    )
   })
 
   test(
@@ -363,13 +349,11 @@ final class MultiPartySubmissionIT extends LedgerTestSuite {
             .exerciseMPLookupOtherByKey(unusedActor, keyA, PList(charlie, david), Some(contractA)),
         )
         .mustFail("exercising a choice without authorization to look up another contract by key")
-    } yield {
-      assertGrpcError(
-        failure,
-        Status.Code.INVALID_ARGUMENT,
-        Some(Pattern.compile("User abort: LookupOtherByKey value matches")),
-      )
-    }
+    } yield assertGrpcError(
+      failure,
+      Status.Code.INVALID_ARGUMENT,
+      Some(Pattern.compile("User abort: LookupOtherByKey value matches")),
+    )
   })
 
   private[this] def createMultiPartyContract(

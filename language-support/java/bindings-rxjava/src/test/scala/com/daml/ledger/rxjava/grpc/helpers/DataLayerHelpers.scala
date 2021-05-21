@@ -20,20 +20,18 @@ trait DataLayerHelpers {
 
   def ledgerServices: LedgerServices
 
-  def genGetActiveContractsResponse: GetActiveContractsResponse = {
+  def genGetActiveContractsResponse: GetActiveContractsResponse =
     new GetActiveContractsResponse(
       "",
       "workflowId",
       Seq[CreatedEvent](),
       None,
     )
-  }
 
-  def genGetTimeResponse: GetTimeResponse = {
+  def genGetTimeResponse: GetTimeResponse =
     new GetTimeResponse(Some(Timestamp(1L, 2)))
-  }
 
-  def genCommands(commands: List[Command], party: Option[String] = None): SubmitCommandsRequest = {
+  def genCommands(commands: List[Command], party: Option[String] = None): SubmitCommandsRequest =
     new SubmitCommandsRequest(
       "workflowId",
       "applicationId",
@@ -44,7 +42,6 @@ trait DataLayerHelpers {
       Optional.empty(),
       commands.asJava,
     )
-  }
   def genLedgerOffset(absVal: String): LedgerOffset =
     new LedgerOffset(Absolute(absVal))
 

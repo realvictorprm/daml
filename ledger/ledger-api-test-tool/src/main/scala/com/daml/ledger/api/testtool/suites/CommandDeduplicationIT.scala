@@ -157,9 +157,7 @@ final class CommandDeduplicationIT(timeoutScaleFactor: Double, ledgerTimeInterva
       _ <- submissionResults
         .collectFirst { case (request, Failure(_)) => request }
         .fold(Future.unit)(request => ledger.submitAndWait(request))
-    } yield {
-      ()
-    }
+    } yield ()
   })
 
   test(

@@ -48,10 +48,9 @@ private[events] object EventsRange {
     */
   def readEventSeqIdRange(endInclusive: Offset)(
       connection: java.sql.Connection
-  ): EventsRange[Long] = {
+  ): EventsRange[Long] =
     if (endInclusive == Offset.beforeBegin) EmptyEventSeqIdRange
     else EmptyEventSeqIdRange.copy(endInclusive = readEventSeqId(endInclusive)(connection))
-  }
 
   private def readEventSeqId(offset: Offset)(connection: java.sql.Connection): Long = {
     import com.daml.platform.store.Conversions.OffsetToStatement

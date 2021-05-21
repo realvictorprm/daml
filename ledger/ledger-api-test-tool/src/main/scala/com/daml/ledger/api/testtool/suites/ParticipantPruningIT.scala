@@ -31,9 +31,7 @@ class ParticipantPruningIT extends LedgerTestSuite {
       failure <- participant
         .prune("", attempts = 1)
         .mustFail("pruning without specifying an offset")
-    } yield {
-      assertGrpcError(failure, Status.Code.INVALID_ARGUMENT, "prune_up_to not specified")
-    }
+    } yield assertGrpcError(failure, Status.Code.INVALID_ARGUMENT, "prune_up_to not specified")
   })
 
   test(
@@ -45,13 +43,11 @@ class ParticipantPruningIT extends LedgerTestSuite {
       cannotPruneNonHexOffset <- participant
         .prune("cofefe", attempts = 1)
         .mustFail("pruning, specifiying a non-hexadecimal offset")
-    } yield {
-      assertGrpcError(
-        cannotPruneNonHexOffset,
-        Status.Code.INVALID_ARGUMENT,
-        "prune_up_to needs to be a hexadecimal string and not",
-      )
-    }
+    } yield assertGrpcError(
+      cannotPruneNonHexOffset,
+      Status.Code.INVALID_ARGUMENT,
+      "prune_up_to needs to be a hexadecimal string and not",
+    )
   })
 
   test(
@@ -66,13 +62,11 @@ class ParticipantPruningIT extends LedgerTestSuite {
       cannotPruneOffsetBeyondEnd <- participant
         .prune(actualEndExclusive, attempts = 1)
         .mustFail("pruning, specifiying an offset after the ledger end")
-    } yield {
-      assertGrpcError(
-        cannotPruneOffsetBeyondEnd,
-        Status.Code.INVALID_ARGUMENT,
-        "prune_up_to needs to be before ledger end",
-      )
-    }
+    } yield assertGrpcError(
+      cannotPruneOffsetBeyondEnd,
+      Status.Code.INVALID_ARGUMENT,
+      "prune_up_to needs to be before ledger end",
+    )
   })
 
   test(
@@ -236,9 +230,10 @@ class ParticipantPruningIT extends LedgerTestSuite {
       _ <- participant.prune(offsetToPruneUpTo)
 
       createdAfter <- participant.activeContracts(submitter)
-    } yield {
-      assert(createdBefore == createdAfter, "Pruning should not alter the set of active contracts")
-    }
+    } yield assert(
+      createdBefore == createdAfter,
+      "Pruning should not alter the set of active contracts",
+    )
   })
 
   test(
@@ -277,11 +272,9 @@ class ParticipantPruningIT extends LedgerTestSuite {
       _ <- Future.sequence(
         unprunedTransactionIds.map(participant.transactionTreeById(_, submitter))
       )
-    } yield {
-      prunedTransactionTrees.foreach(
-        assertGrpcError(_, Status.Code.NOT_FOUND, "Transaction not found, or not visible.")
-      )
-    }
+    } yield prunedTransactionTrees.foreach(
+      assertGrpcError(_, Status.Code.NOT_FOUND, "Transaction not found, or not visible.")
+    )
   })
 
   test(
@@ -320,11 +313,9 @@ class ParticipantPruningIT extends LedgerTestSuite {
       _ <- Future.sequence(
         unprunedTransactionIds.map(participant.flatTransactionById(_, submitter))
       )
-    } yield {
-      prunedFlatTransactions.foreach(
-        assertGrpcError(_, Status.Code.NOT_FOUND, "Transaction not found, or not visible.")
-      )
-    }
+    } yield prunedFlatTransactions.foreach(
+      assertGrpcError(_, Status.Code.NOT_FOUND, "Transaction not found, or not visible.")
+    )
   })
 
   test(
@@ -359,11 +350,9 @@ class ParticipantPruningIT extends LedgerTestSuite {
       )
 
       _ <- Future.sequence(unprunedEventIds.map(participant.transactionTreeByEventId(_, submitter)))
-    } yield {
-      prunedEventsViaTree.foreach(
-        assertGrpcError(_, Status.Code.NOT_FOUND, "Transaction not found, or not visible.")
-      )
-    }
+    } yield prunedEventsViaTree.foreach(
+      assertGrpcError(_, Status.Code.NOT_FOUND, "Transaction not found, or not visible.")
+    )
   })
 
   test(
@@ -398,11 +387,9 @@ class ParticipantPruningIT extends LedgerTestSuite {
       )
 
       _ <- Future.sequence(unprunedEventIds.map(participant.flatTransactionByEventId(_, submitter)))
-    } yield {
-      prunedEventsViaFlat.foreach(
-        assertGrpcError(_, Status.Code.NOT_FOUND, "Transaction not found, or not visible.")
-      )
-    }
+    } yield prunedEventsViaFlat.foreach(
+      assertGrpcError(_, Status.Code.NOT_FOUND, "Transaction not found, or not visible.")
+    )
   })
 
   test(

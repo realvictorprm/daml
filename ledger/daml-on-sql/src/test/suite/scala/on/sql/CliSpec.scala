@@ -91,9 +91,8 @@ class CliSpec
     }
   }
 
-  override def beforeEach(): Unit = {
+  override def beforeEach(): Unit =
     fakeEnv.clear()
-  }
 }
 
 object CliSpec {

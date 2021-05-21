@@ -27,10 +27,9 @@ private[dao] trait JdbcLedgerDaoContractsSpec extends LoneElement with Inside wi
         Set(alice),
         nonTransient(tx).loneElement,
       )
-    } yield {
-      // The agreement text is always empty when retrieved from the contract store
-      result shouldEqual Some(someVersionedContractInstance.copy(agreementText = ""))
-    }
+    } yield
+    // The agreement text is always empty when retrieved from the contract store
+    result shouldEqual Some(someVersionedContractInstance.copy(agreementText = ""))
   }
 
   it should "allow to divulge a contract that has already been committed" in {
@@ -42,10 +41,9 @@ private[dao] trait JdbcLedgerDaoContractsSpec extends LoneElement with Inside wi
         divulgees = Set(charlie),
       )
       result <- contractsReader.lookupActiveContractAndLoadArgument(Set(charlie), create)
-    } yield {
-      // The agreement text is always empty when retrieved from the contract store
-      result shouldEqual Some(someVersionedContractInstance.copy(agreementText = ""))
-    }
+    } yield
+    // The agreement text is always empty when retrieved from the contract store
+    result shouldEqual Some(someVersionedContractInstance.copy(agreementText = ""))
   }
 
   it should "not find contracts that are not visible to the requester" in {
@@ -55,9 +53,7 @@ private[dao] trait JdbcLedgerDaoContractsSpec extends LoneElement with Inside wi
         Set(charlie),
         nonTransient(tx).loneElement,
       )
-    } yield {
-      result shouldEqual None
-    }
+    } yield result shouldEqual None
   }
 
   it should "not find contracts that are not visible to any of the requesters" in {
@@ -70,9 +66,7 @@ private[dao] trait JdbcLedgerDaoContractsSpec extends LoneElement with Inside wi
       )
       contractId = nonTransient(tx).loneElement
       result <- contractsReader.lookupActiveContractAndLoadArgument(Set(charlie, emma), contractId)
-    } yield {
-      result shouldBe None
-    }
+    } yield result shouldBe None
   }
 
   it should "find contract if at least one of requesters is a stakeholder" in {
@@ -85,9 +79,7 @@ private[dao] trait JdbcLedgerDaoContractsSpec extends LoneElement with Inside wi
       )
       contractId = nonTransient(tx).loneElement
       result <- contractsReader.lookupActiveContractAndLoadArgument(Set(charlie, emma), contractId)
-    } yield {
-      result.value shouldBe a[ContractInst[_]]
-    }
+    } yield result.value shouldBe a[ContractInst[_]]
   }
 
   it should "find contract if at least one of requesters is a divulgee" in {
@@ -104,9 +96,7 @@ private[dao] trait JdbcLedgerDaoContractsSpec extends LoneElement with Inside wi
         divulgees = Set(emma),
       )
       result <- contractsReader.lookupActiveContractAndLoadArgument(Set(david, emma), contractId)
-    } yield {
-      result.value shouldBe a[ContractInst[_]]
-    }
+    } yield result.value shouldBe a[ContractInst[_]]
   }
 
   it should "not find keys if none of requesters are stakeholders" in {
@@ -120,9 +110,7 @@ private[dao] trait JdbcLedgerDaoContractsSpec extends LoneElement with Inside wi
       )
       key = GlobalKey.assertBuild(someTemplateId, aTextValue)
       result <- contractsReader.lookupContractKey(key, Set(charlie, emma))
-    } yield {
-      result shouldBe None
-    }
+    } yield result shouldBe None
   }
 
   it should "find a key if at least one of requesters is a stakeholder" in {
@@ -137,9 +125,7 @@ private[dao] trait JdbcLedgerDaoContractsSpec extends LoneElement with Inside wi
       contractId = nonTransient(tx).loneElement
       key = GlobalKey.assertBuild(someTemplateId, aTextValue)
       result <- contractsReader.lookupContractKey(key, Set(emma, charlie))
-    } yield {
-      result.value shouldBe contractId
-    }
+    } yield result.value shouldBe contractId
   }
 
   it should "not find a key if the requesters are only divulgees" in {
@@ -157,9 +143,7 @@ private[dao] trait JdbcLedgerDaoContractsSpec extends LoneElement with Inside wi
       )
       key = GlobalKey.assertBuild(someTemplateId, aTextValue)
       result <- contractsReader.lookupContractKey(key, Set(david, emma))
-    } yield {
-      result shouldBe None
-    }
+    } yield result shouldBe None
   }
 
   it should "prevent retrieving the maximum ledger time if some contracts are not found" in {
@@ -178,10 +162,8 @@ private[dao] trait JdbcLedgerDaoContractsSpec extends LoneElement with Inside wi
     for {
       (_, tx) <- store(singleCreate)
       result <- contractsReader.lookupMaximumLedgerTime(nonTransient(tx))
-    } yield {
-      inside(result) { case Some(time) =>
-        time should be <= Instant.now
-      }
+    } yield inside(result) { case Some(time) =>
+      time should be <= Instant.now
     }
   }
 
@@ -198,10 +180,8 @@ private[dao] trait JdbcLedgerDaoContractsSpec extends LoneElement with Inside wi
       (_, tx) <- store(singleCreate)
       contractIds = nonTransient(tx) + divulgedContractId
       result <- contractsReader.lookupMaximumLedgerTime(contractIds)
-    } yield {
-      inside(result) { case Some(tx.ledgerEffectiveTime) =>
-        succeed
-      }
+    } yield inside(result) { case Some(tx.ledgerEffectiveTime) =>
+      succeed
     }
   }
 
@@ -216,9 +196,7 @@ private[dao] trait JdbcLedgerDaoContractsSpec extends LoneElement with Inside wi
         offsetAndTx = singleNonConsumingExercise(divulgedContractId),
       )
       result <- contractsReader.lookupMaximumLedgerTime(Set(divulgedContractId))
-    } yield {
-      result shouldBe None
-    }
+    } yield result shouldBe None
   }
 
   it should "not allow the retrieval of the maximum ledger time of archived divulged contracts" in {

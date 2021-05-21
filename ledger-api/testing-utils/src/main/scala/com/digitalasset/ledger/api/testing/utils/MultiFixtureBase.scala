@@ -74,7 +74,7 @@ trait MultiFixtureBase[FixtureId, TestContext]
       runTest: TestFixture => Future[Assertion],
   ): Future[Assertion] = {
 
-    def failOnFixture(throwable: Throwable): Assertion = {
+    def failOnFixture(throwable: Throwable): Assertion =
       // Add additional information about failure (which fixture was problematic)
       throwable match {
         case ex: TestCanceledException => throw ex
@@ -84,7 +84,6 @@ trait MultiFixtureBase[FixtureId, TestContext]
             throwable,
           ) with NoStackTrace
       }
-    }
 
     val timeoutPromise = Promise[Assertion]()
     es.schedule(
@@ -93,13 +92,12 @@ trait MultiFixtureBase[FixtureId, TestContext]
       TimeUnit.MILLISECONDS,
     )
 
-    try {
-      Future
-        .firstCompletedOf(List(runTest(testFixture), timeoutPromise.future))(DirectExecutionContext)
-        .recover { case NonFatal(throwable) =>
-          failOnFixture(throwable)
-        }(DirectExecutionContext)
-    } catch {
+    try Future
+      .firstCompletedOf(List(runTest(testFixture), timeoutPromise.future))(DirectExecutionContext)
+      .recover { case NonFatal(throwable) =>
+        failOnFixture(throwable)
+      }(DirectExecutionContext)
+    catch {
       case NonFatal(throwable) => failOnFixture(throwable)
     }
   }
@@ -108,13 +106,12 @@ trait MultiFixtureBase[FixtureId, TestContext]
   protected def allFixtures(runTest: TestContext => Future[Assertion]): Future[Assertion] =
     forAllFixtures(fixture => runTest(fixture.context()))
 
-  protected def forAllFixtures(runTest: TestFixture => Future[Assertion]): Future[Assertion] = {
+  protected def forAllFixtures(runTest: TestFixture => Future[Assertion]): Future[Assertion] =
     forAllMatchingFixtures { case f => runTest(f) }
-  }
 
   protected def forAllMatchingFixtures(
       runTest: PartialFunction[TestFixture, Future[Assertion]]
-  ): Future[Assertion] = {
+  ): Future[Assertion] =
     if (parallelExecution) {
       val results = fixtures.map(fixture =>
         if (runTest.isDefinedAt(fixture))
@@ -131,6 +128,5 @@ trait MultiFixtureBase[FixtureId, TestContext]
         }
       }
     }
-  }
 
 }

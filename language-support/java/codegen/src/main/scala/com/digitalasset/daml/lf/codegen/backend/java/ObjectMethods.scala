@@ -102,7 +102,7 @@ private[codegen] object ObjectMethods extends StrictLogging {
       className: ClassName,
       fieldNames: IndexedSeq[String],
       enclosingClassName: Option[ClassName],
-  ): MethodSpec = {
+  ): MethodSpec =
     if (fieldNames.isEmpty) {
       initToStringBuilder().addStatement("return $S", className).build()
     } else {
@@ -116,6 +116,5 @@ private[codegen] object ObjectMethods extends StrictLogging {
         )
         .build()
     }
-  }
 
 }

@@ -107,7 +107,7 @@ case class DefaultBatchingQueue(
 
       override def offer(
           submission: DamlSubmissionBatch.CorrelatedSubmission
-      ): Future[SubmissionResult] = {
+      ): Future[SubmissionResult] =
         materializedQueue
           .offer(submission)
           .map {
@@ -117,7 +117,6 @@ case class DefaultBatchingQueue(
             case QueueOfferResult.QueueClosed =>
               SubmissionResult.InternalError("DefaultBatchingQueue.queue is closed")
           }(materializer.executionContext)
-      }
 
       override def stop(): Future[Unit] = {
         if (

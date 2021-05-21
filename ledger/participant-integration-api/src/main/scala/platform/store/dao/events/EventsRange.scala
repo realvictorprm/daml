@@ -50,10 +50,9 @@ private[events] object EventsRange {
     */
   def readEventSeqIdRange(endInclusive: Offset, dbType: DbType)(
       connection: java.sql.Connection
-  ): EventsRange[Long] = {
+  ): EventsRange[Long] =
     if (endInclusive == Offset.beforeBegin) EmptyEventSeqIdRange
     else EmptyEventSeqIdRange.copy(endInclusive = readEventSeqId(endInclusive, dbType)(connection))
-  }
 
   private def readEventSeqId(offset: Offset, dbType: DbType)(
       connection: java.sql.Connection

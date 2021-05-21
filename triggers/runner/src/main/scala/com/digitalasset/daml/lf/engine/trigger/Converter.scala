@@ -83,7 +83,7 @@ object Converter {
   private def toLedgerValue(v: SValue): Either[String, value.Value] =
     lfValueToApiValue(true, v.toValue)
 
-  private def fromIdentifier(id: value.Identifier): SValue = {
+  private def fromIdentifier(id: value.Identifier): SValue =
     STypeRep(
       TTyCon(
         TypeConName(
@@ -95,7 +95,6 @@ object Converter {
         )
       )
     )
-  }
 
   private def fromTransactionId(triggerIds: TriggerIds, transactionId: String): SValue = {
     val transactionIdTy = triggerIds.damlTriggerLowLevel("TransactionId")
@@ -112,13 +111,12 @@ object Converter {
     record(commandIdTy, ("unpack", SText(commandId)))
   }
 
-  private def fromOptionalCommandId(triggerIds: TriggerIds, commandId: String): SValue = {
+  private def fromOptionalCommandId(triggerIds: TriggerIds, commandId: String): SValue =
     if (commandId.isEmpty) {
       SOptional(None)
     } else {
       SOptional(Some(fromCommandId(triggerIds, commandId)))
     }
-  }
 
   private def fromTemplateTypeRep(templateId: value.Identifier): SValue = {
     val templateTypeRepTy = daInternalAny("TemplateTypeRep")
@@ -360,13 +358,12 @@ object Converter {
       },
     )
 
-  private[this] def toAnyTemplate(v: SValue): Either[String, AnyTemplate] = {
+  private[this] def toAnyTemplate(v: SValue): Either[String, AnyTemplate] =
     v match {
       case SRecord(_, _, JavaList(SAny(TTyCon(tmplId), value))) =>
         Right(AnyTemplate(tmplId, value))
       case _ => Left(s"Expected AnyTemplate but got $v")
     }
-  }
 
   private[this] def toAnyChoice(v: SValue): Either[String, AnyChoice] =
     v match {
@@ -451,7 +448,7 @@ object Converter {
       },
     )
 
-  private def toCommand(v: SValue): Either[String, Command] = {
+  private def toCommand(v: SValue): Either[String, Command] =
     v match {
       case SVariant(_, "CreateCommand", _, createVal) =>
         for {
@@ -471,7 +468,6 @@ object Converter {
         } yield Command().withCreateAndExercise(createAndExercise)
       case _ => Left(s"Expected a Command but got $v")
     }
-  }
 
   private def toCommands(v: SValue): Either[String, Seq[Command]] =
     for {

@@ -42,12 +42,11 @@ final class Database(
   ): Future[X, T] = {
     import connectionPool.executionContext
     val connection =
-      try {
-        Timed.value(
-          metrics.daml.ledger.database.transactions.acquireConnection(name),
-          connectionPool.acquireConnection(),
-        )
-      } catch {
+      try Timed.value(
+        metrics.daml.ledger.database.transactions.acquireConnection(name),
+        connectionPool.acquireConnection(),
+      )
+      catch {
         case exception: SQLException =>
           throw new ConnectionAcquisitionException(name, exception)
       }

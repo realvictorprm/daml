@@ -147,9 +147,7 @@ object CodeGenRunner extends StrictLogging {
     logger.info(s"Start processing packageId '${interfaceTree.interface.packageId}'")
     for {
       _ <- interfaceTree.process(backend.process(_, conf, packagePrefixes))
-    } yield {
-      logger.info(s"Stop processing packageId '${interfaceTree.interface.packageId}'")
-    }
+    } yield logger.info(s"Stop processing packageId '${interfaceTree.interface.packageId}'")
   }
 
   private[CodeGenRunner] def assertInputFileExists(filePath: Path): Unit = {

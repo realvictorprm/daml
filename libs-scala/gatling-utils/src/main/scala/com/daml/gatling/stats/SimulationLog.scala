@@ -28,7 +28,7 @@ case class SimulationLog(simulation: String, requests: Map[String, RequestTypeSt
       .map(_.mkString("", System.lineSeparator(), System.lineSeparator()))
       .getOrElse("")
 
-  private def toCsv: List[ListMap[String, String]] = {
+  private def toCsv: List[ListMap[String, String]] =
     requests.view.map { case (requestType, stats) =>
       ListMap(
         "simulation" -> simulation.toString,
@@ -46,7 +46,6 @@ case class SimulationLog(simulation: String, requests: Map[String, RequestTypeSt
         "rps" -> stats.meanNumberOfRequestsPerSecond.ok.toString,
       )
     }.toList
-  }
 }
 
 object SimulationLog {

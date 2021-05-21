@@ -88,9 +88,7 @@ private[dao] trait JdbcLedgerDaoActiveContractsSpec
             verbose = true,
           )
       )
-    } yield {
-      activeContractsAfter.toSet.diff(activeContractsBefore.toSet) should have size 0
-    }
+    } yield activeContractsAfter.toSet.diff(activeContractsBefore.toSet) should have size 0
   }
 
   it should "filter correctly for a single party" in {

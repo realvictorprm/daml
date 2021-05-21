@@ -16,7 +16,6 @@ trait MetricsAround extends BeforeAndAfterAll {
     metrics = new MetricRegistry
   }
 
-  override protected def afterAll(): Unit = {
+  override protected def afterAll(): Unit =
     super.afterAll()
-  }
 }

@@ -42,10 +42,10 @@ private[indexer] final class RecoveringIndexer(
     logger.info("Starting Indexer Server")
     val subscription = new AtomicReference[Resource[IndexFeedHandle]](null)
 
-    val firstSubscription = subscribe().map(handle => {
+    val firstSubscription = subscribe().map { handle =>
       logger.info("Started Indexer Server")
       handle
-    })
+    }
     subscription.set(firstSubscription)
     resubscribeOnFailure(firstSubscription)
 
@@ -131,15 +131,15 @@ private[indexer] final class RecoveringIndexer(
         .get()
         .asFuture
         .transform(_ => Success(complete.future))
-    )(_ => {
+    ) { _ =>
       logger.info("Stopping Indexer Server")
       subscription
         .getAndSet(null)
         .release()
         .flatMap(_ => complete.future)
-        .map(_ => {
+        .map { _ =>
           logger.info("Stopped Indexer Server")
-        })
-    })
+        }
+    }
   }
 }

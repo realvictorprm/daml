@@ -249,9 +249,7 @@ final class ContractKeysIT extends LedgerTestSuite {
       // Try it again, expecting it to succeed.
       _ <- ledger.exercise(owner, delegated.exerciseCreateAnotherAndArchive(_, key2))
 
-    } yield {
-      assertGrpcError(failedFetch, Status.Code.INVALID_ARGUMENT, "couldn't find key")
-    }
+    } yield assertGrpcError(failedFetch, Status.Code.INVALID_ARGUMENT, "couldn't find key")
   })
 
   test(

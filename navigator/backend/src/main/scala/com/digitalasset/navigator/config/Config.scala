@@ -50,7 +50,7 @@ object Config {
   private[this] val logger = LoggerFactory.getLogger(this.getClass)
   private[this] def userFacingLogger = LoggerFactory.getLogger("user-facing-logs")
 
-  def load(configOpt: ConfigOption, useDatabase: Boolean): Either[ConfigReadError, Config] = {
+  def load(configOpt: ConfigOption, useDatabase: Boolean): Either[ConfigReadError, Config] =
     configOpt match {
       case ExplicitConfig(configFile) =>
         // If users specified a config file explicitly, we ignore the SDK config.
@@ -66,7 +66,6 @@ object Config {
               Left(e)
           }
     }
-  }
 
   def loadNavigatorConfig(
       configFile: Path,

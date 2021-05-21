@@ -47,9 +47,7 @@ final class CommandSubmissionCompletionIT extends LedgerTestSuite {
         .update(_.applicationId := "invalid-application-id")
       failure <- WithTimeout(5.seconds)(ledger.firstCompletions(invalidRequest))
         .mustFail("subscribing to completions with an invalid application ID")
-    } yield {
-      assert(failure == TimeoutException, "Timeout expected")
-    }
+    } yield assert(failure == TimeoutException, "Timeout expected")
   })
 
   test(
@@ -67,9 +65,7 @@ final class CommandSubmissionCompletionIT extends LedgerTestSuite {
       failure <- ledger
         .firstCompletions(invalidRequest)
         .mustFail("subscribing to completions past the ledger end")
-    } yield {
-      assertGrpcError(failure, Status.Code.OUT_OF_RANGE, "is after ledger end")
-    }
+    } yield assertGrpcError(failure, Status.Code.OUT_OF_RANGE, "is after ledger end")
   })
 
   test(
@@ -82,9 +78,7 @@ final class CommandSubmissionCompletionIT extends LedgerTestSuite {
       _ <- ledger.submit(request)
       failure <- WithTimeout(5.seconds)(ledger.firstCompletions(notTheSubmittingParty))
         .mustFail("subscribing to completions with the wrong party")
-    } yield {
-      assert(failure == TimeoutException, "Timeout expected")
-    }
+    } yield assert(failure == TimeoutException, "Timeout expected")
   })
 
   test(
@@ -99,13 +93,11 @@ final class CommandSubmissionCompletionIT extends LedgerTestSuite {
       wrongExercise = exercise.update(_.exercise.choice := badChoice)
       wrongRequest = ledger.submitRequest(party, wrongExercise)
       failure <- ledger.submit(wrongRequest).mustFail("submitting an invalid choice")
-    } yield {
-      assertGrpcError(
-        failure,
-        Status.Code.INVALID_ARGUMENT,
-        s"Couldn't find requested choice $badChoice",
-      )
-    }
+    } yield assertGrpcError(
+      failure,
+      Status.Code.INVALID_ARGUMENT,
+      s"Couldn't find requested choice $badChoice",
+    )
   })
 
   test(
@@ -134,9 +126,7 @@ final class CommandSubmissionCompletionIT extends LedgerTestSuite {
     val emptyRequest = ledger.submitRequest(party)
     for {
       failure <- ledger.submit(emptyRequest).mustFail("submitting an empty command")
-    } yield {
-      assertGrpcError(failure, Status.Code.INVALID_ARGUMENT, "Missing field: commands")
-    }
+    } yield assertGrpcError(failure, Status.Code.INVALID_ARGUMENT, "Missing field: commands")
   })
 
   test(

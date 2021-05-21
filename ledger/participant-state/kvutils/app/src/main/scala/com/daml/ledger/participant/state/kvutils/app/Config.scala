@@ -167,7 +167,7 @@ object Config {
               "contract-key-state-cache-max-size, " +
               "]"
           )
-          .action((kv, config) => {
+          .action { (kv, config) =>
             val participantId =
               ParticipantId.assertFromString(kv("participant-id"))
             val port = Port(kv("port").toInt)
@@ -274,7 +274,7 @@ object Config {
               maxContractKeyStateCacheSize = maxContractKeyStateCacheSize,
             )
             config.copy(participants = config.participants :+ partConfig)
-          })
+          }
 
         opt[String]("ledger-id")
           .optional()
@@ -399,7 +399,7 @@ object Config {
           .text("Set metric reporting interval.")
           .action((interval, config) => config.copy(metricsReportingInterval = interval))
 
-        checkConfig(c => {
+        checkConfig { c =>
           val participantsIdsWithNonUniqueShardNames = c.participants
             .map(pc => pc.participantId -> pc.shardName)
             .groupBy(_._1)
@@ -416,7 +416,7 @@ object Config {
             )
           else
             success
-        })
+        }
 
         opt[Unit]("early-access")
           .optional()

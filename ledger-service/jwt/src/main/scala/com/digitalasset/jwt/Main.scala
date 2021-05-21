@@ -23,7 +23,7 @@ object Main {
   final case class GenerateKeys(name: Option[String] = None)
   final case class GenerateJwt(publicKey: Option[File] = None, privateKey: Option[File] = None)
 
-  def main(args: Array[String]): Unit = {
+  def main(args: Array[String]): Unit =
     parseConfig(args) match {
       case Some(Config(Some(GenerateKeys(Some(name))), None)) =>
         RsaKeysGenerator.generate(keyPair(name)) match {
@@ -48,7 +48,6 @@ object Main {
         // error is printed out by scopt... yeah I know... why?
         sys.exit(ErrorCodes.InvalidUsage)
     }
-  }
 
   private def keyPair(name: String) =
     domain.KeyPair(
@@ -56,9 +55,8 @@ object Main {
       privateKey = new File(s"./$name.pvt").getAbsoluteFile,
     )
 
-  private def parseConfig(args: collection.Seq[String]): Option[Config] = {
+  private def parseConfig(args: collection.Seq[String]): Option[Config] =
     configParser.parse(args, Config())
-  }
 
   private val configParser = new scopt.OptionParser[Config]("ledger-service-jwt") {
     cmd("generate-keys")

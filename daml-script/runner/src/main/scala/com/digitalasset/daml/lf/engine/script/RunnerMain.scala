@@ -28,12 +28,11 @@ import com.daml.auth.TokenHolder
 
 object RunnerMain {
 
-  def main(args: Array[String]): Unit = {
+  def main(args: Array[String]): Unit =
     RunnerConfig.parse(args) match {
       case None => sys.exit(1)
       case Some(config) => main(config)
     }
-  }
 
   def main(config: RunnerConfig): Unit = {
     val encodedDar: Dar[(PackageId, DamlLf.ArchivePayload)] =
@@ -52,29 +51,23 @@ object RunnerMain {
     implicit val ec: ExecutionContext = system.dispatcher
     implicit val materializer: Materializer = Materializer(system)
 
-    val inputValue = config.inputFile.map(file => {
+    val inputValue = config.inputFile.map { file =>
       val source = Source.fromFile(file)
       val fileContent =
-        try {
-          source.mkString
-        } finally {
-          source.close()
-        }
+        try source.mkString
+        finally source.close()
       fileContent.parseJson
-    })
+    }
 
     val participantParams = config.participantConfig match {
-      case Some(file) => {
+      case Some(file) =>
         // We allow specifying --access-token-file/--application-id together with
         // --participant-config and use the values as the default for
         // all participants that do not specify an explicit token.
         val source = Source.fromFile(file)
         val fileContent =
-          try {
-            source.mkString
-          } finally {
-            source.close
-          }
+          try source.mkString
+          finally source.close
         val jsVal = fileContent.parseJson
         val token = config.accessTokenFile.map(new TokenHolder(_)).flatMap(_.token)
         import ParticipantsJsonProtocol._
@@ -86,7 +79,6 @@ object RunnerMain {
               application_id = params.application_id.orElse(config.applicationId),
             )
           )
-      }
       case None =>
         val tokenHolder = config.accessTokenFile.map(new TokenHolder(_))
         Participants(

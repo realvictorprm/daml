@@ -24,11 +24,10 @@ final case class GetPackageResponse(
 )
 
 object GetPackageResponse {
-  def fromLedgerApi(a: package_service.GetPackageResponse): GetPackageResponse = {
+  def fromLedgerApi(a: package_service.GetPackageResponse): GetPackageResponse =
     GetPackageResponse(
       hashFunction = HashFunction.fromLedgerApi(a.hashFunction),
       archivePayload = a.archivePayload,
       hash = a.hash,
     )
-  }
 }

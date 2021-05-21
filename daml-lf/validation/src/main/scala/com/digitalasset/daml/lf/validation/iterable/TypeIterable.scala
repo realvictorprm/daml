@@ -27,7 +27,7 @@ private[validation] object TypeIterable {
         fields.values
     }
 
-  private[validation] def iterator(expr0: Expr): Iterator[Type] = {
+  private[validation] def iterator(expr0: Expr): Iterator[Type] =
     expr0 match {
       case ERecCon(tycon, fields @ _) =>
         Iterator(toType(tycon)) ++
@@ -83,7 +83,6 @@ private[validation] object TypeIterable {
           EExperimental(_, _) =>
         ExprIterable.iterator(expr0).flatMap(iterator(_))
     }
-  }
 
   private[validation] def iterator(update: Update): Iterator[Type] =
     update match {

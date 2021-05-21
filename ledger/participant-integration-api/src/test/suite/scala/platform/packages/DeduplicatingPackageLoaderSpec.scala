@@ -36,7 +36,7 @@ class DeduplicatingPackageLoaderSpec
   private[this] val metric = metricRegistry.timer("test-metric")
 
   private[this] val Success(dar) = {
-    val reader = DarReader { (_, stream) => Try(DamlLf.Archive.parseFrom(stream)) }
+    val reader = DarReader((_, stream) => Try(DamlLf.Archive.parseFrom(stream)))
     val fileName = new File(rlocation(ModelTestDar.path))
     reader.readArchiveFromFile(fileName)
   }

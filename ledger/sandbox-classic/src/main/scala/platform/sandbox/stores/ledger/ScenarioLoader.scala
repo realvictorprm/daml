@@ -88,7 +88,7 @@ private[sandbox] object ScenarioLoader {
         case ImmArray() => processed.toImmArray
         // we have to bump the offsets when the first one is not zero (passTimes),
         case ImmArrayCons((entryTxId, entry), entries @ ImmArrayCons((nextTxId, _), _))
-            if (processed.isEmpty && entryTxId.index > 0) =>
+            if processed.isEmpty && entryTxId.index > 0 =>
           val newProcessed = (processed :++ ImmArray(
             LedgerEntryOrBump.Bump(entryTxId.index),
             LedgerEntryOrBump.Entry(entry),
@@ -135,7 +135,7 @@ private[sandbox] object ScenarioLoader {
       packages: InMemoryPackageStore,
       scenario: String,
       candidateScenarios: List[(Ref.DefinitionRef, Ast.Definition)],
-  ): (Ref.DefinitionRef, Ast.Definition) = {
+  ): (Ref.DefinitionRef, Ast.Definition) =
     candidateScenarios match {
       case Nil =>
         throw new RuntimeException(
@@ -147,12 +147,11 @@ private[sandbox] object ScenarioLoader {
           s"Requested scenario $scenario is present in multiple packages: ${candidates.map(_._1.packageId).toString}"
         )
     }
-  }
 
   private def getCandidateScenarios(
       packages: InMemoryPackageStore,
       scenarioQualName: Ref.QualifiedName,
-  ): List[(Ref.Identifier, Ast.Definition)] = {
+  ): List[(Ref.Identifier, Ast.Definition)] =
     packages
       .listLfPackagesSync()
       .view
@@ -167,12 +166,11 @@ private[sandbox] object ScenarioLoader {
         }
       }
       .toList
-  }
 
   private def getScenarioQualifiedName(
       packages: InMemoryPackageStore,
       scenario: String,
-  ): Ref.QualifiedName = {
+  ): Ref.QualifiedName =
     Ref.QualifiedName.fromString(scenario) match {
       case Left(_) =>
         throw new RuntimeException(
@@ -180,7 +178,6 @@ private[sandbox] object ScenarioLoader {
         )
       case Right(x) => x
     }
-  }
 
   private val workflowIdPrefix = Ref.LedgerString.assertFromString(s"scenario-workflow-")
   private val scenarioLoader = Ref.LedgerString.assertFromString("scenario-loader")
@@ -192,7 +189,7 @@ private[sandbox] object ScenarioLoader {
       mbOldTxId: Option[ScenarioLedger.TransactionId],
       stepId: Int,
       step: ScenarioLedger.ScenarioStep,
-  ): (InMemoryActiveLedgerState, Time.Timestamp, Option[ScenarioLedger.TransactionId]) = {
+  ): (InMemoryActiveLedgerState, Time.Timestamp, Option[ScenarioLedger.TransactionId]) =
     step match {
       case ScenarioLedger.Commit(
             txId: ScenarioLedger.TransactionId,
@@ -252,6 +249,5 @@ private[sandbox] object ScenarioLoader {
       case ScenarioLedger.PassTime(dtMicros) =>
         (acs, time.addMicros(dtMicros), mbOldTxId)
     }
-  }
 
 }

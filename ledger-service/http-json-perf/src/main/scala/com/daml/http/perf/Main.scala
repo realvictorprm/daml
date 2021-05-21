@@ -58,15 +58,15 @@ object Main extends StrictLogging {
     implicit val ec: ExecutionContext = asys.dispatcher
 
     def terminate(): Unit = {
-      discard { Await.result(asys.terminate(), terminationTimeout) }
+      discard(Await.result(asys.terminate(), terminationTimeout))
       val promise = Promise[Unit]()
       val future = elg.shutdownGracefully(0, terminationTimeout.length, terminationTimeout.unit)
       discard {
         future.addListener((f: io.netty.util.concurrent.Future[_]) =>
-          discard { promise.complete(Try(f.get).map(_ => ())) }
+          discard(promise.complete(Try(f.get).map(_ => ())))
         )
       }
-      discard { Await.result(promise.future, terminationTimeout) }
+      discard(Await.result(promise.future, terminationTimeout))
     }
 
     val exitCode: ExitCode = Config.parseConfig(args) match {
@@ -91,11 +91,10 @@ object Main extends StrictLogging {
   }
 
   private def waitForResult[A](fa: Future[Throwable \/ ExitCode], timeout: Duration): ExitCode =
-    try {
-      Await
-        .result(fa, timeout)
-        .valueOr(_ => ExitCode.GatlingError)
-    } catch {
+    try Await
+      .result(fa, timeout)
+      .valueOr(_ => ExitCode.GatlingError)
+    catch {
       case e: TimeoutException =>
         logger.error(s"Scenario failed", e)
         ExitCode.TimedOutScenario
@@ -227,7 +226,7 @@ object Main extends StrictLogging {
       createSchema = true,
     )
 
-  private def resolveSimulationClass(str: String): Throwable \/ Class[_ <: Simulation] = {
+  private def resolveSimulationClass(str: String): Throwable \/ Class[_ <: Simulation] =
     try {
       val klass: Class[_] = Class.forName(str)
       val simClass = klass.asSubclass(classOf[Simulation])
@@ -237,13 +236,11 @@ object Main extends StrictLogging {
         logger.error(s"Cannot resolve scenario: '$str'", e)
         -\/(e)
     }
-  }
 
-  private def getLedgerId(jwt: Jwt): EndpointsCompanion.Unauthorized \/ LedgerId = {
+  private def getLedgerId(jwt: Jwt): EndpointsCompanion.Unauthorized \/ LedgerId =
     EndpointsCompanion
       .decodeAndParsePayload[JwtPayload](jwt, HttpService.decodeJwt)
       .map { case (_, payload) => payload.ledgerId }
-  }
 
   private def runGatlingScenario(
       config: Config[String],
@@ -259,8 +256,8 @@ object Main extends StrictLogging {
     import io.gatling.core.config.GatlingPropertiesBuilder
 
     val hostAndPort = s"${jsonApiHost: String}:${jsonApiPort: Int}"
-    discard { System.setProperty(SimulationConfig.HostAndPortKey, hostAndPort) }
-    discard { System.setProperty(SimulationConfig.JwtKey, config.jwt.value) }
+    discard(System.setProperty(SimulationConfig.HostAndPortKey, hostAndPort))
+    discard(System.setProperty(SimulationConfig.JwtKey, config.jwt.value))
 
     val configBuilder = new GatlingPropertiesBuilder()
       .simulationClass(config.scenario)

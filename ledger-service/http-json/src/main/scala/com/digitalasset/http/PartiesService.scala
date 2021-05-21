@@ -44,9 +44,8 @@ class PartiesService(
     et.run
   }
 
-  def allParties(jwt: Jwt): Future[List[domain.PartyDetails]] = {
+  def allParties(jwt: Jwt): Future[List[domain.PartyDetails]] =
     listAllParties(jwt).map(ps => ps.map(p => domain.PartyDetails.fromLedgerApi(p)))
-  }
 
   def parties(
       jwt: Jwt,

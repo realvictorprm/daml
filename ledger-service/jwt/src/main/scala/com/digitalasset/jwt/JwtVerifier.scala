@@ -21,7 +21,7 @@ abstract class JwtVerifierBase {
 
 class JwtVerifier(verifier: com.auth0.jwt.interfaces.JWTVerifier) extends JwtVerifierBase {
 
-  def verify(jwt: domain.Jwt): Error \/ domain.DecodedJwt[String] = {
+  def verify(jwt: domain.Jwt): Error \/ domain.DecodedJwt[String] =
     // The auth0 library verification already fails if the token has expired,
     // but we still need to do manual expiration checks in ongoing streams
     \/.fromTryCatchNonFatal(verifier.verify(jwt.value))
@@ -30,7 +30,6 @@ class JwtVerifier(verifier: com.auth0.jwt.interfaces.JWTVerifier) extends JwtVer
         a => domain.DecodedJwt(header = a.getHeader, payload = a.getPayload),
       )
       .flatMap(base64Decode)
-  }
 
   private def base64Decode(jwt: domain.DecodedJwt[String]): Error \/ domain.DecodedJwt[String] =
     jwt.traverse(Base64.decode).leftMap(e => Error(Symbol("base64Decode"), e.shows))
@@ -71,7 +70,7 @@ object ECDSAVerifier extends StrictLogging {
   def fromCrtFile(
       path: String,
       algorithmPublicKey: ECPublicKey => Algorithm,
-  ): Error \/ JwtVerifier = {
+  ): Error \/ JwtVerifier =
     for {
       key <- \/.fromEither(
         KeyUtils
@@ -81,7 +80,6 @@ object ECDSAVerifier extends StrictLogging {
         .leftMap(e => Error(Symbol("fromCrtFile"), e.getMessage))
       verifier <- ECDSAVerifier(algorithmPublicKey(key))
     } yield verifier
-  }
 }
 
 // RSA256 validator factory
@@ -106,7 +104,7 @@ object RSA256Verifier extends StrictLogging {
     * The file is assumed to be a X509 encoded certificate.
     * These typically have the .crt file extension.
     */
-  def fromCrtFile(path: String): Error \/ JwtVerifier = {
+  def fromCrtFile(path: String): Error \/ JwtVerifier =
     for {
       rsaKey <- \/.fromEither(
         KeyUtils
@@ -116,5 +114,4 @@ object RSA256Verifier extends StrictLogging {
         .leftMap(e => Error(Symbol("fromCrtFile"), e.getMessage))
       verfier <- RSA256Verifier.apply(rsaKey)
     } yield verfier
-  }
 }

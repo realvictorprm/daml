@@ -144,8 +144,8 @@ private[trigger] object UnfoldState {
       val splat = gb add (Flow[T \/ A] statefulMapConcat (() => statefulMapConcatFun(f)))
       val split = gb add partition[T, B]
       // format: off
-      discard { initialT ~> tas }
-      discard {       as ~> tas ~> splat ~> split.in }
+      discard {initialT ~> tas}
+      discard {as ~> tas ~> splat ~> split.in}
       // format: on
       new BidiShape(initialT.in, split.out1, as.in, split.out0)
     }
@@ -165,8 +165,8 @@ private[trigger] object UnfoldState {
       )
       val as = b.add(Flow[A \/ B].collect { case -\/(a) => a })
       val bs = b.add(Flow[A \/ B].collect { case \/-(b) => b })
-      discard { split ~> as }
-      discard { split ~> bs }
+      discard(split ~> as)
+      discard(split ~> bs)
       new FanOutShape2(split.in, as.out, bs.out)
     }
 
@@ -179,9 +179,7 @@ private[trigger] object UnfoldState {
         mcFun = mkMapConcatFun(zeroT, f)
         Iterable.empty
       },
-      { a =>
-        mcFun(a)
-      },
+      a => mcFun(a),
     )
   }
 

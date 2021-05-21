@@ -197,7 +197,6 @@ class PostgreSQLWriter(config: ExtractorConfig, target: PostgreSQLTarget, ledger
     }).sequence
   }
 
-  def getLastOffset: Future[Option[String]] = {
+  def getLastOffset: Future[Option[String]] =
     lastOffset.query[String].option.transact(xa).unsafeToFuture()
-  }
 }

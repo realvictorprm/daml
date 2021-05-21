@@ -59,7 +59,6 @@ private[apiserver] object ApiLedgerIdentityService {
   )(implicit
       executionContext: ExecutionContext,
       loggingContext: LoggingContext,
-  ): ApiLedgerIdentityService with BindableService = {
+  ): ApiLedgerIdentityService with BindableService =
     new ApiLedgerIdentityService(getLedgerId)
-  }
 }

@@ -101,9 +101,8 @@ private[platform] case class InMemoryPackageStore(
   ): Either[String, InMemoryPackageStore] =
     archives
       .traverse(archive =>
-        try {
-          Right((archive, Decode.decodeArchive(archive)._2))
-        } catch {
+        try Right((archive, Decode.decodeArchive(archive)._2))
+        catch {
           case err: ParseError => Left(s"Could not parse archive ${archive.getHash}: $err")
         }
       )

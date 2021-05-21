@@ -73,7 +73,7 @@ private[events] object EventsTableTreeEvents {
   val rawTreeEventParser: RowParser[EventsTable.Entry[Raw.TreeEvent]] =
     createdTreeEventParser | exercisedTreeEventParser
 
-  private val selectColumns = {
+  private val selectColumns =
     Seq(
       "event_offset",
       "transaction_id",
@@ -100,7 +100,6 @@ private[events] object EventsTableTreeEvents {
       "exercise_actors",
       "exercise_child_event_ids",
     ).mkString(", ")
-  }
 
   def prepareLookupTransactionTreeById(sqlFunctions: SqlFunctions)(
       transactionId: TransactionId,

@@ -260,9 +260,7 @@ abstract class ResetServiceITBase
           _ = events should have size 3
           newLid <- reset(ledgerId)
           newEvents <- activeContracts(newLid, M.transactionFilter)
-        } yield {
-          newEvents should have size 0
-        }
+        } yield newEvents should have size 0
       }
 
       "retain previously uploaded packages" in {
@@ -276,9 +274,7 @@ abstract class ResetServiceITBase
           }
           newLid <- reset(ledgerId)
           packagesAfterReset <- listPackages(newLid)
-        } yield {
-          packagesBeforeReset should contain theSameElementsAs packagesAfterReset
-        }
+        } yield packagesBeforeReset should contain theSameElementsAs packagesAfterReset
       }
 
       if (timeIsStatic) {
@@ -294,9 +290,7 @@ abstract class ResetServiceITBase
 
             newLedgerId <- reset(ledgerId)
             resetTime <- getTime(newLedgerId)
-          } yield {
-            resetTime should be(epoch)
-          }
+          } yield resetTime should be(epoch)
         }
       }
     }

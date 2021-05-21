@@ -108,9 +108,8 @@ private[migration] final class V38__Update_value_versions extends BaseJavaMigrat
     stat.setFetchSize(BATCH_SIZE)
     val rows: ResultSet = stat.executeQuery(sqlQuery)
     def updates: Iterator[List[NamedParameter]] = new Iterator[List[NamedParameter]] {
-      override def hasNext: Boolean = {
+      override def hasNext: Boolean =
         rows.next()
-      }
 
       override def next(): List[NamedParameter] =
         readAndUpdate(rows, rowType, rowKeyLabel, valueLabels)

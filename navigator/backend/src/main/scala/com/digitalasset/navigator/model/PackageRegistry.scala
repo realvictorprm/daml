@@ -90,9 +90,8 @@ case class PackageRegistry(
     templates.get(damlId)
   }
 
-  def templateByStringId(id: TemplateStringId): Option[Template] = {
+  def templateByStringId(id: TemplateStringId): Option[Template] =
     parseOpaqueIdentifier(TemplateStringId.unwrap(id)).flatMap(lfid => templates.get(lfid))
-  }
 
   def templateCount: Int =
     templates.size
@@ -123,7 +122,7 @@ case class PackageRegistry(
         typ: DamlLfType,
         deps: Map[DamlLfIdentifier, DamlLfDefDataType],
         instantiatesRemaining: Int,
-    ): Map[DamlLfIdentifier, DamlLfDefDataType] = {
+    ): Map[DamlLfIdentifier, DamlLfDefDataType] =
       typ match {
         case DamlLfTypeVar(_) | DamlLfTypeNumeric(_) => deps
         case DamlLfTypePrim(_, vars) =>
@@ -135,23 +134,22 @@ case class PackageRegistry(
             // New dependency
             case None =>
               if (instantiatesRemaining > 0) {
-                damlLfDefDataType(name.identifier).fold(deps)(ddt => {
+                damlLfDefDataType(name.identifier).fold(deps) { ddt =>
                   val r1 = deps + (name.identifier -> ddt)
                   val r2 = foldDataType(ddt, r1, instantiatesRemaining - 1)
                   vars.foldLeft(r2)((r, v) => foldType(v, r, instantiatesRemaining - 1))
-                })
+                }
               } else {
                 deps
               }
           }
       }
-    }
 
     def foldDataType(
         ddt: DamlLfDefDataType,
         deps: Map[DamlLfIdentifier, DamlLfDefDataType],
         instantiatesRemaining: Int,
-    ): Map[DamlLfIdentifier, DamlLfDefDataType] = {
+    ): Map[DamlLfIdentifier, DamlLfDefDataType] =
       ddt.dataType match {
         case DamlLfRecord(fields) =>
           fields.foldLeft(deps)((r, field) => foldType(field._2, r, instantiatesRemaining))
@@ -160,7 +158,6 @@ case class PackageRegistry(
         case DamlLfEnum(_) =>
           deps
       }
-    }
 
     foldDataType(typ, Map.empty, maxDepth)
   }

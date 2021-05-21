@@ -19,9 +19,7 @@ class DelayedSpec extends AsyncWordSpec with Matchers {
         result <- Delayed.Future.by(Duration.Zero)(Future {
           7
         })
-      } yield {
-        result should be(7)
-      }
+      } yield result should be(7)
     }
 
     "delay by a little while" in {
@@ -70,9 +68,7 @@ class DelayedSpec extends AsyncWordSpec with Matchers {
             14
           })
           .failed
-      } yield {
-        exception should be(an[IllegalArgumentException])
-      }
+      } yield exception should be(an[IllegalArgumentException])
     }
   }
 

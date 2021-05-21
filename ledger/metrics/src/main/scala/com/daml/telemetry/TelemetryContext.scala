@@ -124,15 +124,12 @@ protected class DefaultTelemetryContext(protected val tracer: Tracer, protected 
   ): T = {
     val subSpan = createSubSpan(spanName, kind, attributes: _*)
 
-    try {
-      body(DefaultTelemetryContext(tracer, subSpan))
-    } catch {
+    try body(DefaultTelemetryContext(tracer, subSpan))
+    catch {
       case exception: Exception =>
         subSpan.recordException(exception)
         throw exception
-    } finally {
-      subSpan.end()
-    }
+    } finally subSpan.end()
   }
 
   protected def createSubSpan(
@@ -148,19 +145,14 @@ protected class DefaultTelemetryContext(protected val tracer: Tracer, protected 
         .startSpan()
     for {
       (attribute, value) <- attributes
-    } {
-      subSpan.setAttribute(attribute.key, value)
-    }
+    } subSpan.setAttribute(attribute.key, value)
     subSpan
   }
 
   override def runInOpenTelemetryScope[T](body: => T): T = {
     val scope = openTelemetryContext.makeCurrent()
-    try {
-      body
-    } finally {
-      scope.close()
-    }
+    try body
+    finally scope.close()
   }
 
   override def encodeMetadata(): jMap[String, String] = {
@@ -187,9 +179,7 @@ protected class RootDefaultTelemetryContext(override protected val tracer: Trace
       tracer.spanBuilder(spanName).setNoParent().setSpanKind(kind.kind).startSpan()
     for {
       (attribute, value) <- attributes
-    } {
-      subSpan.setAttribute(attribute.key, value)
-    }
+    } subSpan.setAttribute(attribute.key, value)
     subSpan
   }
 }
@@ -213,9 +203,8 @@ object NoOpTelemetryContext extends TelemetryContext {
       attributes: (SpanAttribute, String)*
   )(
       body: TelemetryContext => Future[T]
-  ): Future[T] = {
+  ): Future[T] =
     body(this)
-  }
 
   override def runInNewSpan[T](
       spanName: String,
@@ -223,13 +212,11 @@ object NoOpTelemetryContext extends TelemetryContext {
       attributes: (SpanAttribute, String)*
   )(
       body: TelemetryContext => T
-  ): T = {
+  ): T =
     body(this)
-  }
 
-  override def runInOpenTelemetryScope[T](body: => T): T = {
+  override def runInOpenTelemetryScope[T](body: => T): T =
     body
-  }
 
   override def encodeMetadata(): jMap[String, String] = new jHashMap()
 

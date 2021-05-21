@@ -24,7 +24,7 @@ final case class ContractRow(
     key: Option[String],
 ) {
 
-  def toContract(types: PackageRegistry): Try[Contract] = {
+  def toContract(types: PackageRegistry): Try[Contract] =
     (for {
       id <- Try(ApiTypes.ContractId(id))
       tid <- Try(parseOpaqueIdentifier(templateId).get)
@@ -42,17 +42,15 @@ final case class ContractRow(
           )
         )
       )
-    } yield {
-      Contract(id, template, recArg, agreementText, sig, obs, key)
-    }).recoverWith { case e: Throwable =>
-      Failure(DeserializationFailed(s"Failed to deserialize Contract from row: $this. Error: $e"))
+    } yield Contract(id, template, recArg, agreementText, sig, obs, key)).recoverWith {
+      case e: Throwable =>
+        Failure(DeserializationFailed(s"Failed to deserialize Contract from row: $this. Error: $e"))
     }
-  }
 }
 
 object ContractRow {
 
-  def fromContract(c: Contract): ContractRow = {
+  def fromContract(c: Contract): ContractRow =
     ContractRow(
       c.id.unwrap,
       c.template.id.asOpaqueString,
@@ -63,5 +61,4 @@ object ContractRow {
       c.observers.toJson.compactPrint,
       c.key.map(_.toJson.compactPrint),
     )
-  }
 }

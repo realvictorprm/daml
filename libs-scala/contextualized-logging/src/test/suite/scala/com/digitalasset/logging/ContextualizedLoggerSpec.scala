@@ -51,7 +51,7 @@ final class ContextualizedLoggerSpec
 
   it should "construct log entries lazily based on the required level" in
     withEmptyContext { logger => implicit loggingContext =>
-      noException should be thrownBy { logger.debug(s"${thisThrows()}") }
+      noException should be thrownBy logger.debug(s"${thisThrows()}")
       verify(logger.withoutContext, times(0)).debug(any[String])
     }
 
@@ -87,9 +87,9 @@ final class ContextualizedLoggerSpec
       import scala.concurrent.duration.DurationInt
       import scala.concurrent.{Await, Future}
 
-      val f1 = Future { logger.info("a") }
+      val f1 = Future(logger.info("a"))
       LoggingContext.withEnrichedLoggingContext("id" -> "next") { implicit loggingContext =>
-        val f2 = Future { logger.info("b") }
+        val f2 = Future(logger.info("b"))
         Await.result(Future.sequence(Seq(f1, f2)), 10.seconds)
       }
       val m = logger.withoutContext

@@ -247,17 +247,17 @@ object RecoveringIndexerSpec {
       private[this] val promise = Promise[Unit]()
 
       if (result.status == SuccessfullyCompletes) {
-        scheduler.scheduleOnce(result.completeDelay)({
+        scheduler.scheduleOnce(result.completeDelay) {
           actionsQueue.add(EventStreamComplete(result.name))
           promise.trySuccess(())
           ()
-        })
+        }
       } else {
-        scheduler.scheduleOnce(result.completeDelay)({
+        scheduler.scheduleOnce(result.completeDelay) {
           actionsQueue.add(EventStreamFail(result.name))
           promise.tryFailure(new RuntimeException("Random simulated failure: subscribe"))
           ()
-        })
+        }
       }
 
       def stop(): Future[Unit] = {
@@ -266,9 +266,8 @@ object RecoveringIndexerSpec {
         promise.future
       }
 
-      override def completed(): Future[Unit] = {
+      override def completed(): Future[Unit] =
         promise.future
-      }
     }
 
     def subscribe()(implicit context: ResourceContext): Resource[IndexFeedHandle] =
@@ -291,13 +290,13 @@ object RecoveringIndexerSpec {
               throw new RuntimeException("Random simulated failure: subscribe")
             }
           })
-        })(handle => {
+        }) { handle =>
           val complete = handle.stop()
           complete.onComplete { _ =>
             openSubscriptions -= handle
           }
           complete
-        })
+        }
       }
     }
 

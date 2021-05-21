@@ -65,8 +65,7 @@ object SomeArrayEquals {
       case _ => false
     }
 
-    override def hashCode(): Int = {
+    override def hashCode(): Int =
       if (a eq null) null.## else arrayHash(a)
-    }
   }
 }

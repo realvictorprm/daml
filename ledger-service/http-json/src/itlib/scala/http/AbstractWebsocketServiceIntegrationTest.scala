@@ -185,7 +185,7 @@ abstract class AbstractWebsocketServiceIntegrationTest
       } yield inside(clientMsg) { case result +: heartbeats =>
         result should include(""""owner":"Alice"""")
         result should include(""""number":"abc123"""")
-        result should not include (""""offset":"""")
+        result should not include """"offset":""""
         Inspectors.forAll(heartbeats)(assertHeartbeat)
       }
   }
@@ -585,9 +585,7 @@ abstract class AbstractWebsocketServiceIntegrationTest
     def archive(id: domain.ContractId): Future[Assertion] =
       for {
         r <- postArchiveCommand(domain.TemplateId(None, "Account", "Account"), id, encoder, uri)
-      } yield {
-        assert(r._1.isSuccess)
-      }
+      } yield assert(r._1.isSuccess)
     def resp(kill: UniqueKillSwitch): Sink[JsValue, Future[Assertion]] = {
       val dslSyntax = Consume.syntax[JsValue]
       import dslSyntax._

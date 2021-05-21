@@ -10,20 +10,14 @@ class LockedFreePortSpec extends AnyWordSpec with Matchers {
   "a free port" should {
     "always be available" in {
       val lockedPort = LockedFreePort.find()
-      try {
-        lockedPort.port.value should (be >= 1024 and be < 65536)
-      } finally {
-        lockedPort.unlock()
-      }
+      try lockedPort.port.value should (be >= 1024 and be < 65536)
+      finally lockedPort.unlock()
     }
 
     "lock, to prevent race conditions" in {
       val lockedPort = LockedFreePort.find()
-      try {
-        PortLock.lock(lockedPort.port) should be(Left(PortLock.FailedToLock(lockedPort.port)))
-      } finally {
-        lockedPort.unlock()
-      }
+      try PortLock.lock(lockedPort.port) should be(Left(PortLock.FailedToLock(lockedPort.port)))
+      finally lockedPort.unlock()
     }
 
     "unlock when the server's started" in {

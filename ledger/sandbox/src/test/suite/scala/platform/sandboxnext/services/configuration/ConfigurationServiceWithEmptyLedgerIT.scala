@@ -47,8 +47,6 @@ final class ConfigurationServiceWithEmptyLedgerIT
     for {
       _ <- publishATimeModel(channel)
       end <- completionService.completionEnd(CompletionEndRequest(lid))
-    } yield {
-      end.getOffset.value.absolute.get should not be ApiOffset.begin.toHexString
-    }
+    } yield end.getOffset.value.absolute.get should not be ApiOffset.begin.toHexString
   }
 }

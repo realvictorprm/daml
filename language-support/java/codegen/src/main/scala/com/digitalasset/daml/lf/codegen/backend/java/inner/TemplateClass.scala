@@ -361,7 +361,7 @@ private[inner] object TemplateClass extends StrictLogging {
       typeCon: TypeCon,
       identifierToType: Map[QualifiedName, InterfaceType],
       packageId: PackageId,
-  ): Option[Record.FWT] = {
+  ): Option[Record.FWT] =
     // TODO: at the moment we don't support other packages Records because the codegen works on single packages
     if (typeCon.name.identifier.packageId == packageId) {
       identifierToType.get(typeCon.name.identifier.qualifiedName) match {
@@ -370,7 +370,6 @@ private[inner] object TemplateClass extends StrictLogging {
         case _ => None
       }
     } else None
-  }
 
   private def generateStaticExerciseByKeyMethods(
       templateClassName: ClassName,
@@ -394,16 +393,14 @@ private[inner] object TemplateClass extends StrictLogging {
             record <- choice.param
               .fold(getRecord(_, typeDeclarations, packageId), _ => None, _ => None, _ => None)
           )
-            yield {
-              generateFlattenedStaticExerciseByKeyMethod(
-                choiceName,
-                choice,
-                key,
-                templateClassName,
-                getFieldsWithTypes(record.fields, packagePrefixes),
-                packagePrefixes,
-              )
-            }
+            yield generateFlattenedStaticExerciseByKeyMethod(
+              choiceName,
+              choice,
+              key,
+              templateClassName,
+              getFieldsWithTypes(record.fields, packagePrefixes),
+              packagePrefixes,
+            )
         raw :: flattened.toList
       }
       methods.flatten.asJava
@@ -456,9 +453,8 @@ private[inner] object TemplateClass extends StrictLogging {
     val keyJavaType = toJavaTypeName(key, packagePrefixes)
     exerciseByKeyBuilder.addParameter(keyJavaType, "key")
     val choiceJavaType = toJavaTypeName(choice.param, packagePrefixes)
-    for (FieldInfo(_, _, javaName, javaType) <- fields) {
+    for (FieldInfo(_, _, javaName, javaType) <- fields)
       exerciseByKeyBuilder.addParameter(javaType, javaName)
-    }
     exerciseByKeyBuilder.addStatement(
       "return $T.$L(key, new $T($L))",
       templateClassName,
@@ -483,14 +479,13 @@ private[inner] object TemplateClass extends StrictLogging {
         for (
           record <- choice.param
             .fold(getRecord(_, typeDeclarations, packageId), _ => None, _ => None, _ => None)
-        ) yield {
-          generateFlattenedCreateAndExerciseMethod(
+        )
+          yield generateFlattenedCreateAndExerciseMethod(
             choiceName,
             choice,
             getFieldsWithTypes(record.fields, packagePrefixes),
             packagePrefixes,
           )
-        }
       createAndExerciseChoiceMethod :: splatted.toList
     }
     methods.flatten.asJava
@@ -551,9 +546,8 @@ private[inner] object TemplateClass extends StrictLogging {
       .addModifiers(Modifier.PUBLIC)
       .returns(classOf[javaapi.data.CreateAndExerciseCommand])
     val javaType = toJavaTypeName(choice.param, packagePrefixes)
-    for (FieldInfo(_, _, javaName, javaType) <- fields) {
+    for (FieldInfo(_, _, javaName, javaType) <- fields)
       createAndExerciseChoiceBuilder.addParameter(javaType, javaName)
-    }
     createAndExerciseChoiceBuilder.addStatement(
       "return $L(new $T($L))",
       methodName,
@@ -618,9 +612,8 @@ private[inner] object TemplateClass extends StrictLogging {
       .addModifiers(Modifier.PUBLIC)
       .returns(classOf[javaapi.data.ExerciseCommand])
     val javaType = toJavaTypeName(choice.param, packagePrefixes)
-    for (FieldInfo(_, _, javaName, javaType) <- fields) {
+    for (FieldInfo(_, _, javaName, javaType) <- fields)
       exerciseChoiceBuilder.addParameter(javaType, javaName)
-    }
     exerciseChoiceBuilder.addStatement(
       "return $L(new $T($L))",
       methodName,

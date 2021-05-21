@@ -15,7 +15,6 @@ object LogCollector {
 }
 
 final class LogCollector extends AppenderBase[ILoggingEvent] {
-  override def append(e: ILoggingEvent): Unit = {
+  override def append(e: ILoggingEvent): Unit =
     LogCollector.events += e
-  }
 }

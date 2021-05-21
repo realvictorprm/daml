@@ -32,9 +32,7 @@ final class GrpcServerSpec extends AsyncWordSpec with Matchers with TestResource
         val helloService = HelloServiceGrpc.stub(channel)
         for {
           response <- helloService.single(HelloRequest(7))
-        } yield {
-          response.respInt shouldBe 14
-        }
+        } yield response.respInt shouldBe 14
       }
     }
 
@@ -45,9 +43,7 @@ final class GrpcServerSpec extends AsyncWordSpec with Matchers with TestResource
           exception <- helloService
             .fails(HelloRequest(7, ByteString.copyFromUtf8("This is some text.")))
             .failed
-        } yield {
-          exception.getMessage shouldBe "INTERNAL: This is some text."
-        }
+        } yield exception.getMessage shouldBe "INTERNAL: This is some text."
       }
     }
 
@@ -62,9 +58,7 @@ final class GrpcServerSpec extends AsyncWordSpec with Matchers with TestResource
           exception <- helloService
             .fails(HelloRequest(7, ByteString.copyFromUtf8(exceptionMessage)))
             .failed
-        } yield {
-          exception.getMessage shouldBe s"INTERNAL: $exceptionMessage"
-        }
+        } yield exception.getMessage shouldBe s"INTERNAL: $exceptionMessage"
       }
     }
 
@@ -81,11 +75,10 @@ final class GrpcServerSpec extends AsyncWordSpec with Matchers with TestResource
           exception <- helloService
             .fails(HelloRequest(7, ByteString.copyFromUtf8(exceptionMessage)))
             .failed
-        } yield {
-          // We don't want to test the exact message content, just that it does indeed contain a
-          // large chunk of the response error message, followed by "...".
-          exception.getMessage should fullyMatch regex "INTERNAL: There was an error. x{1024,}\\.\\.\\.".r
-        }
+        } yield
+        // We don't want to test the exact message content, just that it does indeed contain a
+        // large chunk of the response error message, followed by "...".
+        exception.getMessage should fullyMatch regex "INTERNAL: There was an error. x{1024,}\\.\\.\\.".r
       }
     }
   }

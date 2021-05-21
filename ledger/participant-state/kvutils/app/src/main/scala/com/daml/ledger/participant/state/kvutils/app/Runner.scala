@@ -60,8 +60,8 @@ final class Runner[T <: ReadWriteService, Extra](
   )(implicit resourceContext: ResourceContext): Resource[Unit] = {
     val logger = ContextualizedLogger.get(this.getClass)
     import ExecutionContext.Implicits.global
-    Resource.sequenceIgnoringValues(for (jdbcUrl <- jdbcUrls) yield {
-      newLoggingContext { implicit loggingContext: LoggingContext =>
+    Resource.sequenceIgnoringValues(for (jdbcUrl <- jdbcUrls) yield newLoggingContext {
+      implicit loggingContext: LoggingContext =>
         Resource.fromFuture(IndexMetadata.read(jdbcUrl, enableAppendOnlySchema).andThen {
           case Failure(exception) =>
             logger.error("Error while retrieving the index metadata", exception)
@@ -71,7 +71,6 @@ final class Runner[T <: ReadWriteService, Extra](
             logger.warn(s"ledger_end: ${metadata.ledgerEnd}")
             logger.warn(s"version: ${metadata.participantIntegrationApiVersion}")
         })
-      }
     })
   }
 

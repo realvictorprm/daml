@@ -32,7 +32,7 @@ class SynchronousResponse[Input, Entry, AcceptedEntry](
       telemetryContext: TelemetryContext,
       executionContext: ExecutionContext,
       materializer: Materializer,
-  ): Future[AcceptedEntry] = {
+  ): Future[AcceptedEntry] =
     for {
       ledgerEndBeforeRequest <- strategy.currentLedgerEnd()
       submissionResult <- strategy.submit(submissionId, input)
@@ -60,7 +60,6 @@ class SynchronousResponse[Input, Entry, AcceptedEntry](
           Future.failed(ErrorFactories.unimplemented(r.description))
       }
     } yield entry
-  }
 
 }
 

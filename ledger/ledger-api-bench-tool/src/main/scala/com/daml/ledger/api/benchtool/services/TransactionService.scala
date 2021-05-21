@@ -50,13 +50,12 @@ final class TransactionService(
   private def getTransactionsRequest(
       ledgerId: String,
       config: Config.StreamConfig,
-  ): GetTransactionsRequest = {
+  ): GetTransactionsRequest =
     GetTransactionsRequest.defaultInstance
       .withLedgerId(ledgerId)
       .withBegin(config.beginOffset.getOrElse(ledgerBeginOffset))
       .withEnd(config.endOffset.getOrElse(ledgerEndOffset))
       .withFilter(partyFilter(config.party, config.templateIds))
-  }
 
   private def partyFilter(
       party: String,

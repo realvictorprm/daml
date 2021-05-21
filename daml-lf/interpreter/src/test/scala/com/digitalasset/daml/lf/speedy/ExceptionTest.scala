@@ -571,12 +571,11 @@ class ExceptionTest extends AnyWordSpec with Matchers with TableDrivenPropertyCh
 
     def mkPackagesAtVersion(languageVersion: LanguageVersion): PureCompiledPackages = {
 
-      implicit val defaultParserParameters: ParserParameters[this.type] = {
+      implicit val defaultParserParameters: ParserParameters[this.type] =
         ParserParameters(
           defaultPackageId = Ref.PackageId.assertFromString("-pkgId-"),
           languageVersion,
         )
-      }
 
       typeAndCompile(p"""
       module M {
@@ -628,9 +627,8 @@ class ExceptionTest extends AnyWordSpec with Matchers with TableDrivenPropertyCh
     )
   }
 
-  private def runExpr(pkgs1: PureCompiledPackages)(e: Expr): SResult = {
+  private def runExpr(pkgs1: PureCompiledPackages)(e: Expr): SResult =
     Speedy.Machine.fromPureExpr(pkgs1, e).run()
-  }
 
   private def runUpdateExpr(pkgs1: PureCompiledPackages)(e: Expr): SResult = {
     def transactionSeed: crypto.Hash = crypto.Hash.hashPrivateKey("ExceptionTest.scala")

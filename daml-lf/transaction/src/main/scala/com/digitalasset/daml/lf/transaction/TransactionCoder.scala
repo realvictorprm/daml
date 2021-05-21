@@ -201,14 +201,13 @@ object TransactionCoder {
       version: TransactionVersion,
       key: Option[KeyWithMaintainers[Value[Cid]]],
       setKey: TransactionOuterClass.KeyWithMaintainers => GeneratedMessageV3.Builder[_],
-  ) = {
+  ) =
     key match {
       case Some(key) =>
         encodeKeyWithMaintainers(encodeCid, version, key).map { k => setKey(k); () }
       case None =>
         Right(())
     }
-  }
 
   private[this] def encodeAndSetValue[Cid](
       encodeCid: ValueCoder.EncodeCid[Cid],
@@ -216,7 +215,7 @@ object TransactionCoder {
       value: Value[Cid],
       setVersioned: ValueOuterClass.VersionedValue => GeneratedMessageV3.Builder[_],
       setUnversioned: ValueOuterClass.Value => GeneratedMessageV3.Builder[_],
-  ): Either[EncodeError, Unit] = {
+  ): Either[EncodeError, Unit] =
     if (version < TransactionVersion.minNoVersionValue) {
       encodeVersionedValue(encodeCid, version, value).map { v =>
         setVersioned(v);
@@ -228,7 +227,6 @@ object TransactionCoder {
         {}
       }
     }
-  }
 
   /** encodes a [[GenNode[Nid, Cid]] to protocol buffer
     *
@@ -400,7 +398,7 @@ object TransactionCoder {
       decodeCid: ValueCoder.DecodeCid[Cid],
       version: TransactionVersion,
       keyWithMaintainers: TransactionOuterClass.KeyWithMaintainers,
-  ): Either[DecodeError, KeyWithMaintainers[Value[Cid]]] = {
+  ): Either[DecodeError, KeyWithMaintainers[Value[Cid]]] =
     for {
       maintainers <- toPartySet(keyWithMaintainers.getMaintainersList)
       key <- decodeValue(
@@ -410,7 +408,6 @@ object TransactionCoder {
         keyWithMaintainers.getKeyUnversioned,
       )
     } yield KeyWithMaintainers(key, maintainers)
-  }
 
   private val RightNone = Right(None)
 
@@ -418,7 +415,7 @@ object TransactionCoder {
       decodeCid: ValueCoder.DecodeCid[Cid],
       version: TransactionVersion,
       keyWithMaintainers: TransactionOuterClass.KeyWithMaintainers,
-  ): Either[DecodeError, Option[KeyWithMaintainers[Value[Cid]]]] = {
+  ): Either[DecodeError, Option[KeyWithMaintainers[Value[Cid]]]] =
     if (keyWithMaintainers == TransactionOuterClass.KeyWithMaintainers.getDefaultInstance) {
       RightNone
     } else {
@@ -432,7 +429,6 @@ object TransactionCoder {
         )
       } yield Some(KeyWithMaintainers(key, maintainers))
     }
-  }
 
   // package private for test, do not use outside TransactionCoder
   private[lf] def decodeValue[Cid](
@@ -440,13 +436,12 @@ object TransactionCoder {
       version: TransactionVersion,
       versionedProto: => ValueOuterClass.VersionedValue,
       unversionedProto: => ValueOuterClass.Value,
-  ): Either[DecodeError, Value[Cid]] = {
+  ): Either[DecodeError, Value[Cid]] =
     if (version < TransactionVersion.minNoVersionValue) {
       decodeValue(decodeCid, version, versionedProto)
     } else {
       ValueCoder.decodeValue(decodeCid, version, unversionedProto)
     }
-  }
 
   /** read a [[GenNode[Nid, Cid]] from protobuf
     *
@@ -570,7 +565,7 @@ object TransactionCoder {
                 nodeVersion,
                 protoExe.getResultVersioned,
                 protoExe.getResultUnversioned,
-              ).map { v => Some(v) }
+              ).map(v => Some(v))
             }
           keyWithMaintainers <-
             decodeOptionalKeyWithMaintainers(decodeCid, nodeVersion, protoExe.getKeyWithMaintainers)
@@ -631,14 +626,13 @@ object TransactionCoder {
   private[this] def decodeChildren[Nid](
       decodeNid: DecodeNid[Nid],
       strList: ProtocolStringList,
-  ): Either[DecodeError, ImmArray[Nid]] = {
+  ): Either[DecodeError, ImmArray[Nid]] =
     strList.asScala
       .foldLeft[Either[DecodeError, BackStack[Nid]]](Right(BackStack.empty[Nid])) {
         case (Left(e), _) => Left(e)
         case (Right(ids), s) => decodeNid.fromString(s).map(ids :+ _)
       }
       .map(_.toImmArray)
-  }
 
   /** Encode a [[GenTransaction[Nid, Cid]]] to protobuf using [[TransactionVersion]] provided by the libary.
     *
@@ -703,7 +697,7 @@ object TransactionCoder {
   def decodeNodeVersion(
       txVersion: TransactionVersion,
       protoNode: TransactionOuterClass.Node,
-  ): Either[DecodeError, TransactionVersion] = {
+  ): Either[DecodeError, TransactionVersion] =
     if (txVersion < TransactionVersion.minNodeVersion) {
       Right(txVersion)
     } else {
@@ -711,7 +705,7 @@ object TransactionCoder {
         case NodeTypeCase.ROLLBACK => Right(txVersion)
         case _ =>
           decodeVersion(protoNode.getVersion) match {
-            case Right(nodeVersion) if (txVersion < nodeVersion) =>
+            case Right(nodeVersion) if txVersion < nodeVersion =>
               Left(
                 DecodeError(
                   s"A transaction of version $txVersion cannot contain node of newer version (${protoNode.getVersion})"
@@ -721,7 +715,6 @@ object TransactionCoder {
           }
       }
     }
-  }
 
   def decodeVersion(vs: String): Either[DecodeError, TransactionVersion] =
     TransactionVersion.fromString(vs).left.map(DecodeError)
@@ -836,11 +829,9 @@ object TransactionCoder {
         for {
           signatories_ <- toPartySet(protoCreate.getSignatoriesList)
           stakeholders_ <- toPartySet(protoCreate.getStakeholdersList)
-        } yield {
-          new ActionNodeInfo.Create {
-            def signatories = signatories_
-            def stakeholders = stakeholders_
-          }
+        } yield new ActionNodeInfo.Create {
+          def signatories = signatories_
+          def stakeholders = stakeholders_
         }
       case NodeTypeCase.FETCH =>
         val protoFetch = protoNode.getFetch
@@ -848,12 +839,10 @@ object TransactionCoder {
           actingParties_ <- toPartySet(protoFetch.getActorsList)
           stakeholders_ <- toPartySet(protoFetch.getStakeholdersList)
           signatories_ <- toPartySet(protoFetch.getSignatoriesList)
-        } yield {
-          new ActionNodeInfo.Fetch {
-            def signatories = signatories_
-            def stakeholders = stakeholders_
-            def actingParties = actingParties_
-          }
+        } yield new ActionNodeInfo.Fetch {
+          def signatories = signatories_
+          def stakeholders = stakeholders_
+          def actingParties = actingParties_
         }
 
       case NodeTypeCase.EXERCISE =>
@@ -867,25 +856,21 @@ object TransactionCoder {
               Right(Set.empty[Party])
             else
               toPartySet(protoExe.getObserversList)
-        } yield {
-          new ActionNodeInfo.Exercise {
-            def signatories = signatories_
-            def stakeholders = stakeholders_
-            def actingParties = actingParties_
-            def choiceObservers = choiceObservers_
-            def consuming = protoExe.getConsuming
-          }
+        } yield new ActionNodeInfo.Exercise {
+          def signatories = signatories_
+          def stakeholders = stakeholders_
+          def actingParties = actingParties_
+          def choiceObservers = choiceObservers_
+          def consuming = protoExe.getConsuming
         }
 
       case NodeTypeCase.LOOKUP_BY_KEY =>
         val protoLookupByKey = protoNode.getLookupByKey
         for {
           maintainers <- toPartySet(protoLookupByKey.getKeyWithMaintainers.getMaintainersList)
-        } yield {
-          new ActionNodeInfo.LookupByKey {
-            def hasResult = protoLookupByKey.hasContractIdStruct
-            def keyMaintainers = maintainers
-          }
+        } yield new ActionNodeInfo.LookupByKey {
+          def hasResult = protoLookupByKey.hasContractIdStruct
+          def keyMaintainers = maintainers
         }
 
       case NodeTypeCase.NODETYPE_NOT_SET => Left(DecodeError("Unset Node type"))
@@ -909,7 +894,7 @@ object TransactionCoder {
   def nodeKey(
       nodeVersion: TransactionVersion,
       protoCreate: TransactionOuterClass.NodeCreate,
-  ): Either[DecodeError, Option[GlobalKey]] = {
+  ): Either[DecodeError, Option[GlobalKey]] =
     if (protoCreate.hasKeyWithMaintainers) {
       val (rawTmplId, rawKey) =
         if (nodeVersion < TransactionVersion.minNoVersionValue) {
@@ -921,7 +906,6 @@ object TransactionCoder {
     } else {
       Right(None)
     }
-  }
 
   /*
    * Fast decoder for contract key of Exercise node.

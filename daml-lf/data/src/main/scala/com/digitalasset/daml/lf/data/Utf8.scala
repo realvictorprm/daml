@@ -76,7 +76,7 @@ object Utf8 {
   @throws[IllegalArgumentException]
   def pack(codePoints: ImmArray[Long]): String = {
     val builder = new StringBuilder()
-    for (cp <- codePoints) {
+    for (cp <- codePoints)
       if (
         Character.MIN_VALUE <= cp && cp < Character.MIN_SURROGATE ||
         Character.MAX_SURROGATE < cp && cp <= Character.MAX_VALUE
@@ -92,7 +92,6 @@ object Utf8 {
       } else {
         throw new IllegalArgumentException(s"invalid code point 0x${cp.toHexString}.")
       }
-    }
     builder.result()
   }
 

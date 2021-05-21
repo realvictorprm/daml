@@ -11,8 +11,7 @@ import scala.Ordering.Implicits.infixOrderingOps
 private[validation] object DependencyVersion {
 
   @throws[ValidationError]
-  def checkPackage(world: World, pkgId: PackageId, pkg: Package): Unit = {
-
+  def checkPackage(world: World, pkgId: PackageId, pkg: Package): Unit =
     for {
       depPkgId <- pkg.directDeps
       depPkg = world.lookupPackage(NoContext, depPkgId)
@@ -23,6 +22,5 @@ private[validation] object DependencyVersion {
       depPkgId,
       depPkg.languageVersion,
     )
-  }
 
 }

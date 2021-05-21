@@ -34,7 +34,7 @@ class CommandClientImplTest
 
   val ledgerServices = new LedgerServices("command-service-ledger")
 
-  private def withCommandClient(authService: AuthService = AuthServiceWildcard) = {
+  private def withCommandClient(authService: AuthService = AuthServiceWildcard) =
     ledgerServices.withCommandClient(
       Future.successful(Empty.defaultInstance),
       Future.successful(SubmitAndWaitForTransactionIdResponse.defaultInstance),
@@ -42,7 +42,6 @@ class CommandClientImplTest
       Future.successful(SubmitAndWaitForTransactionTreeResponse.defaultInstance),
       authService,
     ) _
-  }
 
   implicit class JavaOptionalAsScalaOption[A](opt: Optional[A]) {
     def asScala: Option[A] = if (opt.isPresent) Some(opt.get()) else None

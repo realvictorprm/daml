@@ -21,7 +21,7 @@ sealed abstract class FilteringPager[N <: Node[_]](
   }
 
   private[query] def isIncluded(node: N): Boolean = {
-    def loop(criterion: FilterCriterionBase): Boolean = {
+    def loop(criterion: FilterCriterionBase): Boolean =
       criterion match {
         case AndFilterCriterion(criteria) =>
           criteria.forall(loop)
@@ -30,7 +30,6 @@ sealed abstract class FilteringPager[N <: Node[_]](
         case criterion: FilterCriterion =>
           matchCriterion(node)(criterion)
       }
-    }
     loop(criterion)
   }
 

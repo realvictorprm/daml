@@ -98,9 +98,7 @@ abstract class ParticipantStateIntegrationSpecBase(implementationName: String)(i
           conditions <- ps
             .getLedgerInitialConditions()
             .runWith(Sink.head)
-        } yield {
-          conditions.ledgerId should be(ledgerId)
-        }
+        } yield conditions.ledgerId should be(ledgerId)
       }
     }
 
@@ -312,9 +310,7 @@ abstract class ParticipantStateIntegrationSpecBase(implementationName: String)(i
             )
             .toScala
           (offset2, _) <- waitForNextUpdate(ps, Some(offset1))
-        } yield {
-          offset2 should be(toOffset(2))
-        }
+        } yield offset2 should be(toOffset(2))
       }
 
       "reject duplicate commands" in participantState.use { ps =>

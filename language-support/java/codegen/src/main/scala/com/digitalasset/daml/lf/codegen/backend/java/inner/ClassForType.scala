@@ -75,10 +75,9 @@ object ClassForType extends StrictLogging {
     JavaFile.builder(javaPackage, withField).build()
   }
 
-  private def createPackageIdField(packageId: PackageId): FieldSpec = {
+  private def createPackageIdField(packageId: PackageId): FieldSpec =
     FieldSpec
       .builder(classOf[String], "_packageId", Modifier.FINAL, Modifier.PUBLIC, Modifier.STATIC)
       .initializer("$S", packageId)
       .build()
-  }
 }

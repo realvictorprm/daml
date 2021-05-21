@@ -233,7 +233,7 @@ final case class GenTransaction[Nid, +Cid](
   }
 
   /** checks that all the values contained are serializable */
-  def serializable(f: Value[Cid] => ImmArray[String]): ImmArray[String] = {
+  def serializable(f: Value[Cid] => ImmArray[String]): ImmArray[String] =
     fold(BackStack.empty[String]) { case (errs, (_, node)) =>
       node match {
         case Node.NodeRollback(_) =>
@@ -248,7 +248,6 @@ final case class GenTransaction[Nid, +Cid](
         case nlbk: Node.NodeLookupByKey[Cid] => errs :++ f(nlbk.key.key)
       }
     }.toImmArray
-  }
 
   /** Visit every `Val`. */
   def foldValues[Z](z: Z)(f: (Z, Value[Cid]) => Z): Z =
@@ -478,7 +477,7 @@ sealed abstract class HasTxNodes[Nid, +Cid] {
     */
   final def contractKeys(implicit
       evidence: HasTxNodes[Nid, Cid] <:< HasTxNodes[_, Value.ContractId]
-  ): Set[GlobalKey] = {
+  ): Set[GlobalKey] =
     evidence(this).fold(Set.empty[GlobalKey]) {
       case (acc, (_, node: Node.NodeCreate[Value.ContractId])) =>
         node.key.fold(acc)(key => acc + GlobalKey.assertBuild(node.templateId, key.key))
@@ -491,7 +490,6 @@ sealed abstract class HasTxNodes[Nid, +Cid] {
       case (acc, (_, _: Node.NodeRollback[_])) =>
         acc
     }
-  }
 
   /** Return the expected contract key inputs (i.e. the state before the transaction)
     * for this transaction or an error if the transaction contains a
@@ -521,7 +519,7 @@ sealed abstract class HasTxNodes[Nid, +Cid] {
       def setKeyMapping(
           key: GlobalKey,
           value: KeyInput,
-      ): Either[KeyInputError, State] = {
+      ): Either[KeyInputError, State] =
         (keyInputs.get(key), value) match {
           case (None, _) =>
             Right(copy(keyInputs = keyInputs.updated(key, value)))
@@ -530,7 +528,6 @@ sealed abstract class HasTxNodes[Nid, +Cid] {
           case (Some(KeyActive(_)), KeyCreate) => Left(DuplicateKeys(key))
           case _ => Right(this)
         }
-      }
       def assertKeyMapping(
           templateId: Identifier,
           cid: Value.ContractId,
@@ -634,7 +631,7 @@ sealed abstract class HasTxNodes[Nid, +Cid] {
     */
   final def updatedContractKeys(implicit
       ev: HasTxNodes[Nid, Cid] <:< HasTxNodes[_, Value.ContractId]
-  ): Map[GlobalKey, Option[Value.ContractId]] = {
+  ): Map[GlobalKey, Option[Value.ContractId]] =
     ev(this).foldInExecutionOrder(Map.empty[GlobalKey, Option[Value.ContractId]])(
       exerciseBegin = {
         case (acc, _, exec) if exec.consuming =>
@@ -657,7 +654,6 @@ sealed abstract class HasTxNodes[Nid, +Cid] {
       exerciseEnd = (acc, _, _) => acc,
       rollbackEnd = (acc, _, _) => acc,
     )
-  }
 
   // This method visits to all nodes of the transaction in execution order.
   // Exercise/rollback nodes are visited twice: when execution reaches them and when execution leaves their body.
@@ -742,7 +738,7 @@ sealed abstract class HasTxNodes[Nid, +Cid] {
   }
 
   // This method returns all node-ids reachable from the roots of a transaction.
-  final def reachableNodeIds: Set[Nid] = {
+  final def reachableNodeIds: Set[Nid] =
     foldInExecutionOrder[Set[Nid]](Set.empty)(
       (acc, nid, _) => (acc + nid, true),
       (acc, nid, _) => (acc + nid, true),
@@ -750,7 +746,6 @@ sealed abstract class HasTxNodes[Nid, +Cid] {
       (acc, _, _) => acc,
       (acc, _, _) => acc,
     )
-  }
 
   final def guessSubmitter: Either[String, Party] =
     rootNodes.map(_.requiredAuthorizers) match {

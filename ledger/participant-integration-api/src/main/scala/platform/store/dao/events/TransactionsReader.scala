@@ -300,12 +300,12 @@ private[dao] final class TransactionsReader(
     groupContiguous(events)(by = _.transactionId)
       .mapConcat(EventsTable.Entry.toGetActiveContractsResponse)
       .buffer(outputStreamBufferSize, OverflowStrategy.backpressure)
-      .wireTap(response => {
+      .wireTap { response =>
         Spans.addEventToSpan(
           telemetry.Event("contract", Map((SpanAttribute.Offset, response.offset))),
           span,
         )
-      })
+      }
       .watchTermination()(endSpanOnTermination(span))
   }
 

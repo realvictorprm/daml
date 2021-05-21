@@ -389,17 +389,16 @@ class PipelinedExecuteUpdate(
       loggingContextFor(pipelinedUpdate.offsetStep.offset, pipelinedUpdate.update)
     ) { implicit loggingContext =>
       Timed.future(
-        metrics.daml.indexer.stateUpdateProcessing, {
-          pipelinedUpdate match {
-            case OffsetUpdate.PreparedTransactionInsert(offsetStep, tx, _) =>
-              completeTransactionInsertion(
-                offsetStep,
-                tx,
-                timedPipelinedUpdate.transactionInsertionTimer,
-              )
-            case metadataUpdate =>
-              updateMetadata(metadataUpdate)
-          }
+        metrics.daml.indexer.stateUpdateProcessing,
+        pipelinedUpdate match {
+          case OffsetUpdate.PreparedTransactionInsert(offsetStep, tx, _) =>
+            completeTransactionInsertion(
+              offsetStep,
+              tx,
+              timedPipelinedUpdate.transactionInsertionTimer,
+            )
+          case metadataUpdate =>
+            updateMetadata(metadataUpdate)
         },
       )
     }

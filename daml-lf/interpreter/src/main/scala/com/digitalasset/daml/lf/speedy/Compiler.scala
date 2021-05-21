@@ -100,11 +100,11 @@ private[lf] object Compiler {
       compilerConfig: Compiler.Config,
   ): Either[String, Map[SDefinitionRef, SDefinition]] = {
     val compiler = new Compiler(signatures, compilerConfig)
-    try {
-      Right(packages.foldLeft(Map.empty[SDefinitionRef, SDefinition]) { case (acc, (pkgId, pkg)) =>
+    try Right(packages.foldLeft(Map.empty[SDefinitionRef, SDefinition]) {
+      case (acc, (pkgId, pkg)) =>
         acc ++ compiler.unsafeCompilePackage(pkgId, pkg)
-      })
-    } catch {
+    })
+    catch {
       case CompilationError(msg) => Left(s"Compilation Error: $msg")
       case PackageNotFound(pkgId) => Left(s"Package not found $pkgId")
       case e: ValidationError => Left(e.pretty)
@@ -132,12 +132,11 @@ private[lf] final class Compiler(
   import Compiler._
 
   // Stack-trace support is disabled by avoiding the construction of SELocation nodes.
-  private[this] def maybeSELocation(loc: Location, sexp: SExpr): SExpr = {
+  private[this] def maybeSELocation(loc: Location, sexp: SExpr): SExpr =
     config.stacktracing match {
       case NoStackTrace => sexp
       case FullStackTrace => SELocation(loc, sexp)
     }
-  }
 
   private[this] val logger = LoggerFactory.getLogger(this.getClass)
 
@@ -191,15 +190,13 @@ private[lf] final class Compiler(
 
   private[this] val withLabel: (Profile.Label, SExpr) => SExpr =
     config.profiling match {
-      case NoProfile => { (_, expr) =>
-        expr
-      }
-      case FullProfile => { (label, expr) =>
-        expr match {
-          case SELabelClosure(_, expr1) => SELabelClosure(label, expr1)
-          case _ => SELabelClosure(label, expr)
-        }
-      }
+      case NoProfile => (_, expr) => expr
+      case FullProfile =>
+        (label, expr) =>
+          expr match {
+            case SELabelClosure(_, expr1) => SELabelClosure(label, expr1)
+            case _ => SELabelClosure(label, expr)
+          }
     }
 
   private[this] def withOptLabel[L: Profile.LabelModule.Allowed](
@@ -951,7 +948,7 @@ private[lf] final class Compiler(
       cidPos: Position,
       mbKey: Option[Position], // defined for byKey operation
       tokenPos: Position,
-  ) = {
+  ) =
     let(
       SBUFetch(
         tmplId
@@ -964,11 +961,10 @@ private[lf] final class Compiler(
           svar(cidPos), {
             addExprVar(choice.argBinder._1, choiceArgPos)
             compile(choice.controllers)
-          }, {
-            choice.choiceObservers match {
-              case Some(observers) => compile(observers)
-              case None => SEValue.EmptyList
-            }
+          },
+          choice.choiceObservers match {
+            case Some(observers) => compile(observers)
+            case None => SEValue.EmptyList
           },
         )
       ) { _ =>
@@ -976,7 +972,6 @@ private[lf] final class Compiler(
         SEScopeExercise(app(compile(choice.update), svar(tokenPos)))
       }
     }
-  }
 
   private[this] def compileChoice(
       tmplId: TypeConName,

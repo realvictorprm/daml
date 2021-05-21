@@ -63,9 +63,8 @@ object ReqFieldLens {
         s: Witness.Aux[K]
     )(implicit
         mkFieldLens: MkFieldLens.Aux[C, K, Option[V]]
-    ): ReqFieldLens[C, V] = {
+    ): ReqFieldLens[C, V] =
       new ReqFieldLens[C, V](lens[C] >> s, s.value)
-    }
   }
 
   def create[C <: Product, V] = new Create[C, V]

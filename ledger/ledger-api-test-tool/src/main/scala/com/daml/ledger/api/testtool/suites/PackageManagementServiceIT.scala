@@ -36,13 +36,11 @@ final class PackageManagementServiceIT extends LedgerTestSuite {
   )(implicit ec => { case Participants(Participant(ledger)) =>
     for {
       failure <- ledger.uploadDarFile(ByteString.EMPTY).mustFail("uploading an empty package")
-    } yield {
-      assertGrpcError(
-        failure,
-        Status.Code.INVALID_ARGUMENT,
-        "Invalid argument: Invalid DAR: package-upload",
-      )
-    }
+    } yield assertGrpcError(
+      failure,
+      Status.Code.INVALID_ARGUMENT,
+      "Invalid argument: Invalid DAR: package-upload",
+    )
   })
 
   test(

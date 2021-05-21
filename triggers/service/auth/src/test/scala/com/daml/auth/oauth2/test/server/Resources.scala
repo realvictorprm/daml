@@ -15,11 +15,10 @@ import scala.concurrent.Future
 object Resources {
   def clock(start: Instant, zoneId: ZoneId): ResourceOwner[AdjustableClock] =
     new ResourceOwner[AdjustableClock] {
-      override def acquire()(implicit context: ResourceContext): Resource[AdjustableClock] = {
+      override def acquire()(implicit context: ResourceContext): Resource[AdjustableClock] =
         Resource(Future(AdjustableClock(Clock.fixed(start, zoneId), Duration.ZERO)))(_ =>
           Future(())
         )
-      }
     }
   def authServerBinding(server: Server)(implicit sys: ActorSystem): ResourceOwner[ServerBinding] =
     new ResourceOwner[ServerBinding] {

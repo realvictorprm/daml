@@ -47,10 +47,9 @@ object Dependencies {
     go(references, Map.empty)
   }
 
-  def targetLfVersion(dalfs: Iterable[LanguageVersion]): Option[LanguageVersion] = {
+  def targetLfVersion(dalfs: Iterable[LanguageVersion]): Option[LanguageVersion] =
     if (dalfs.isEmpty) { None }
     else { Some(dalfs.max) }
-  }
 
   def targetFlag(v: LanguageVersion): String =
     s"--target=${v.pretty}"
@@ -61,11 +60,8 @@ object Dependencies {
       bs: ByteString,
   ): Unit = {
     val os = new FileOutputStream(file.toFile)
-    try {
-      encodeDalf(pkgId, bs).writeTo(os)
-    } finally {
-      os.close()
-    }
+    try encodeDalf(pkgId, bs).writeTo(os)
+    finally os.close()
   }
 
   private def encodeDalf(pkgId: PackageId, bs: ByteString) =
@@ -86,10 +82,9 @@ object Dependencies {
   def toPackages(
       mainId: PackageId,
       pkgs: Map[PackageId, (ByteString, Ast.Package)],
-  ): Option[String] = {
+  ): Option[String] =
     for {
       main <- pkgs.get(mainId) if !isProvidedLibrary(main._2)
       md <- main._2.metadata
     } yield s"${md.name}-${md.version}"
-  }
 }

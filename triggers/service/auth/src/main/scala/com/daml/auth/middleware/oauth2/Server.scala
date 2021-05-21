@@ -55,17 +55,15 @@ class Server(config: Config) extends StrictLogging {
   }
 
   // Check whether the provided token's signature is valid.
-  private def tokenIsValid(accessToken: String, verifier: JwtVerifierBase): Boolean = {
+  private def tokenIsValid(accessToken: String, verifier: JwtVerifierBase): Boolean =
     verifier.verify(Jwt(accessToken)).isRight
-  }
 
   // Check whether the provided access token grants at least the requested claims.
   private def tokenProvidesClaims(accessToken: String, claims: Request.Claims): Boolean = {
     for {
       decodedJwt <- JwtDecoder.decode(Jwt(accessToken)).toOption
       tokenPayload <- AuthServiceJWTCodec.readFromString(decodedJwt.payload).toOption
-    } yield {
-      (tokenPayload.admin || !claims.admin) &&
+    } yield (tokenPayload.admin || !claims.admin) &&
       tokenPayload.actAs.toSet.subsetOf(claims.actAs.map(_.toString).toSet) &&
       tokenPayload.readAs.toSet.subsetOf(claims.readAs.map(_.toString).toSet) &&
       ((claims.applicationId, tokenPayload.applicationId) match {
@@ -75,7 +73,6 @@ class Server(config: Config) extends StrictLogging {
         case (_, None) => true
         case (Some(expectedAppId), Some(actualAppId)) => expectedAppId == ApplicationId(actualAppId)
       })
-    }
   }.getOrElse(false)
 
   private val requestTemplates: RequestTemplates = RequestTemplates(
@@ -155,7 +152,7 @@ class Server(config: Config) extends StrictLogging {
         }
       }
 
-  private val loginCallback: Route = {
+  private val loginCallback: Route =
     extractActorSystem { implicit sys =>
       extractExecutionContext { implicit ec =>
         def popRequest(optState: Option[String]): Directive1[Option[Uri]] = {
@@ -248,9 +245,8 @@ class Server(config: Config) extends StrictLogging {
         )
       }
     }
-  }
 
-  private val refresh: Route = {
+  private val refresh: Route =
     extractActorSystem { implicit sys =>
       extractExecutionContext { implicit ec =>
         entity(as[Request.Refresh]) { refresh =>
@@ -291,7 +287,6 @@ class Server(config: Config) extends StrictLogging {
         }
       }
     }
-  }
 
   def route: Route = concat(
     path("auth") {

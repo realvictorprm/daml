@@ -72,29 +72,25 @@ trait ExtractorFixture extends SandboxFixture with PostgresAroundSuite with Type
     getResultList[TransactionResult](sql"SELECT * FROM transaction")
   }
 
-  protected def getContracts: List[ContractResult] = {
+  protected def getContracts: List[ContractResult] =
     getResultList[ContractResult](sql"SELECT * FROM contract")
-  }
 
-  protected def getExercises: List[ExerciseResult] = {
+  protected def getExercises: List[ExerciseResult] =
     getResultList[ExerciseResult](sql"SELECT * FROM exercise")
-  }
 
-  protected def getResultList[R: Read](sql: Fragment)(implicit xa: Transactor[IO]): List[R] = {
+  protected def getResultList[R: Read](sql: Fragment)(implicit xa: Transactor[IO]): List[R] =
     sql
       .query[R]
       .to[List]
       .transact(xa)
       .unsafeRunSync()
-  }
 
-  protected def getResultOption[R: Read](sql: Fragment)(implicit xa: Transactor[IO]): Option[R] = {
+  protected def getResultOption[R: Read](sql: Fragment)(implicit xa: Transactor[IO]): Option[R] =
     sql
       .query[R]
       .option
       .transact(xa)
       .unsafeRunSync()
-  }
 
   protected var extractor: Extractor[PostgreSQLTarget] = _
 

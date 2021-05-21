@@ -108,7 +108,7 @@ private[apiserver] final class ApiPartyManagementService private (
         }
 
       validatedPartyIdentifier
-        .flatMap(party => {
+        .flatMap { party =>
           val displayName = if (request.displayName.isEmpty) None else Some(request.displayName)
           synchronousResponse
             .submitAndWait(submissionIdGenerator(party), (party, displayName))
@@ -123,7 +123,7 @@ private[apiserver] final class ApiPartyManagementService private (
                 )
               )
             }
-        })
+        }
         .andThen(logger.logErrorsOnCall[AllocatePartyResponse])
     }
 

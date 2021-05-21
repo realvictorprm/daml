@@ -65,9 +65,8 @@ final class AuthSpec
 
   override protected def afterAll(): Unit = {
     super.afterAll()
-    try {
-      Files.delete(accessTokenFile)
-    } catch {
+    try Files.delete(accessTokenFile)
+    catch {
       case NonFatal(e) =>
         LoggerFactory.getLogger(classOf[AuthSpec]).warn("Unable to delete temporary token file", e)
     }
@@ -125,7 +124,7 @@ final class AuthSpec
 
           override def handleTransaction(
               transaction: TransactionTree
-          ): Future[Writer.RefreshPackages \/ Unit] = {
+          ): Future[Writer.RefreshPackages \/ Unit] =
             Future.successful {
               \/.right {
                 lastOffset.set {
@@ -134,7 +133,6 @@ final class AuthSpec
                 }
               }
             }
-          }
           override def getLastOffset: Future[Option[String]] =
             Future.successful(Option(lastOffset.get()))
         }

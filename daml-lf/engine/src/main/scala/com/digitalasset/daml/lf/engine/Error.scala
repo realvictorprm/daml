@@ -19,9 +19,8 @@ sealed trait Error {
 
 object Error {
 
-  def withError[A](e: Error)(optional: Option[A]): Either[Error, A] = {
+  def withError[A](e: Error)(optional: Option[A]): Either[Error, A] =
     optional.fold[Either[Error, A]](Left(e))(v => Right(v))
-  }
 
   /** small conversion from option to either error with specific error */
   implicit class optionError[A](o: Option[A]) {

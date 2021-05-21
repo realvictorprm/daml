@@ -25,17 +25,16 @@ import scala.concurrent.Future
 object Resources {
   def clock(start: Instant, zoneId: ZoneId): ResourceOwner[AdjustableClock] =
     new ResourceOwner[AdjustableClock] {
-      override def acquire()(implicit context: ResourceContext): Resource[AdjustableClock] = {
+      override def acquire()(implicit context: ResourceContext): Resource[AdjustableClock] =
         Resource(Future(AdjustableClock(Clock.fixed(start, zoneId), Duration.ZERO)))(_ =>
           Future(())
         )
-      }
     }
   def temporaryDirectory(): ResourceOwner[File] =
     new ResourceOwner[File] {
       override def acquire()(implicit context: ResourceContext): Resource[File] =
         Resource(Future(Files.createTempDirectory("daml-oauth2-middleware").toFile))(dir =>
-          Future(discard { dir.delete() })
+          Future(discard(dir.delete()))
         )
     }
   def authServerBinding(
@@ -100,7 +99,7 @@ object Resources {
                     }
                   }
                 },
-                path("cb") { get { client.callbackHandler } },
+                path("cb")(get(client.callbackHandler)),
               )
             }
         } {

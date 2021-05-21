@@ -26,7 +26,7 @@ class InMemoryLedgerReader(
           .map(OffsetBuilder.highestIndex(_).toInt)
           .getOrElse(StartIndex),
         RangeSource((startExclusive, endInclusive) =>
-          Source.fromIterator(() => {
+          Source.fromIterator { () =>
             Timed.value(
               metrics.daml.ledger.log.read,
               state
@@ -35,7 +35,7 @@ class InMemoryLedgerReader(
                 )
                 .iterator,
             )
-          })
+          }
         ),
       )
       .map { case (_, updates) => updates }

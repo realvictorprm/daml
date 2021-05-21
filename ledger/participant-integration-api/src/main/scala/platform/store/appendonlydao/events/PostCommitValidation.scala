@@ -98,14 +98,14 @@ private[appendonlydao] object PostCommitValidation {
     ): Option[RejectionReason] =
       maximumLedgerEffectiveTime
         .filter(_.isAfter(transactionLedgerEffectiveTime))
-        .fold(Option.empty[RejectionReason])(contractLedgerEffectiveTime => {
+        .fold(Option.empty[RejectionReason]) { contractLedgerEffectiveTime =>
           Some(
             CausalMonotonicityViolation(
               contractLedgerEffectiveTime = contractLedgerEffectiveTime,
               transactionLedgerEffectiveTime = transactionLedgerEffectiveTime,
             )
           )
-        })
+        }
 
     private def validateParties(
         transaction: CommittedTransaction
@@ -121,9 +121,8 @@ private[appendonlydao] object PostCommitValidation {
     private def collectReferredContracts(
         transaction: CommittedTransaction,
         divulged: Set[ContractId],
-    ): Set[ContractId] = {
+    ): Set[ContractId] =
       transaction.inputContracts.diff(divulged)
-    }
 
     private def validateKeyUsages(
         transaction: CommittedTransaction

@@ -12,9 +12,8 @@ object StandaloneMain extends StrictLogging {
 
   @deprecated("Use codegen font-end: com.daml.codegen.CodegenMain.main", "0.13.23")
   def main(args: Array[String]): Unit =
-    try {
-      Main.main(args)
-    } catch {
+    try Main.main(args)
+    catch {
       case NonFatal(t) =>
         logger.error(s"Error generating code: {}", t.getMessage)
         sys.exit(-1)

@@ -33,10 +33,10 @@ object TransactionGenerator {
 
   val nonEmptyId: Gen[String] = Gen
     .nonEmptyListOf(Arbitrary.arbChar.arbitrary)
-    .map(s => {
+    .map { s =>
       if (s.mkString.equals("")) { throw new IllegalStateException() }
       s.mkString
-    })
+    }
 
   val timestampGen: Gen[(ScalaTimestamp, Instant)] = for {
     seconds <- Gen.posNum[Long]
@@ -59,12 +59,10 @@ object TransactionGenerator {
     for {
       label <- if (withLabel) nonEmptyId else Gen.const("")
       (scalaValue, javaValue) <- valueGen(height)
-    } yield {
-      (
-        RecordField(label, Some(scalaValue)),
-        if (withLabel) new data.Record.Field(label, javaValue) else new data.Record.Field(javaValue),
-      )
-    }
+    } yield (
+      RecordField(label, Some(scalaValue)),
+      if (withLabel) new data.Record.Field(label, javaValue) else new data.Record.Field(javaValue),
+    )
 
   def recordGen(height: Int): Gen[(Record, data.Record)] =
     for {

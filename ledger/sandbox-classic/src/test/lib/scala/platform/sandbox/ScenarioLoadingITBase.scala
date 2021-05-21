@@ -52,9 +52,8 @@ abstract class ScenarioLoadingITBase
   private def submitRequest(request: SubmitAndWaitRequest) =
     newSyncClient.submitAndWait(request)
 
-  private def newTransactionClient(ledgerId: LedgerId): TransactionClient = {
+  private def newTransactionClient(ledgerId: LedgerId): TransactionClient =
     new TransactionClient(ledgerId, TransactionServiceGrpc.stub(channel))
-  }
 
   private def getSnapshot(transactionFilter: TransactionFilter = allTemplatesForParty) =
     newACClient(ledgerId())

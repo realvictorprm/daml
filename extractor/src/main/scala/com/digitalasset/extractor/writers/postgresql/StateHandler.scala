@@ -59,9 +59,8 @@ object StateHandler {
   // and deal with backward compatibility specifically
   val version = 1
 
-  def init(): ConnectionIO[Unit] = {
+  def init(): ConnectionIO[Unit] =
     createStateTable.update.run.void
-  }
 
   def saveStatus(
       ledgerId: String,
@@ -81,23 +80,20 @@ object StateHandler {
       setState("statusVersion", version.toString).update.run.void
   }
 
-  def retrieveStatus: ConnectionIO[Option[String \/ Status]] = {
+  def retrieveStatus: ConnectionIO[Option[String \/ Status]] =
     (for {
       version <- OptionT(getState("statusVersion").query[Int].option)
       statusString <- OptionT(getState("currentStatus").query[String].option)
-    } yield {
-      version match {
-        case 1 => decodeStatus(statusString)
-        case _ =>
-          "Invalid version found in the `state` table. The table's content is probably tempered with.".left
-      }
+    } yield version match {
+      case 1 => decodeStatus(statusString)
+      case _ =>
+        "Invalid version found in the `state` table. The table's content is probably tempered with.".left
     }).value
-  }
 
   private def extractStartUpParams(
       config: ExtractorConfig,
       target: PostgreSQLTarget,
-  ): StartUpParameters = {
+  ): StartUpParameters =
     StartUpParameters(
       target.copy(connectUrl = "**masked**", user = "**masked**", password = "**masked**"),
       config.from,
@@ -105,11 +101,9 @@ object StateHandler {
       config.partySpec,
       config.templateConfigs.toList.sorted,
     )
-  }
 
-  private def decodeStatus(json: String): String \/ Status = {
+  private def decodeStatus(json: String): String \/ Status =
     decode[Status](json).fold(e => -\/(e.toString), \/.right)
-  }
 
   def validateArgumentsAgainstStatus(
       previousStatus: Status,
@@ -169,22 +163,20 @@ object StateHandler {
     )
   }
 
-  private def validate[A](previous: A, current: A, error: => String): String \/ Unit = {
+  private def validate[A](previous: A, current: A, error: => String): String \/ Unit =
     if (previous != current) {
       error.left
     } else {
       ().right
     }
-  }
 
-  private def validateParam[A](previous: A, current: A, name: String): String \/ Unit = {
+  private def validateParam[A](previous: A, current: A, name: String): String \/ Unit =
     validate(
       previous,
       current,
       s"The current ${name} parameter `${current}` is not equal " +
         s"to the one that was used when extraction started: `${previous}`",
     )
-  }
 
   private def validateLedgerId(previous: String, current: String): String \/ Unit =
     validate(

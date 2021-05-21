@@ -192,14 +192,12 @@ final private[kvutils] class PackageCommitter(
 
       archives
         .foldLeft[Result](Right(Map.empty)) { (acc, arch) =>
-          try {
-            if (knownPackages(arch.getHash)) {
-              // If the package is already known by the engine, we don't decode it but still verify its hash.
-              lf.archive.Reader.HashChecker.decodeArchive(arch)
-              acc
-            } else {
-              acc.map(_ + lf.archive.Decode.decodeArchive(arch))
-            }
+          try if (knownPackages(arch.getHash)) {
+            // If the package is already known by the engine, we don't decode it but still verify its hash.
+            lf.archive.Reader.HashChecker.decodeArchive(arch)
+            acc
+          } else {
+            acc.map(_ + lf.archive.Decode.decodeArchive(arch))
           } catch {
             case NonFatal(e) =>
               Left(

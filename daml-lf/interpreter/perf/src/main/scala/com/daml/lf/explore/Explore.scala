@@ -43,17 +43,16 @@ object PlaySpeedy {
       names: List[String]
   )
 
-  def usage(): Unit = {
+  def usage(): Unit =
     println("""
      |usage: explore [EXAMPLES]
      |default: run all known examples
     """.stripMargin)
-  }
 
   def parseArgs(args0: List[String]): Config = {
     var names: List[String] = Nil
     def loop(args: List[String]): Unit = args match {
-      case Nil => {}
+      case Nil =>
       case "-h" :: _ => usage()
       case "--help" :: _ => usage()
       case name :: args =>

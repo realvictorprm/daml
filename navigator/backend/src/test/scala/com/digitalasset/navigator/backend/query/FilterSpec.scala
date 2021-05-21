@@ -44,11 +44,10 @@ class FilterSpec extends AnyFlatSpec with Matchers {
     "choices.call.parameter.fOptionalText" -> "optional",
   ).map((PropertyCursor.fromString _).first)
 
-  for ((cursor, expectedValue) <- templateTests) {
+  for ((cursor, expectedValue) <- templateTests)
     "templateFilter" should s"match the input $expectedValue in path $cursor for template $template" in {
       templateFilter.run(template, cursor, expectedValue, C.allTypes.get) shouldEqual Right(true)
     }
-  }
 
   val contractTests = Seq(
     "id" -> contractId.unwrap,
@@ -64,11 +63,10 @@ class FilterSpec extends AnyFlatSpec with Matchers {
     "argument.fOptOptText.Some.Some" -> "foo",
   ).map((PropertyCursor.fromString _).first)
 
-  for ((cursor, expectedValue) <- contractTests) {
+  for ((cursor, expectedValue) <- contractTests)
     "contractFilter" should s"match the input $expectedValue in path $cursor for template $template" in {
       contractFilter.run(contract, cursor, expectedValue, C.allTypes.get) shouldEqual Right(true)
     }
-  }
 
   val commandTests = Seq(
     "id" -> command.id.unwrap,
@@ -77,9 +75,8 @@ class FilterSpec extends AnyFlatSpec with Matchers {
     "index" -> command.index.toString,
   ).map((PropertyCursor.fromString _).first)
 
-  for ((cursor, expectedValue) <- commandTests) {
+  for ((cursor, expectedValue) <- commandTests)
     "commandFilter" should s"match the input $expectedValue in path $cursor for command $command" in {
       commandFilter.run(command, cursor, expectedValue, C.allTypes.get) shouldEqual Right(true)
     }
-  }
 }

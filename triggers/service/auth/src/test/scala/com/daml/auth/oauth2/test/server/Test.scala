@@ -131,46 +131,34 @@ class Test extends AsyncWordSpec with TestFixture with SuiteResourceManagementAr
     "issue a token with no parties" in {
       for {
         (token, _) <- expectToken(Seq())
-      } yield {
-        assert(token.actAs == Seq())
-      }
+      } yield assert(token.actAs == Seq())
     }
     "issue a token with 1 party" in {
       for {
         (token, _) <- expectToken(Seq("Alice"))
-      } yield {
-        assert(token.actAs == Seq("Alice"))
-      }
+      } yield assert(token.actAs == Seq("Alice"))
     }
     "issue a token with multiple parties" in {
       for {
         (token, _) <- expectToken(Seq("Alice", "Bob"))
-      } yield {
-        assert(token.actAs == Seq("Alice", "Bob"))
-      }
+      } yield assert(token.actAs == Seq("Alice", "Bob"))
     }
     "deny access to unauthorized parties" in {
       server.revokeParty(Party("Eve"))
       for {
         error <- expectError(Seq("Alice", "Eve"))
-      } yield {
-        assert(error == "access_denied")
-      }
+      } yield assert(error == "access_denied")
     }
     "issue a token with admin access" in {
       for {
         (token, _) <- expectToken(Seq(), admin = true)
-      } yield {
-        assert(token.admin)
-      }
+      } yield assert(token.admin)
     }
     "deny admin access if unauthorized" in {
       server.revokeAdmin()
       for {
         error <- expectError(Seq(), admin = true)
-      } yield {
-        assert(error == "access_denied")
-      }
+      } yield assert(error == "access_denied")
     }
     "refresh a token" in {
       for {
@@ -185,16 +173,12 @@ class Test extends AsyncWordSpec with TestFixture with SuiteResourceManagementAr
     "return a token with the requested app id" in {
       for {
         (token, __) <- expectToken(Seq(), applicationId = Some("my-app-id"))
-      } yield {
-        assert(token.applicationId == Some("my-app-id"))
-      }
+      } yield assert(token.applicationId == Some("my-app-id"))
     }
     "return a token with no app id if non is requested" in {
       for {
         (token, __) <- expectToken(Seq(), applicationId = None)
-      } yield {
-        assert(token.applicationId == None)
-      }
+      } yield assert(token.applicationId == None)
     }
   }
 }

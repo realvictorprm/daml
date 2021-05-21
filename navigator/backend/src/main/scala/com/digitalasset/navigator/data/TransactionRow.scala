@@ -18,7 +18,7 @@ final case class TransactionRow(
     offset: String,
 ) {
 
-  def toTransaction(events: List[Event]): Transaction = {
+  def toTransaction(events: List[Event]): Transaction =
     Transaction(
       ApiTypes.TransactionId(id),
       commandId.map(ApiTypes.CommandId(_)),
@@ -26,12 +26,11 @@ final case class TransactionRow(
       offset,
       events,
     )
-  }
 }
 
 object TransactionRow {
 
-  def fromTransaction(tx: Transaction): TransactionRow = {
+  def fromTransaction(tx: Transaction): TransactionRow =
     TransactionRow(
       None,
       tx.id.unwrap,
@@ -39,5 +38,4 @@ object TransactionRow {
       tx.effectiveAt.toString,
       tx.offset,
     )
-  }
 }

@@ -58,7 +58,7 @@ trait TestFixture
             clientSecret = "test-client-secret",
           )
         )
-      } yield { (clock, server, serverBinding, clientBinding) }
+      } yield (clock, server, serverBinding, clientBinding)
     )
   }
 

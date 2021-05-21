@@ -33,9 +33,8 @@ final class BackStack[+A] private (fq: BQ[A], val length: Int) {
         array(cursor) = last
         go(cursor - 1, init)
       case BQAppend(init, last) =>
-        for (i <- last.indices) {
+        for (i <- last.indices)
           array(cursor - i) = last(last.length - 1 - i)
-        }
         go(cursor - last.length, init)
     }
 
@@ -57,7 +56,7 @@ final class BackStack[+A] private (fq: BQ[A], val length: Int) {
   }
 
   /** O(1) */
-  def pop: Option[(BackStack[A], A)] = {
+  def pop: Option[(BackStack[A], A)] =
     if (length > 0) {
       fq match {
         case BQEmpty => throw new RuntimeException(s"BackQueue has length $length but BQEmpty.")
@@ -74,12 +73,10 @@ final class BackStack[+A] private (fq: BQ[A], val length: Int) {
     } else {
       None
     }
-  }
 
   /** O(n) */
-  def map[B](f: A => B): BackStack[B] = {
+  def map[B](f: A => B): BackStack[B] =
     BackStack(this.toImmArray.map(f))
-  }
 
   /** O(1) */
   def isEmpty: Boolean = length == 0

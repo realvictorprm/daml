@@ -223,20 +223,18 @@ final class Conversions(
     builder.build
   }
 
-  def convertGlobalKey(globalKey: GlobalKey): proto.GlobalKey = {
+  def convertGlobalKey(globalKey: GlobalKey): proto.GlobalKey =
     proto.GlobalKey.newBuilder
       .setTemplateId(convertIdentifier(globalKey.templateId))
       .setKey(convertValue(globalKey.key))
       .build
-  }
 
   def convertSValue(svalue: SValue): proto.Value = {
     def unserializable(what: String): proto.Value =
       proto.Value.newBuilder.setUnserializable(what).build
-    try {
-      convertValue(svalue.toValue)
-    } catch {
-      case _: SError.SErrorCrash => {
+    try convertValue(svalue.toValue)
+    catch {
+      case _: SError.SErrorCrash =>
         // We cannot rely on serializability information since we do not have that available in the IDE.
         // We also cannot simply pattern match on SValue since the unserializable values can be nested, e.g.,
         // a function ina record.
@@ -244,7 +242,6 @@ final class Conversions(
         // encounter an unserializable type but that doesn’t seem worth the effort, especially
         // given that the error would still be on speedy expressions.
         unserializable("Unserializable scenario result")
-      }
     }
   }
 
@@ -397,7 +394,7 @@ final class Conversions(
 
   def convertTransaction(
       rtx: ScenarioLedger.RichTransaction
-  ): proto.Transaction = {
+  ): proto.Transaction =
     proto.Transaction.newBuilder
       .addAllActAs(rtx.actAs.map(convertParty(_)).asJava)
       .addAllReadAs(rtx.readAs.map(convertParty(_)).asJava)
@@ -408,7 +405,6 @@ final class Conversions(
         proto.FailedAuthorizations.newBuilder.build
       )
       .build
-  }
 
   def convertPartialTransaction(ptx: SPartialTransaction): proto.PartialTransaction = {
     val builder = proto.PartialTransaction.newBuilder
@@ -532,13 +528,12 @@ final class Conversions(
 
   def convertKeyWithMaintainers(
       key: N.KeyWithMaintainers[V.VersionedValue[V.ContractId]]
-  ): proto.KeyWithMaintainers = {
+  ): proto.KeyWithMaintainers =
     proto.KeyWithMaintainers
       .newBuilder()
       .setKey(convertVersionedValue(key.key))
       .addAllMaintainers(key.maintainers.map(convertParty).asJava)
       .build()
-  }
 
   def convertNode(
       nodeWithId: (NodeId, N.GenNode[NodeId, V.ContractId])
@@ -607,12 +602,12 @@ final class Conversions(
 
       case lookup: N.NodeLookupByKey[V.ContractId] =>
         lookup.optLocation.map(loc => builder.setLocation(convertLocation(loc)))
-        builder.setLookupByKey({
+        builder.setLookupByKey {
           val builder = proto.Node.LookupByKey.newBuilder
             .setKeyWithMaintainers(convertKeyWithMaintainers(lookup.versionedKey))
           lookup.result.foreach(cid => builder.setContractId(coidToEventId(cid).toLedgerString))
           builder.build
-        })
+        }
     }
     builder.build
   }

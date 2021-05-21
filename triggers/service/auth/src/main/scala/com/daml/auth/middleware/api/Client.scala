@@ -53,7 +53,7 @@ class Client(config: Client.Config) {
         case None =>
           complete(StatusCodes.NotFound)
         case Some(callback) =>
-          Response.Login.callbackParameters { callback }
+          Response.Login.callbackParameters(callback)
       }
     }
 
@@ -92,7 +92,7 @@ class Client(config: Client.Config) {
     *     once the login flow completed and authentication succeeded.
     *     A route for the [[callbackHandler]] must be configured.
     */
-  def authorize(claims: Request.Claims): Directive1[Client.AuthorizeResult] = {
+  def authorize(claims: Request.Claims): Directive1[Client.AuthorizeResult] =
     auth(claims).flatMap {
       // Authorization successful - pass token to continuation
       case Some(authorization) => provide(Client.Authorized(authorization))
@@ -126,7 +126,6 @@ class Client(config: Client.Config) {
           }
           .or(unauthorized(claims))
     }
-  }
 
   /** This directive attempts to obtain an access token from the middleware's auth endpoint for the given claims.
     *

@@ -20,9 +20,7 @@ final class ExceptionsIT extends LedgerTestSuite {
     for {
       t <- ledger.create(party, ExceptionTester(party))
       failure <- ledger.exercise(party, t.exerciseThrowUncaught(_)).mustFail("unhandled exception")
-    } yield {
-      assertGrpcError(failure, Status.Code.INVALID_ARGUMENT, "unhandled exception")
-    }
+    } yield assertGrpcError(failure, Status.Code.INVALID_ARGUMENT, "unhandled exception")
   })
 
   test(
@@ -66,9 +64,7 @@ final class ExceptionsIT extends LedgerTestSuite {
       failure <- ledger
         .exercise(party, t.exerciseRollbackFetch(_, tFetch))
         .mustFail("contract is archived")
-    } yield {
-      assertGrpcError(failure, Status.Code.ABORTED, "Contract could not be found")
-    }
+    } yield assertGrpcError(failure, Status.Code.ABORTED, "Contract could not be found")
   })
 
   test(
@@ -84,9 +80,7 @@ final class ExceptionsIT extends LedgerTestSuite {
       failure <- ledger
         .exercise(party, t.exerciseRollbackConsuming(_, tExercise))
         .mustFail("contract is archived")
-    } yield {
-      assertGrpcError(failure, Status.Code.ABORTED, "Contract could not be found")
-    }
+    } yield assertGrpcError(failure, Status.Code.ABORTED, "Contract could not be found")
   })
 
   test(
@@ -102,9 +96,7 @@ final class ExceptionsIT extends LedgerTestSuite {
       failure <- ledger
         .exercise(party, t.exerciseRollbackNonConsuming(_, tExercise))
         .mustFail("contract is archived")
-    } yield {
-      assertGrpcError(failure, Status.Code.ABORTED, "Contract could not be found")
-    }
+    } yield assertGrpcError(failure, Status.Code.ABORTED, "Contract could not be found")
   })
 
   test(
@@ -152,9 +144,7 @@ final class ExceptionsIT extends LedgerTestSuite {
       _ <- ledger.exercise(party, t.exerciseDuplicateKey(_))
       _ <- ledger.create(party, WithKey(party))
       failure <- ledger.exercise(party, t.exerciseDuplicateKey(_)).mustFail("duplicate key")
-    } yield {
-      assertGrpcError(failure, Status.Code.ABORTED, "DuplicateKey")
-    }
+    } yield assertGrpcError(failure, Status.Code.ABORTED, "DuplicateKey")
   })
 
   test(

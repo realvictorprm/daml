@@ -51,9 +51,7 @@ final class PackageServiceIT extends LedgerTestSuite {
       failure <- ledger
         .getPackage(unknownPackageId)
         .mustFail("getting the contents of an unknown package")
-    } yield {
-      assertGrpcError(failure, Status.Code.NOT_FOUND, "")
-    }
+    } yield assertGrpcError(failure, Status.Code.NOT_FOUND, "")
   })
 
   test(
@@ -64,9 +62,7 @@ final class PackageServiceIT extends LedgerTestSuite {
     for {
       somePackageId <- ledger.listPackages().map(_.headOption.getOrElse(fail("No package found")))
       status <- ledger.getPackageStatus(somePackageId)
-    } yield {
-      assert(status.isRegistered, s"Package $somePackageId is not registered.")
-    }
+    } yield assert(status.isRegistered, s"Package $somePackageId is not registered.")
   })
 
   test(
@@ -76,8 +72,6 @@ final class PackageServiceIT extends LedgerTestSuite {
   )(implicit ec => { case Participants(Participant(ledger)) =>
     for {
       status <- ledger.getPackageStatus(unknownPackageId)
-    } yield {
-      assert(status.isUnknown, s"Package $unknownPackageId is not unknown.")
-    }
+    } yield assert(status.isUnknown, s"Package $unknownPackageId is not unknown.")
   })
 }

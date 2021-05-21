@@ -320,10 +320,9 @@ private[migration] class V2_1__Rebuild_Acs extends BaseJavaMigration {
             this
           }
 
-          override def addParties(parties: Set[Party]): AcsStoreAcc = {
+          override def addParties(parties: Set[Party]): AcsStoreAcc =
             // Implemented in a future migration
             this
-          }
 
           override def divulgeAlreadyCommittedContracts(
               transactionId: TransactionId,
@@ -432,7 +431,7 @@ private[migration] class V2_1__Rebuild_Acs extends BaseJavaMigration {
       "ledger_offset",
     )
 
-  private val DisclosureParser = (eventId("event_id") ~ party("party") map (flatten))
+  private val DisclosureParser = eventId("event_id") ~ party("party") map flatten
 
   private def toLedgerEntry(
       parsedEntry: ParsedEntry
@@ -504,7 +503,7 @@ private[migration] class V2_1__Rebuild_Acs extends BaseJavaMigration {
     ~ date("recorded_at")
     ~ binaryStream("contract")
     ~ binaryStream("key").?
-    ~ binaryStream("transaction") map (flatten))
+    ~ binaryStream("transaction") map flatten)
 
   private val SQL_SELECT_CONTRACT_LET =
     SQL(
@@ -565,9 +564,9 @@ private[migration] class V2_1__Rebuild_Acs extends BaseJavaMigration {
   override def migrate(context: Context): Unit = {
     implicit val connection: Connection = context.getConnection
 
-    lookupLedgerEnd().fold({
+    lookupLedgerEnd().fold {
       logger.info(s"No ledger end found, assuming empty database. Skipping migration.")
-    })(ledgerEnd => {
+    } { ledgerEnd =>
       // Instead of throwing away all ACS data and recomputing it, we could only fill the new contract_divulgences
       // table. However, it seems safer to reuse the tested ACS implementation from PostgresLedgerDao to
       // recompute the entire ACS.
@@ -580,14 +579,13 @@ private[migration] class V2_1__Rebuild_Acs extends BaseJavaMigration {
 
       // The database might contain a large number of ledger entries, more than fits into memory.
       // Process them one by one, even if this is inefficient.
-      for (offset <- 0L to ledgerEnd) {
+      for (offset <- 0L to ledgerEnd)
         lookupLedgerEntry(offset)
           .collect { case tx: LedgerEntry.Transaction => tx }
-          .foreach(tx => {
+          .foreach { tx =>
             val blindingInfo = Blinding.blind(tx.transaction)
             updateActiveContractSet(offset, tx, blindingInfo.divulgence)
-          })
-      }
-    })
+          }
+    }
   }
 }

@@ -33,9 +33,8 @@ object Time {
     private val formatter: DateTimeFormatter =
       DateTimeFormatter.ISO_DATE.withZone(ZoneId.of("Z"))
 
-    private def assertDaysFromString(str: String) = {
+    private def assertDaysFromString(str: String) =
       asInt(formatter.parse(str).getLong(ChronoField.EPOCH_DAY)).fold(sys.error, identity)
-    }
 
     private[lf] def asInt(days: Long): Either[String, Int] = {
       val daysI = days.toInt

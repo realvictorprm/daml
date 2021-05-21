@@ -106,9 +106,7 @@ final class CommandStaticTimeIT
                 )
               )
             )
-        } yield {
-          completion.status.value.code should be(Status.OK.getCode.value())
-        }
+        } yield completion.status.value.code should be(Status.OK.getCode.value())
       }
 
     }

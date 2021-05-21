@@ -41,28 +41,22 @@ abstract class BenchmarkWithLedgerExport {
       Envelope.open(envelope).fold(sys.error, identity) match {
         case Envelope.SubmissionMessage(submission)
             if submission.getPayloadCase == DamlSubmission.PayloadCase.PACKAGE_UPLOAD_ENTRY =>
-          for (archive <- submission.getPackageUploadEntry.getArchivesList.asScala) {
+          for (archive <- submission.getPackageUploadEntry.getArchivesList.asScala)
             builder += Decode.decodeArchive(archive)
-          }
         case Envelope.SubmissionMessage(submission)
             if submission.getPayloadCase == DamlSubmission.PayloadCase.TRANSACTION_ENTRY =>
           builder += submission.getTransactionEntry.getTransaction
         case Envelope.SubmissionBatchMessage(batch) =>
-          for (submission <- batch.getSubmissionsList.asScala) {
+          for (submission <- batch.getSubmissionsList.asScala)
             decodeEnvelope(Raw.Envelope(submission.getSubmission))
-          }
         case _ =>
           ()
       }
 
     val importer = ProtobufBasedLedgerDataImporter(source)
-    try {
-      for ((submissionInfo, _) <- importer.read()) {
-        decodeEnvelope(submissionInfo.submissionEnvelope)
-      }
-    } finally {
-      importer.close()
-    }
+    try for ((submissionInfo, _) <- importer.read())
+      decodeEnvelope(submissionInfo.submissionEnvelope)
+    finally importer.close()
 
     submissions = builder.result()
   }

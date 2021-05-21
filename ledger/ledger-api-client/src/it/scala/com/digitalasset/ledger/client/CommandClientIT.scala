@@ -81,11 +81,10 @@ final class CommandClientIT
       configuration,
     )
 
-  private def timeProvider(ledgerId: domain.LedgerId): Future[TimeProvider] = {
+  private def timeProvider(ledgerId: domain.LedgerId): Future[TimeProvider] =
     StaticTime
       .updatedVia(TimeServiceGrpc.stub(channel), ledgerId.unwrap)
       .recover { case NonFatal(_) => TimeProvider.UTC }(DirectExecutionContext)
-  }
 
   private def commandClient(
       ledgerId: domain.LedgerId = testLedgerId,
@@ -200,9 +199,7 @@ final class CommandClientIT
         for {
           client <- commandClient()
           _ <- client.getCompletionEnd()
-        } yield {
-          succeed
-        }
+        } yield succeed
       }
 
       "fail with the expected status on a ledger Id mismatch" in {
@@ -223,9 +220,7 @@ final class CommandClientIT
             .via(client.submissionFlow())
             .map(_.map(_.isSuccess))
             .runWith(Sink.seq)
-        } yield {
-          result should contain theSameElementsAs contexts.map(Ctx(_, true))
-        }
+        } yield result should contain theSameElementsAs contexts.map(Ctx(_, true))
       }
 
       "fail with the expected status on a ledger Id mismatch" in {
@@ -261,7 +256,7 @@ final class CommandClientIT
           client <- commandClient(applicationId = "")
           completionsSource = client.completionSource(submittingPartyList, LedgerBegin)
           completions <- completionsSource.takeWithin(5.seconds).runWith(Sink.seq)
-        } yield (completions)
+        } yield completions
 
         completionsF.failed.map { failure =>
           failure should be(a[StatusRuntimeException])
@@ -297,9 +292,7 @@ final class CommandClientIT
           _ = submissionResults.foreach(v => v shouldBe a[Success[_]])
 
           result <- readExpectedCommandIds(client, checkpoint.getOffset, commandIdStrings)
-        } yield {
-          result
-        }
+        } yield result
 
         resultF map { case (seenCommandIds, remainingCommandIds) =>
           // N.B.: completions may include already-seen elements, and may be out of order
@@ -348,9 +341,7 @@ final class CommandClientIT
             .via(tracker)
             .map(_.context)
             .runWith(Sink.seq)
-        } yield {
-          result should contain theSameElementsAs contexts
-        }
+        } yield result should contain theSameElementsAs contexts
       }
 
       "complete the stream when there's nothing to track" in {
@@ -358,9 +349,7 @@ final class CommandClientIT
           client <- commandClient()
           tracker <- client.trackCommands[Int](submittingPartyList)
           _ <- Source.empty[Ctx[Int, SubmitRequest]].via(tracker).runWith(Sink.ignore)
-        } yield {
-          succeed
-        }
+        } yield succeed
       }
 
       "not accept commands with missing args, return INVALID_ARGUMENT" in {

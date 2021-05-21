@@ -35,17 +35,15 @@ object TreeUtils {
       index: Int,
   ) extends Selector
 
-  def contractsReferences(contracts: Iterable[CreatedEvent]): Set[PackageId] = {
+  def contractsReferences(contracts: Iterable[CreatedEvent]): Set[PackageId] =
     contracts
       .foldMap(ev => valueRefs(Sum.Record(ev.getCreateArguments)))
       .map(i => PackageId.assertFromString(i.packageId))
-  }
 
-  def treesReferences(transactions: Iterable[TransactionTree]): Set[PackageId] = {
+  def treesReferences(transactions: Iterable[TransactionTree]): Set[PackageId] =
     transactions
       .foldMap(treeRefs(_))
       .map(i => PackageId.assertFromString(i.packageId))
-  }
 
   /** Sort the active contract set topologically,
     *  such that a contract at a given position in the list
@@ -94,7 +92,7 @@ object TreeUtils {
 
   def traverseEventInTree(event: TreeEvent.Kind, tree: TransactionTree)(
       f: (List[Selector], TreeEvent.Kind) => Unit
-  ): Unit = {
+  ): Unit =
     event match {
       case Kind.Empty =>
       case created @ Kind.Created(_) =>
@@ -106,11 +104,9 @@ object TreeUtils {
           traverseEventInTree(ev, tree) { case (path, ev) => f(selector :: path, ev) }
         }
     }
-  }
 
-  def partiesInContracts(contracts: Iterable[CreatedEvent]): Set[Party] = {
+  def partiesInContracts(contracts: Iterable[CreatedEvent]): Set[Party] =
     contracts.foldMap(ev => valueParties(Value.Sum.Record(ev.getCreateArguments)))
-  }
 
   def partiesInTree(tree: TransactionTree): Set[Party] = {
     var parties: Set[Party] = Set()
@@ -191,7 +187,7 @@ object TreeUtils {
     (created, consumed)
   }
 
-  def treeReferencedCids(tree: TransactionTree): Set[ContractId] = {
+  def treeReferencedCids(tree: TransactionTree): Set[ContractId] =
     tree.rootEventIds.map(tree.eventsById(_).kind).foldMap {
       case Kind.Empty => Set.empty[ContractId]
       case Kind.Created(value) =>
@@ -199,12 +195,11 @@ object TreeUtils {
       case Kind.Exercised(value) =>
         value.choiceArgument.foldMap(arg => valueCids(arg.sum)) + ContractId(value.contractId)
     }
-  }
 
   def createdReferencedCids(ev: CreatedEvent): Set[ContractId] =
     ev.createArguments.foldMap(args => args.fields.foldMap(f => valueCids(f.getValue.sum)))
 
-  def cmdReferencedCids(cmd: Command): Set[ContractId] = {
+  def cmdReferencedCids(cmd: Command): Set[ContractId] =
     cmd match {
       case CreateCommand(createdEvent) =>
         createdReferencedCids(createdEvent)
@@ -219,7 +214,6 @@ object TreeUtils {
           valueCids(arg.sum)
         )
     }
-  }
 
   sealed trait Command
   final case class CreateCommand(createdEvent: CreatedEvent) extends Command
@@ -362,13 +356,12 @@ object TreeUtils {
       with SubmitMulti
 
   object Action {
-    def fromACS(acs: Seq[CreatedEvent], batchSize: Int): Seq[Action] = {
+    def fromACS(acs: Seq[CreatedEvent], batchSize: Int): Seq[Action] =
       acs
         .grouped(batchSize)
         .map(SubmitSimple.fromCreatedEvents)
         .toSeq
-    }
-    def fromTrees(trees: Seq[TransactionTree], setTime: Boolean): Seq[Action] = {
+    def fromTrees(trees: Seq[TransactionTree], setTime: Boolean): Seq[Action] =
       if (setTime) {
         var currentTime = Timestamp.MinValue
         val result = ArrayBuffer.newBuilder[Action]
@@ -385,7 +378,6 @@ object TreeUtils {
       } else {
         trees.map(Submit.fromTree)
       }
-    }
   }
 
   object Submit {
@@ -424,7 +416,7 @@ object TreeUtils {
     case TreeEvent.Kind.Empty => Set.empty[Party]
   }
 
-  def cmdParties(cmd: Command): Set[Party] = {
+  def cmdParties(cmd: Command): Set[Party] =
     cmd match {
       case CreateCommand(createdEvent) => evParties(Kind.Created(createdEvent))
       case ExerciseCommand(exercisedEvent) => evParties(Kind.Exercised(exercisedEvent))
@@ -432,13 +424,11 @@ object TreeUtils {
       case CreateAndExerciseCommand(createdEvent, exercisedEvent) =>
         evParties(Kind.Created(createdEvent)) ++ evParties(Kind.Exercised(exercisedEvent))
     }
-  }
 
-  def timestampFromTree(tree: TransactionTree): Timestamp = {
+  def timestampFromTree(tree: TransactionTree): Timestamp =
     Timestamp.assertFromInstant(
       Instant.ofEpochSecond(tree.getEffectiveAt.seconds, tree.getEffectiveAt.nanos.toLong)
     )
-  }
 
   def treeRefs(t: TransactionTree): Set[Identifier] =
     t.eventsById.values.foldMap(e => evRefs(e.kind))

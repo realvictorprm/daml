@@ -105,14 +105,12 @@ object SandboxServer {
   // Run only the flyway migrations but do not initialize any of the ledger api or indexer services
   def migrateOnly(
       config: SandboxConfig
-  )(implicit resourceContext: ResourceContext): Future[Unit] = {
-
+  )(implicit resourceContext: ResourceContext): Future[Unit] =
     newLoggingContext(logging.participantId(config.participantId)) { implicit loggingContext =>
       logger.info("Running only schema migration scripts")
       new FlywayMigrations(config.jdbcUrl.get)
         .migrate(enableAppendOnlySchema = config.enableAppendOnlySchema)
     }
-  }
 
   final class SandboxState(
       materializer: Materializer,
@@ -444,7 +442,7 @@ final class SandboxServer(
     }
   }
 
-  private def start(): Future[SandboxState] = {
+  private def start(): Future[SandboxState] =
     newLoggingContext(logging.participantId(config.participantId)) { implicit loggingContext =>
       val packageStore = loadDamlPackages()
       val apiServerResource = buildAndStartApiServer(
@@ -458,9 +456,8 @@ final class SandboxServer(
       )
       Future.successful(new SandboxState(materializer, metrics, packageStore, apiServerResource))
     }
-  }
 
-  private def loadDamlPackages(): InMemoryPackageStore = {
+  private def loadDamlPackages(): InMemoryPackageStore =
     // TODO is it sensible to have all the initial packages to be known since the epoch?
     config.damlPackages
       .foldLeft[Either[(String, File), InMemoryPackageStore]](Right(InMemoryPackageStore.empty)) {
@@ -469,7 +466,6 @@ final class SandboxServer(
 
       }
       .fold({ case (err, file) => sys.error(s"Could not load package $file: $err") }, identity)
-  }
 
   override def close(): Unit = {
     implicit val executionContext: ExecutionContext = DirectExecutionContext

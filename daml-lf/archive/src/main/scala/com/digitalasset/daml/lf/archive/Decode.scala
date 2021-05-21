@@ -85,12 +85,11 @@ object Decode extends Decode(onlySerializableDataDefs = false) {
   private def identifierPart(c: Char): Boolean =
     identifierStart(c) || '0' <= c && c <= '9'
 
-  def checkIdentifier(s: String): Unit = {
+  def checkIdentifier(s: String): Unit =
     if (s.isEmpty)
       throw Reader.ParseError("empty identifier")
     else if (!(identifierStart(s.head) && s.tail.forall(identifierPart)))
       throw Reader.ParseError(s"identifier $s contains invalid character")
-  }
 
   private val decimalPattern = "[+-]*[0-9]{0,28}(\\.[0-9]{0,10})*".r.pattern
   def checkDecimal(s: String): Boolean =

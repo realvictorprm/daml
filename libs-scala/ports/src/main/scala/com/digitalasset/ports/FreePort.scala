@@ -9,11 +9,8 @@ object FreePort {
 
   def find(): Port = {
     val socket = new ServerSocket(0, 0, InetAddress.getLoopbackAddress)
-    try {
-      Port(socket.getLocalPort)
-    } finally {
-      socket.close()
-    }
+    try Port(socket.getLocalPort)
+    finally socket.close()
   }
 
 }

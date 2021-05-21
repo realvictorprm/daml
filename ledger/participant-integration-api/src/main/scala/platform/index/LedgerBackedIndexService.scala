@@ -75,7 +75,7 @@ private[platform] final class LedgerBackedIndexService(
       filter: domain.TransactionFilter,
       verbose: Boolean,
   )(implicit loggingContext: LoggingContext): Source[GetTransactionTreesResponse, NotUsed] =
-    between(startExclusive, endInclusive)((from, to) => {
+    between(startExclusive, endInclusive) { (from, to) =>
       from.foreach(offset =>
         Spans.setCurrentSpanAttribute(SpanAttribute.OffsetFrom, offset.toHexString)
       )
@@ -90,7 +90,7 @@ private[platform] final class LedgerBackedIndexService(
           verbose = verbose,
         )
         .map(_._2)
-    })
+    }
 
   override def transactions(
       startExclusive: domain.LedgerOffset,
@@ -98,7 +98,7 @@ private[platform] final class LedgerBackedIndexService(
       filter: domain.TransactionFilter,
       verbose: Boolean,
   )(implicit loggingContext: LoggingContext): Source[GetTransactionsResponse, NotUsed] =
-    between(startExclusive, endInclusive)((from, to) => {
+    between(startExclusive, endInclusive) { (from, to) =>
       from.foreach(offset =>
         Spans.setCurrentSpanAttribute(SpanAttribute.OffsetFrom, offset.toHexString)
       )
@@ -113,7 +113,7 @@ private[platform] final class LedgerBackedIndexService(
           verbose = verbose,
         )
         .map(_._2)
-    })
+    }
 
   // Returns a function that memoizes the current end
   // Can be used directly or shared throughout a request processing
@@ -243,7 +243,7 @@ private[platform] final class LedgerBackedIndexService(
 
   override def partyEntries(
       startExclusive: Option[LedgerOffset.Absolute]
-  )(implicit loggingContext: LoggingContext): Source[PartyEntry, NotUsed] = {
+  )(implicit loggingContext: LoggingContext): Source[PartyEntry, NotUsed] =
     Source
       .future(concreteOffset(startExclusive))
       .flatMapConcat(ledger.partyEntries)
@@ -253,7 +253,6 @@ private[platform] final class LedgerBackedIndexService(
         case (_, PartyLedgerEntry.AllocationAccepted(subId, _, details)) =>
           PartyEntry.AllocationAccepted(subId, details)
       }
-  }
 
   override def packageEntries(
       startExclusive: Option[LedgerOffset.Absolute]
@@ -278,7 +277,7 @@ private[platform] final class LedgerBackedIndexService(
     */
   override def getLedgerConfiguration()(implicit
       loggingContext: LoggingContext
-  ): Source[LedgerConfiguration, NotUsed] = {
+  ): Source[LedgerConfiguration, NotUsed] =
     Source
       .future(lookupConfiguration())
       .flatMapConcat { optResult =>
@@ -293,7 +292,6 @@ private[platform] final class LedgerBackedIndexService(
           .concat(configStream)
           .map(cfg => LedgerConfiguration(cfg.maxDeduplicationTime))
       }
-  }
 
   /** Retrieve configuration entries. */
   override def configurationEntries(startExclusive: Option[LedgerOffset.Absolute])(implicit

@@ -28,12 +28,10 @@ private[dao] trait JdbcLedgerDaoTransactionsWriterSpec extends LoneElement {
       (_, lookup) <- store(txLookupByKey(alice, keyValue, Some(createdContractId)))
       to <- ledgerDao.lookupLedgerEnd()
       completions <- getCompletions(from, to, defaultAppId, Set(alice))
-    } yield {
-      completions should contain.allOf(
-        create.commandId.get -> ok,
-        lookup.commandId.get -> ok,
-      )
-    }
+    } yield completions should contain.allOf(
+      create.commandId.get -> ok,
+      lookup.commandId.get -> ok,
+    )
   }
 
   it should "serialize a valid fetch" in {
@@ -46,12 +44,10 @@ private[dao] trait JdbcLedgerDaoTransactionsWriterSpec extends LoneElement {
       (_, fetch) <- store(txFetch(alice, createdContractId))
       to <- ledgerDao.lookupLedgerEnd()
       completions <- getCompletions(from, to, defaultAppId, Set(alice))
-    } yield {
-      completions should contain.allOf(
-        create.commandId.get -> ok,
-        fetch.commandId.get -> ok,
-      )
-    }
+    } yield completions should contain.allOf(
+      create.commandId.get -> ok,
+      fetch.commandId.get -> ok,
+    )
   }
 
   it should "prefer pre-computed blinding info" in {
@@ -67,9 +63,7 @@ private[dao] trait JdbcLedgerDaoTransactionsWriterSpec extends LoneElement {
         Set(alice),
         nonTransient(tx).loneElement,
       )
-    } yield {
-      result shouldBe None
-    }
+    } yield result shouldBe None
   }
 
   it should "fail trying to store transactions with non-incremental offsets" in {

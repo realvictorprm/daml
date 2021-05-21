@@ -19,7 +19,7 @@ object StateUpdateExporter {
       actualReadService: ReplayingReadService,
       outputWriterFactory: Path => PrintWriter,
       config: Config,
-  )(implicit executionContext: ExecutionContext, materializer: Materializer): Future[Unit] = {
+  )(implicit executionContext: ExecutionContext, materializer: Materializer): Future[Unit] =
     for {
       _ <- config.expectedUpdatesPath.fold(Future.unit)(path =>
         StateUpdateExporter.write(
@@ -36,7 +36,6 @@ object StateUpdateExporter {
         )
       )
     } yield ()
-  }
 
   private def write(
       readService: ReadService,
@@ -45,7 +44,7 @@ object StateUpdateExporter {
   )(implicit
       materializer: Materializer,
       executionContext: ExecutionContext,
-  ): Future[Unit] = {
+  ): Future[Unit] =
     readService
       .stateUpdates(None)
       .runForeach { case (_, update) =>
@@ -54,5 +53,4 @@ object StateUpdateExporter {
       }
       .map(_ => ())
       .andThen { case _ => outputWriter.close() }
-  }
 }

@@ -61,46 +61,38 @@ object TriggerRunner {
     private def handleException(
         ctx: TypedActorContext[TriggerRunnerImpl.Message]
     ): Catcher[Behavior[TriggerRunnerImpl.Message]] = {
-      case e: InitializationHalted => {
+      case e: InitializationHalted =>
         // This should be a stop supervisor nested under the restart supervisor.
         ctx.asScala.log.info(s"Supervisor saw failure ${e.getMessage} - stopping")
         Behaviors.stopped
-      }
-      case e: UnauthenticatedException => {
+      case e: UnauthenticatedException =>
         // This should be a stop supervisor nested under the restart supervisor.
         // The TriggerRunner should receive a ChildFailed signal when watching TriggerRunnerImpl.
         // This cannot be emulated outside the akka-actor-typed implementation, so we use a dedicated message instead.
         ctx.asScala.log.info(s"Supervisor saw failure ${e.getMessage} - stopping")
         parent ! Unauthenticated(e)
         Behaviors.stopped
-      }
     }
     override def aroundStart(
         ctx: TypedActorContext[TriggerRunnerImpl.Message],
         target: BehaviorInterceptor.PreStartTarget[TriggerRunnerImpl.Message],
-    ): Behavior[TriggerRunnerImpl.Message] = {
-      try {
-        target.start(ctx)
-      } catch handleException(ctx)
-    }
+    ): Behavior[TriggerRunnerImpl.Message] =
+      try target.start(ctx)
+      catch handleException(ctx)
     override def aroundReceive(
         ctx: TypedActorContext[TriggerRunnerImpl.Message],
         msg: TriggerRunnerImpl.Message,
         target: BehaviorInterceptor.ReceiveTarget[TriggerRunnerImpl.Message],
-    ): Behavior[TriggerRunnerImpl.Message] = {
-      try {
-        target(ctx, msg)
-      } catch handleException(ctx)
-    }
+    ): Behavior[TriggerRunnerImpl.Message] =
+      try target(ctx, msg)
+      catch handleException(ctx)
     override def aroundSignal(
         ctx: TypedActorContext[TriggerRunnerImpl.Message],
         signal: Signal,
         target: BehaviorInterceptor.SignalTarget[TriggerRunnerImpl.Message],
-    ): Behavior[TriggerRunnerImpl.Message] = {
-      try {
-        target(ctx, signal)
-      } catch handleException(ctx)
-    }
+    ): Behavior[TriggerRunnerImpl.Message] =
+      try target(ctx, signal)
+      catch handleException(ctx)
   }
 
   def apply(config: Config, name: String)(implicit

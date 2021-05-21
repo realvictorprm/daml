@@ -62,23 +62,21 @@ class JwksVerifier(
   /** Looks up the verifier for the given keyId from the local cache.
     * On a cache miss, creates a new verifier by fetching the public key from the JWKS URL.
     */
-  private[this] def getCachedVerifier(keyId: String): Error \/ JwtVerifier = {
+  private[this] def getCachedVerifier(keyId: String): Error \/ JwtVerifier =
     if (keyId == null)
       -\/(Error(Symbol("getCachedVerifier"), "No Key ID found"))
     else
       \/.fromTryCatchNonFatal(
         cache.get(keyId, () => getVerifier(keyId).fold(e => sys.error(e.shows), x => x))
       ).leftMap(e => Error(Symbol("getCachedVerifier"), e.getMessage))
-  }
 
-  def verify(jwt: domain.Jwt): Error \/ domain.DecodedJwt[String] = {
+  def verify(jwt: domain.Jwt): Error \/ domain.DecodedJwt[String] =
     for {
       keyId <- \/.fromTryCatchNonFatal(com.auth0.jwt.JWT.decode(jwt.value).getKeyId)
         .leftMap(e => Error(Symbol("verify"), e.getMessage))
       verifier <- getCachedVerifier(keyId)
       decoded <- verifier.verify(jwt)
     } yield decoded
-  }
 }
 
 object JwksVerifier {

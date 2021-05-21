@@ -18,11 +18,8 @@ private[platform] object Compression {
     ): Array[Byte] = {
       val output = new ByteArrayOutputStream(uncompressed.length)
       val gzip = compress(output)
-      try {
-        gzip.write(uncompressed)
-      } finally {
-        gzip.close()
-      }
+      try gzip.write(uncompressed)
+      finally gzip.close()
       val compressed = output.toByteArray
       output.close()
       metrics.compressed.update(compressed.length)

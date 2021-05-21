@@ -442,12 +442,11 @@ object ValuePredicate {
         case _ => None
       }
 
-    def toLiteral(q: A) = {
+    def toLiteral(q: A) =
       // we must roundtrip through normalized because e.g. there are several
       // queries that equal 5, but only one of those will be used as the
       // SQL representation (which we compare directly for equality)
       Literal({ case v if lfvScalar.lift(v) contains q => }, dbApiValueToJsValue(normalized(q)))
-    }
 
     def toRange(ltgt: Boundaries[A])(implicit A: Order[A]) = Range(ltgt, A, lfvScalar, normalized)
 

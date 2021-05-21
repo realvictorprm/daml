@@ -8,8 +8,7 @@ import com.daml.ledger.resources.ResourceContext
 import com.daml.resources.ProgramResource
 
 object Main {
-  def main(args: Array[String]): Unit = {
+  def main(args: Array[String]): Unit =
     new ProgramResource(new Runner("SQL Ledger", SqlLedgerFactory).owner(args))
       .run(ResourceContext.apply)
-  }
 }

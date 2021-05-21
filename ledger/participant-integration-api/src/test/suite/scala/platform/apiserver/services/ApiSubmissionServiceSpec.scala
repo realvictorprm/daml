@@ -150,9 +150,7 @@ class ApiSubmissionServiceSpec
     for {
       service <- submissionService(null, null, implicitPartyAllocation = false)
       result <- service.allocateMissingInformees(transaction)
-    } yield {
-      result shouldBe Seq.empty[SubmissionResult]
-    }
+    } yield result shouldBe Seq.empty[SubmissionResult]
   }
 
   it should "forward SubmissionResult if it failed" in {
@@ -183,9 +181,7 @@ class ApiSubmissionServiceSpec
     for {
       service <- defaultSubmissionService
       result <- service.allocateMissingInformees(transaction)
-    } yield {
-      result shouldBe Seq(submissionFailure)
-    }
+    } yield result shouldBe Seq(submissionFailure)
   }
 
   behavior of "submit"
@@ -294,19 +290,17 @@ class ApiSubmissionServiceSpec
     for {
       configProvider <- configProviderResource.asFuture
       _ <- configProviderResource.release()
-    } yield {
-      new ApiSubmissionService(
-        writeService = writeService,
-        submissionService = mockIndexSubmissionService,
-        partyManagementService = partyManagementService,
-        timeProvider = null,
-        timeProviderType = null,
-        ledgerConfigProvider = configProvider,
-        seedService = SeedService.WeakRandom,
-        commandExecutor = commandExecutor,
-        configuration = ApiSubmissionService.Configuration(implicitPartyAllocation),
-        metrics = new Metrics(mockMetricRegistry),
-      )
-    }
+    } yield new ApiSubmissionService(
+      writeService = writeService,
+      submissionService = mockIndexSubmissionService,
+      partyManagementService = partyManagementService,
+      timeProvider = null,
+      timeProviderType = null,
+      ledgerConfigProvider = configProvider,
+      seedService = SeedService.WeakRandom,
+      commandExecutor = commandExecutor,
+      configuration = ApiSubmissionService.Configuration(implicitPartyAllocation),
+      metrics = new Metrics(mockMetricRegistry),
+    )
   }
 }

@@ -208,11 +208,10 @@ abstract class DbTriggerDao protected (
 
   private def run[T](query: ConnectionIO[T], errorContext: String = "")(implicit
       ec: ExecutionContext
-  ): Future[T] = {
+  ): Future[T] =
     query.transact(xa).unsafeToFuture().recoverWith { case NonFatal(e) =>
       Future.failed(new DatabaseError(errorContext, e))
     }
-  }
 
   override def addRunningTrigger(t: RunningTrigger)(implicit ec: ExecutionContext): Future[Unit] =
     run(insertRunningTrigger(t))
@@ -236,11 +235,10 @@ abstract class DbTriggerDao protected (
 
   override def listRunningTriggers(
       party: Party
-  )(implicit ec: ExecutionContext): Future[Vector[UUID]] = {
+  )(implicit ec: ExecutionContext): Future[Vector[UUID]] =
     // Note(RJR): Postgres' ordering of UUIDs is different to Scala/Java's.
     // We sort them after the query to be consistent with the ordering when not using a database.
     run(selectRunningTriggers(party)).map(_.sorted)
-  }
 
   // Write packages to the `dalfs` table so we can recover state after a shutdown.
   override def persistPackages(

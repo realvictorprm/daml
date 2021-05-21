@@ -73,9 +73,7 @@ abstract class AbstractFuncIT
         for {
           clients <- participantClients()
           v <- run(clients, QualifiedName.assertFromString("ScriptTest:test1"), dar = stableDar)
-        } yield {
-          assert(v == SNumeric(Numeric.assertFromString("2.12000000000")))
-        }
+        } yield assert(v == SNumeric(Numeric.assertFromString("2.12000000000")))
       }
     }
     "test2" should {
@@ -88,9 +86,7 @@ abstract class AbstractFuncIT
             dar = stableDar,
             inputValue = Some(JsObject(("p", JsString("Alice")), ("v", JsNumber(42)))),
           )
-        } yield {
-          assert(v == SInt64(42))
-        }
+        } yield assert(v == SInt64(42))
       }
     }
     "test3" should {
@@ -98,9 +94,7 @@ abstract class AbstractFuncIT
         for {
           clients <- participantClients()
           v <- run(clients, QualifiedName.assertFromString("ScriptTest:test3"), dar = stableDar)
-        } yield {
-          assert(v == SUnit)
-        }
+        } yield assert(v == SUnit)
       }
     }
     "test4" should {
@@ -142,9 +136,7 @@ abstract class AbstractFuncIT
             QualifiedName.assertFromString("ScriptTest:testCreateAndExercise"),
             dar = stableDar,
           )
-        } yield {
-          assert(v == SInt64(42))
-        }
+        } yield assert(v == SInt64(42))
       }
     }
     "testGetTime" should {
@@ -209,9 +201,7 @@ abstract class AbstractFuncIT
         for {
           clients <- participantClients()
           v <- run(clients, QualifiedName.assertFromString("ScriptTest:testStack"), dar = stableDar)
-        } yield {
-          assert(v == SUnit)
-        }
+        } yield assert(v == SUnit)
       }
     }
     "testMaxInboundMessageSize" should {
@@ -225,9 +215,7 @@ abstract class AbstractFuncIT
             QualifiedName.assertFromString("ScriptTest:testMaxInboundMessageSize"),
             dar = stableDar,
           )
-        } yield {
-          assert(v == SUnit)
-        }
+        } yield assert(v == SUnit)
       }
     }
     "ScriptExample" should {
@@ -235,9 +223,7 @@ abstract class AbstractFuncIT
         for {
           clients <- participantClients()
           v <- run(clients, QualifiedName.assertFromString("ScriptExample:test"), dar = stableDar)
-        } yield {
-          assert(v == SUnit)
-        }
+        } yield assert(v == SUnit)
       }
     }
     "testQueryContractId" should {
@@ -249,9 +235,7 @@ abstract class AbstractFuncIT
             QualifiedName.assertFromString("ScriptTest:testQueryContractId"),
             dar = stableDar,
           )
-        } yield {
-          assert(v == SUnit)
-        }
+        } yield assert(v == SUnit)
       }
     }
     "testQueryContractKey" should {
@@ -263,9 +247,7 @@ abstract class AbstractFuncIT
             QualifiedName.assertFromString("ScriptTest:testQueryContractKey"),
             dar = stableDar,
           )
-        } yield {
-          assert(v == SUnit)
-        }
+        } yield assert(v == SUnit)
       }
     }
     "traceOrder" should {
@@ -318,9 +300,7 @@ abstract class AbstractFuncIT
             QualifiedName.assertFromString("TestExceptions:test"),
             dar = devDar,
           )
-        } yield {
-          v shouldBe (SUnit)
-        }
+        } yield v shouldBe SUnit
       }
     }
 
@@ -333,9 +313,7 @@ abstract class AbstractFuncIT
             QualifiedName.assertFromString("ScriptTest:testMultiPartyQueries"),
             dar = stableDar,
           )
-        } yield {
-          assert(v == SUnit)
-        }
+        } yield assert(v == SUnit)
       }
     }
     "multiparty command submission" in {
@@ -346,9 +324,7 @@ abstract class AbstractFuncIT
           QualifiedName.assertFromString("ScriptTest:multiPartySubmission"),
           dar = stableDar,
         )
-      } yield {
-        assert(v == SUnit)
-      }
+      } yield assert(v == SUnit)
     }
     "tuple key" in {
       for {
@@ -358,9 +334,7 @@ abstract class AbstractFuncIT
           QualifiedName.assertFromString("ScriptTest:tupleKey"),
           dar = stableDar,
         )
-      } yield {
-        assert(v == SUnit)
-      }
+      } yield assert(v == SUnit)
     }
     "stack trace" in {
       for {

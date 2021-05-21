@@ -45,13 +45,12 @@ final case class ScenarioRunner(
       case Right(t) => Right(t)
     }
 
-  private def handleUnsafe[T](unsafe: => T): Either[SError, T] = {
+  private def handleUnsafe[T](unsafe: => T): Either[SError, T] =
     Try(unsafe) match {
       case Failure(SRunnerException(err)) => Left(err)
       case Failure(other) => throw other
       case Success(t) => Right(t)
     }
-  }
 
   private def runUnsafe(): (Double, Int, ScenarioLedger, SValue) = {
     // NOTE(JM): Written with an imperative loop and exceptions for speed
@@ -91,10 +90,9 @@ final case class ScenarioRunner(
         case SResultScenarioPassTime(delta, callback) =>
           passTime(delta, callback)
 
-        case SResultScenarioInsertMustFail(committers, optLocation) => {
+        case SResultScenarioInsertMustFail(committers, optLocation) =>
           // We never have readAs parties in scenarios.
           ledger = ledger.insertAssertMustFail(committers, Set.empty, optLocation)
-        }
 
         case SResultScenarioGetParty(partyText, callback) =>
           getParty(partyText, callback)
@@ -151,7 +149,7 @@ final case class ScenarioRunner(
       actAs: Set[Party],
       readAs: Set[Party],
       callback: SValue => Unit,
-  ) = {
+  ) =
     ScenarioLedger.commitTransaction(
       actAs = actAs,
       readAs = readAs,
@@ -166,7 +164,6 @@ final case class ScenarioRunner(
         ledger = result.newLedger
         callback(value)
     }
-  }
 
   private def passTime(delta: Long, callback: Time.Timestamp => Unit) = {
     ledger = ledger.passTime(delta)
@@ -308,7 +305,7 @@ object ScenarioRunner {
   private[this] def getScenarioExpr(
       scenarioRef: Ref.DefinitionRef,
       scenarioDef: Ast.Definition,
-  ): Ast.Expr = {
+  ): Ast.Expr =
     scenarioDef match {
       case Ast.DValue(_, _, body, _) => body
       case _: Ast.DTypeSyn =>
@@ -320,5 +317,4 @@ object ScenarioRunner {
           s"Requested scenario $scenarioRef is a data type, not a definition"
         )
     }
-  }
 }

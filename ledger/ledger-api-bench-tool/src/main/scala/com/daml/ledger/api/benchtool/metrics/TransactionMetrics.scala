@@ -20,7 +20,7 @@ object TransactionMetrics {
 
   def transactionsMetricsManager(streamName: String, logInterval: FiniteDuration)(implicit
       system: ActorSystem[SpawnProtocol.Command]
-  ): Future[ActorRef[MetricsManager.Message[GetTransactionsResponse]]] = {
+  ): Future[ActorRef[MetricsManager.Message[GetTransactionsResponse]]] =
     system.ask(
       SpawnProtocol.Spawn(
         behavior = MetricsManager(
@@ -33,11 +33,10 @@ object TransactionMetrics {
         _,
       )
     )
-  }
 
   def transactionTreesMetricsManager(streamName: String, logInterval: FiniteDuration)(implicit
       system: ActorSystem[SpawnProtocol.Command]
-  ): Future[ActorRef[MetricsManager.Message[GetTransactionTreesResponse]]] = {
+  ): Future[ActorRef[MetricsManager.Message[GetTransactionTreesResponse]]] =
     system.ask(
       SpawnProtocol.Spawn(
         behavior = MetricsManager(
@@ -50,7 +49,6 @@ object TransactionMetrics {
         _,
       )
     )
-  }
 
   private def transactionMetrics(
       reportingPeriod: FiniteDuration

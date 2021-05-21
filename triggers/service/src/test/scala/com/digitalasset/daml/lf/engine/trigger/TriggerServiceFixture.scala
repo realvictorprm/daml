@@ -74,16 +74,15 @@ import scala.util.Success
 trait HttpCookies extends BeforeAndAfterEach { this: Suite =>
   private val cookieJar = TrieMap[String, String]()
 
-  override protected def afterEach(): Unit = {
+  override protected def afterEach(): Unit =
     try super.afterEach()
     finally cookieJar.clear()
-  }
 
   /** Adds a Cookie header for the currently stored cookies and performs the given http request.
     */
   def httpRequest(
       request: HttpRequest
-  )(implicit system: ActorSystem, ec: ExecutionContext): Future[HttpResponse] = {
+  )(implicit system: ActorSystem, ec: ExecutionContext): Future[HttpResponse] =
     Http()
       .singleRequest {
         if (cookieJar.nonEmpty) {
@@ -101,14 +100,13 @@ trait HttpCookies extends BeforeAndAfterEach { this: Suite =>
           case _ =>
         }
       }
-  }
 
   /** Same as [[httpRequest]] but will follow redirections.
     */
   def httpRequestFollow(request: HttpRequest, maxRedirections: Int = 10)(implicit
       system: ActorSystem,
       ec: ExecutionContext,
-  ): Future[HttpResponse] = {
+  ): Future[HttpResponse] =
     httpRequest(request).flatMap {
       case resp @ HttpResponse(StatusCodes.Redirection(_), _, _, _) =>
         if (maxRedirections == 0) {
@@ -119,13 +117,11 @@ trait HttpCookies extends BeforeAndAfterEach { this: Suite =>
         }
       case resp => Future(resp)
     }
-  }
 
   /** Remove all stored cookies.
     */
-  def deleteCookies(): Unit = {
+  def deleteCookies(): Unit =
     cookieJar.clear()
-  }
 }
 
 trait AbstractAuthFixture extends SuiteMixin {
@@ -194,7 +190,7 @@ trait AuthMiddlewareFixture
     resource = new OwnedResource(new ResourceOwner[(AdjustableClock, OAuthServer, ServerBinding)] {
       override def acquire()(implicit
           context: ResourceContext
-      ): Resource[(AdjustableClock, OAuthServer, ServerBinding)] = {
+      ): Resource[(AdjustableClock, OAuthServer, ServerBinding)] =
         for {
           clock <- Resource(
             Future(
@@ -231,7 +227,6 @@ trait AuthMiddlewareFixture
           )
           middleware <- Resource(MiddlewareServer.start(middlewareConfig))(closeServerBinding)
         } yield (clock, oauthServer, middleware)
-      }
     })
     resource.setup()
   }
@@ -524,11 +519,9 @@ trait TriggerServiceFixture
               )
               _ = lock.unlock()
             } yield r
-          } {
-            case (_, system) => {
-              system ! Server.Stop
-              system.whenTerminated.map(_ => ())
-            }
+          } { case (_, system) =>
+            system ! Server.Stop
+            system.whenTerminated.map(_ => ())
           }
         } yield binding
     }

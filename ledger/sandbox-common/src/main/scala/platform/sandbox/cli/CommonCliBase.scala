@@ -273,12 +273,12 @@ class CommonCliBase(name: LedgerName) {
 
       opt[Long]("max-ledger-time-skew")
         .optional()
-        .action((value, config) => {
+        .action { (value, config) =>
           val timeModel = config.ledgerConfig.initialConfiguration.timeModel
             .copy(minSkew = Duration.ofSeconds(value), maxSkew = Duration.ofSeconds(value))
           val ledgerConfig = config.ledgerConfig.initialConfiguration.copy(timeModel = timeModel)
           config.copy(ledgerConfig = config.ledgerConfig.copy(initialConfiguration = ledgerConfig))
-        })
+        }
         .text(
           s"Maximum skew (in seconds) between the ledger time and the record time. Default is ${v1.TimeModel.reasonableDefault.minSkew.getSeconds}."
         )
@@ -301,13 +301,13 @@ class CommonCliBase(name: LedgerName) {
 
       help("help").text("Print the usage text")
 
-      checkConfig(c => {
+      checkConfig { c =>
         if (c.scenario.isDefined && c.timeProviderType.contains(TimeProviderType.WallClock))
           failure(
             "Wall-clock time mode (`-w`/`--wall-clock-time`) and scenario initialization (`--scenario`) may not be used together."
           )
         else success
-      })
+      }
     }
 
   def withContractIdSeeding(

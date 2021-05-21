@@ -13,7 +13,7 @@ import scala.concurrent.{Future, Promise}
 
 object WaitForCompletionsObserver {
 
-  def apply(n: Int)(attach: StreamObserver[CompletionStreamResponse] => Unit): Future[Unit] = {
+  def apply(n: Int)(attach: StreamObserver[CompletionStreamResponse] => Unit): Future[Unit] =
     if (n < 1) {
       Future.failed(
         new IllegalArgumentException(
@@ -25,7 +25,6 @@ object WaitForCompletionsObserver {
       attach(observer)
       observer.result
     }
-  }
 
 }
 

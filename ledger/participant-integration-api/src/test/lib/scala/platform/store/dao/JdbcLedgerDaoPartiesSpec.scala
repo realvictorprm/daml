@@ -40,9 +40,7 @@ private[dao] trait JdbcLedgerDaoPartiesSpec {
       response <- storePartyEntry(bob, nextOffset())
       _ = response should be(PersistenceResponse.Ok)
       parties <- ledgerDao.listKnownParties()
-    } yield {
-      parties should contain.allOf(alice, bob)
-    }
+    } yield parties should contain.allOf(alice, bob)
   }
 
   it should "store and retrieve accepted and rejected parties" in {
@@ -94,9 +92,7 @@ private[dao] trait JdbcLedgerDaoPartiesSpec {
   it should "retrieve zero parties" in {
     for {
       noPartyDetails <- ledgerDao.getParties(Seq.empty)
-    } yield {
-      noPartyDetails should be(Seq.empty)
-    }
+    } yield noPartyDetails should be(Seq.empty)
   }
 
   it should "retrieve a single party, if they exist" in {
@@ -138,9 +134,7 @@ private[dao] trait JdbcLedgerDaoPartiesSpec {
       response <- storePartyEntry(eve, nextOffset())
       _ = response should be(PersistenceResponse.Ok)
       parties <- ledgerDao.getParties(Seq(danParty, eveParty, nonExistentParty))
-    } yield {
-      parties should contain.only(dan, eve)
-    }
+    } yield parties should contain.only(dan, eve)
   }
 
   it should "inform the caller if they try to write a duplicate party" in {
@@ -153,9 +147,7 @@ private[dao] trait JdbcLedgerDaoPartiesSpec {
       response <- storePartyEntry(fred, nextOffset())
       _ = response should be(PersistenceResponse.Ok)
       response <- storePartyEntry(fred, nextOffset())
-    } yield {
-      response should be(PersistenceResponse.Duplicate)
-    }
+    } yield response should be(PersistenceResponse.Duplicate)
   }
 
   it should "fail on storing a party entry with non-incremental offsets" in {
@@ -197,9 +189,7 @@ private[dao] trait JdbcLedgerDaoPartiesSpec {
       response <- storePartyEntry(bobDetails, nextOffset())
       _ = response should be(PersistenceResponse.Ok)
       parties <- ledgerDao.listKnownParties()
-    } yield {
-      parties should contain.allOf(aliceDetails, bobDetails)
-    }
+    } yield parties should contain.allOf(aliceDetails, bobDetails)
   }
 
   private def storePartyEntry(

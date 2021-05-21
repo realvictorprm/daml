@@ -9,7 +9,6 @@ import io.grpc.Metadata
 
 /** An AuthService that authorizes all calls by always returning a wildcard [[ClaimSet.Claims]] */
 object AuthServiceWildcard extends AuthService {
-  override def decodeMetadata(headers: Metadata): CompletionStage[ClaimSet] = {
+  override def decodeMetadata(headers: Metadata): CompletionStage[ClaimSet] =
     CompletableFuture.completedFuture(ClaimSet.Claims.Wildcard)
-  }
 }

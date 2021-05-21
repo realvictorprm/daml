@@ -54,7 +54,7 @@ object LedgerReader {
 
   private def createPackageStoreFromArchives(
       packageResponses: List[GetPackageResponse]
-  ): Error \/ PackageStore = {
+  ): Error \/ PackageStore =
     packageResponses
       .traverse { packageResponse: GetPackageResponse =>
         decodeInterfaceFromPackageResponse(packageResponse).map { interface =>
@@ -62,7 +62,6 @@ object LedgerReader {
         }
       }
       .map(_.toMap)
-  }
 
   private def decodeInterfaceFromPackageResponse(
       packageResponse: GetPackageResponse

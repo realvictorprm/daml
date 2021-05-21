@@ -55,11 +55,8 @@ object FieldCompressionStrategy {
       uncompressed => {
         val output = new ByteArrayOutputStream(uncompressed.length)
         val gzip = a.compress(output)
-        try {
-          gzip.write(uncompressed)
-        } finally {
-          gzip.close()
-        }
+        try gzip.write(uncompressed)
+        finally gzip.close()
         val compressed = output.toByteArray
         output.close()
         metric.compressed.update(compressed.length)

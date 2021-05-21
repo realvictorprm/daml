@@ -32,10 +32,9 @@ class ActiveContractsServiceValidation(
   override def getActiveContracts(
       request: GetActiveContractsRequest,
       responseObserver: StreamObserver[GetActiveContractsResponse],
-  ): Unit = {
+  ): Unit =
     matchLedgerId(ledgerId)(LedgerId(request.ledgerId))
       .fold(responseObserver.onError, _ => service.getActiveContracts(request, responseObserver))
-  }
   override def bindService(): ServerServiceDefinition =
     ActiveContractsServiceGrpc.bindService(this, executionContext)
 }

@@ -140,7 +140,7 @@ class ServerTest
     Session.open(sessionId, userId, userConfig, user.party)
     Get("/api/session/") ~> Cookie("session-id" -> sessionId) ~> connected ~> check {
       Unmarshal(response.entity).to[String].value.map(_.map(_.parseJson)) shouldEqual Some(
-        Success((sessionJson))
+        Success(sessionJson)
       )
     }
   }
@@ -148,7 +148,7 @@ class ServerTest
   "SelectMode POST /api/session/" should "allow to SignIn with an existing user" in withCleanSessions {
     Post("/api/session/", LoginRequest(userId)) ~> connected ~> check {
       Unmarshal(response.entity).to[String].value.map(_.map(_.parseJson)) shouldEqual Some(
-        Success((sessionJson))
+        Success(sessionJson)
       )
       val sessionId = sessionCookie()
       Session.current(sessionId).value shouldEqual Session(user)

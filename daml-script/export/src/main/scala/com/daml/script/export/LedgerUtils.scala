@@ -62,7 +62,7 @@ object LedgerUtils {
       end: LedgerOffset,
   )(implicit
       mat: Materializer
-  ): Future[Seq[TransactionTree]] = {
+  ): Future[Seq[TransactionTree]] =
     if (start == end) {
       Future.successful(Seq.empty)
     } else {
@@ -70,7 +70,6 @@ object LedgerUtils {
         .getTransactionTrees(start, Some(end), filter(parties), verbose = true)
         .runWith(Sink.seq)
     }
-  }
 
   private def filter(parties: Seq[String]): TransactionFilter =
     TransactionFilter(parties.map(p => p -> Filters()).toMap)

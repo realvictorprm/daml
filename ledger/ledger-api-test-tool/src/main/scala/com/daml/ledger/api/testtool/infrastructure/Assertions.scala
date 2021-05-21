@@ -60,13 +60,12 @@ object Assertions extends DiffExtensions {
 
   /** non-regex overload for assertGrpcError which just does a substring check.
     */
-  def assertGrpcError(t: Throwable, expectedCode: Status.Code, pattern: String): Unit = {
+  def assertGrpcError(t: Throwable, expectedCode: Status.Code, pattern: String): Unit =
     assertGrpcError(
       t,
       expectedCode,
       if (pattern.isEmpty) None else Some(Pattern.compile(Pattern.quote(pattern))),
     )
-  }
 
   /** Allows for assertions with more information in the error messages. */
   implicit def futureAssertions[T](future: Future[T]): FutureAssertions[T] =

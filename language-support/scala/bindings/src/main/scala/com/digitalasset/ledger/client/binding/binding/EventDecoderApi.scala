@@ -23,7 +23,7 @@ abstract class EventDecoderApi(val templateTypes: Seq[TemplateCompanion[_]]) {
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
   final def createdEventToContractRef(
       createdEvent: rpcevent.CreatedEvent
-  ): Either[EventDecoderError, Contract.OfAny] = {
+  ): Either[EventDecoderError, Contract.OfAny] =
     for {
       templateToContract <- createdEvent.templateId flatMap dtl toRight DecoderTableLookupFailure
       tadt <- templateToContract(createdEvent).toRight(
@@ -37,5 +37,4 @@ abstract class EventDecoderApi(val templateTypes: Seq[TemplateCompanion[_]]) {
       createdEvent.observers,
       createdEvent.contractKey,
     )
-  }
 }

@@ -72,7 +72,7 @@ final class TransactionConversionSpec extends AnyWordSpec with Matchers {
         key = None,
       )
 
-    def exercise(builder: TransactionBuilder, id: String) = {
+    def exercise(builder: TransactionBuilder, id: String) =
       builder.exercise(
         contract = create(builder, id),
         choice = "C",
@@ -80,7 +80,6 @@ final class TransactionConversionSpec extends AnyWordSpec with Matchers {
         actingParties = Set(partyStr),
         argument = Value.ValueRecord(None, ImmArray.empty),
       )
-    }
 
     def createdEv(evId: String, contractId: String) =
       TreeEvent(

@@ -72,19 +72,16 @@ private[commands] class CommandTracker[Context](maxDeduplicationTime: () => JDur
     val logic: TimerGraphStageLogic = new TimerGraphStageLogic(shape) {
 
       val timeout_detection = "timeout-detection"
-      override def preStart(): Unit = {
+      override def preStart(): Unit =
         scheduleWithFixedDelay(timeout_detection, 1.second, 1.second)
 
-      }
-
-      override protected def onTimer(timerKey: Any): Unit = {
+      override protected def onTimer(timerKey: Any): Unit =
         timerKey match {
           case `timeout_detection` =>
             val timeouts = getOutputForTimeout(Instant.now)
             if (timeouts.nonEmpty) emitMultiple(resultOut, timeouts)
           case _ => // unknown timer, nothing to do
         }
-      }
 
       private val pendingCommands = new mutable.HashMap[String, TrackingData[Context]]()
 
@@ -119,9 +116,8 @@ private[commands] class CommandTracker[Context](maxDeduplicationTime: () => JDur
             completeStageIfTerminal()
           }
 
-          override def onUpstreamFailure(ex: Throwable): Unit = {
+          override def onUpstreamFailure(ex: Throwable): Unit =
             fail(resultOut, ex)
-          }
         },
       )
 
@@ -166,7 +162,7 @@ private[commands] class CommandTracker[Context](maxDeduplicationTime: () => JDur
         },
       )
 
-      private def pushResultOrPullCommandResultIn(compl: Option[Ctx[Context, Completion]]): Unit = {
+      private def pushResultOrPullCommandResultIn(compl: Option[Ctx[Context, Completion]]): Unit =
         // The command tracker detects timeouts outside the regular pull/push
         // mechanism of the input/output ports. Basically the timeout
         // detection jumps the line when emitting outputs on `resultOut`. If it
@@ -175,13 +171,11 @@ private[commands] class CommandTracker[Context](maxDeduplicationTime: () => JDur
         // instead of `push` when a completion arrives makes akka take care of
         // handling the signaling properly.
         compl.fold(if (!hasBeenPulled(commandResultIn)) pull(commandResultIn))(emit(resultOut, _))
-      }
 
-      private def completeStageIfTerminal(): Unit = {
+      private def completeStageIfTerminal(): Unit =
         if (isClosed(submitRequestIn) && pendingCommands.isEmpty) {
           completeStage()
         }
-      }
 
       import CommandTracker.nonTerminalCodes
 

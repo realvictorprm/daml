@@ -54,9 +54,8 @@ final class FrontStack[+A] private (fq: FQ[A], val length: Int) {
         array(cursor) = head
         go(cursor + 1, tail)
       case FQPrepend(head, tail) =>
-        for (i <- head.indices) {
+        for (i <- head.indices)
           array(cursor + i) = head(i)
-        }
         go(cursor + head.length, tail)
     }
     go(0, fq)
@@ -65,7 +64,7 @@ final class FrontStack[+A] private (fq: FQ[A], val length: Int) {
   }
 
   /** O(1) */
-  def pop: Option[(A, FrontStack[A])] = {
+  def pop: Option[(A, FrontStack[A])] =
     if (length > 0) {
       fq match {
         case FQEmpty => throw new RuntimeException(s"FrontStack has length $length but FQEmpty.")
@@ -81,12 +80,10 @@ final class FrontStack[+A] private (fq: FQ[A], val length: Int) {
     } else {
       None
     }
-  }
 
   /** O(n) */
-  def map[B](f: A => B): FrontStack[B] = {
+  def map[B](f: A => B): FrontStack[B] =
     this.toImmArray.map(f) ++: FrontStack.empty
-  }
 
   /** O(1) */
   def isEmpty: Boolean = length == 0

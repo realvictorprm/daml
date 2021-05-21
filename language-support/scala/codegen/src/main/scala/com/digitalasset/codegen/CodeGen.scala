@@ -321,14 +321,13 @@ object CodeGen {
 
   private[this] def writeTemplatesAndTypes(
       util: Util
-  )(wp: WriteParams[util.TemplateInterface]): Unit = {
+  )(wp: WriteParams[util.TemplateInterface]): Unit =
     util.templateAndTypeFiles(wp).iterator.foreach {
       case -\/(msg) => logger.debug(msg)
       case \/-((msg, filePath, trees)) =>
         msg foreach (m => logger.debug(m))
         writeCode(filePath, trees)
     }
-  }
 
   private def writeCode(filePath: File, trees: Iterable[Tree]): Unit =
     if (trees.nonEmpty) {
@@ -337,9 +336,7 @@ object CodeGen {
       try {
         writer.println(Util.autoGenerationHeader)
         trees.foreach(tree => writer.println(showCode(tree)))
-      } finally {
-        writer.close()
-      }
+      } finally writer.close()
     } else {
       logger.warn(s"WARNING: nothing to generate, empty trees passed, file: $filePath")
     }

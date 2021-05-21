@@ -43,10 +43,9 @@ class CommandCompletionServiceValidation(
     )
   }
 
-  override def completionEnd(request: CompletionEndRequest): Future[CompletionEndResponse] = {
+  override def completionEnd(request: CompletionEndRequest): Future[CompletionEndResponse] =
     matchLedgerId(ledgerId)(LedgerId(request.ledgerId))
       .fold(Future.failed, _ => service.completionEnd(request))
-  }
 
   override def bindService(): ServerServiceDefinition =
     CommandCompletionServiceGrpc.bindService(this, executionContext)

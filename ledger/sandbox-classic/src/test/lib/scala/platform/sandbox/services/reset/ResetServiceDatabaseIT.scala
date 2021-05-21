@@ -44,32 +44,29 @@ abstract class ResetServiceDatabaseIT extends ResetServiceITBase with SandboxFix
             "parameters" // a new set of parameters is stored at startup
           )
 
-          for ((table, count) <- counts if expectedToHaveOneItem(table)) {
+          for ((table, count) <- counts if expectedToHaveOneItem(table))
             withClue(s"$table has $count item(s): ") {
               count shouldBe 1
             }
-          }
 
           // FIXME this appears to be racy, forcing us to make a loose check
           val expectedToHaveOneItemOrLess = Set(
             "configuration_entries"
           )
 
-          for ((table, count) <- counts if expectedToHaveOneItemOrLess(table)) {
+          for ((table, count) <- counts if expectedToHaveOneItemOrLess(table))
             withClue(s"$table has $count item(s): ") {
               count should be <= 1
             }
-          }
 
           // Everything else should be empty
           val exceptions = ignored union expectedToHaveOneItem union expectedToHaveOneItemOrLess
           val expectedToBeEmpty = counts.keySet.diff(exceptions)
 
-          for ((table, count) <- counts if expectedToBeEmpty(table)) {
+          for ((table, count) <- counts if expectedToBeEmpty(table))
             withClue(s"$table has $count item(s): ") {
               count shouldBe 0
             }
-          }
 
           succeed
         }

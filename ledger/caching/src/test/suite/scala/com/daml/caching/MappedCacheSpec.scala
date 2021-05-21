@@ -51,9 +51,8 @@ final class MappedCacheSpec
       val mappedCache = cache.mapValues[String](
         mapAfterReading = value => value.toString,
         mapBeforeWriting = value =>
-          try {
-            Some(Integer.parseInt(value))
-          } catch {
+          try Some(Integer.parseInt(value))
+          catch {
             case _: NumberFormatException => None
           },
       )

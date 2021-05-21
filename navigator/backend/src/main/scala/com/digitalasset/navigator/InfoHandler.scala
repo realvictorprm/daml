@@ -116,10 +116,9 @@ case class DefaultInfoHandler(arguments: Arguments, platformStore: ActorRef)(imp
     (platformStore ? GetApplicationStateInfo).mapTo[ApplicationStateInfo]
   }
 
-  def getInfo: Future[JsValue] = {
+  def getInfo: Future[JsValue] =
     getStoreInfo
       .map(i => Info(arguments, Right(i)))
       .recover[Info] { case e: Throwable => Info(arguments, Left(e.getMessage)) }
       .map(i => i.toJson)
-  }
 }

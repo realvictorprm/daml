@@ -30,24 +30,22 @@ case class Ledger(
     private val db: DatabaseActions = new DatabaseActions,
 ) extends LazyLogging {
 
-  private def logErrorAndDefaultTo[A](result: Try[A], default: A): A = {
+  private def logErrorAndDefaultTo[A](result: Try[A], default: A): A =
     result match {
       case Success(a) => a
       case Failure(e) =>
         logger.error(e.getMessage)
         default
     }
-  }
 
-  def latestTransaction(types: PackageRegistry): Option[Transaction] = {
+  def latestTransaction(types: PackageRegistry): Option[Transaction] =
     if (useDatabase) {
       logErrorAndDefaultTo(db.lastTransaction(types), None)
     } else {
       lastTransaction
     }
-  }
 
-  def withCommandStatus(commandId: ApiTypes.CommandId, result: CommandStatus): Ledger = {
+  def withCommandStatus(commandId: ApiTypes.CommandId, result: CommandStatus): Ledger =
     if (useDatabase) {
       db.upsertCommandStatus(commandId, result)
       this
@@ -56,9 +54,8 @@ case class Ledger(
         statusByCommandId = statusByCommandId + (commandId -> result)
       )
     }
-  }
 
-  def withCommand(command: Command): Ledger = {
+  def withCommand(command: Command): Ledger =
     if (useDatabase) {
       db.insertCommand(command)
       db.upsertCommandStatus(command.id, CommandStatusWaiting())
@@ -69,7 +66,6 @@ case class Ledger(
         statusByCommandId = statusByCommandId + (command.id -> CommandStatusWaiting()),
       )
     }
-  }
 
   def withTransaction(tx: Transaction, packageRegistry: PackageRegistry): Ledger = {
     val ledger0 = this
@@ -81,7 +77,7 @@ case class Ledger(
     }
   }
 
-  private def withLatestTransaction(tx: Transaction): Ledger = {
+  private def withLatestTransaction(tx: Transaction): Ledger =
     if (useDatabase) {
       db.insertTransaction(tx)
       this
@@ -91,9 +87,8 @@ case class Ledger(
         transactionById = transactionById + (tx.id -> tx),
       )
     }
-  }
 
-  private def withTransactionResult(tx: Transaction): Ledger = {
+  private def withTransactionResult(tx: Transaction): Ledger =
     // Note: only store the status for commands submitted by this client
     if (useDatabase) {
       tx.commandId.foreach(db.updateCommandStatus(_, CommandStatusSuccess(tx)))
@@ -105,7 +100,6 @@ case class Ledger(
           copy(statusByCommandId = statusByCommandId + (commandId -> CommandStatusSuccess(tx)))
         }
     }
-  }
 
   private def withEvent(event: Event, packageRegistry: PackageRegistry): Ledger =
     event match {
@@ -159,7 +153,7 @@ case class Ledger(
   private def withChoiceExercisedInEvent(
       contractId: ApiTypes.ContractId,
       event: ChoiceExercised,
-  ): Ledger = {
+  ): Ledger =
     if (useDatabase) {
       if (event.consuming) {
         db.archiveContract(contractId, event.transactionId)
@@ -180,118 +174,102 @@ case class Ledger(
         eventById = eventById + (event.id -> event),
       )
     }
-  }
 
-  def allContractsCount: Int = {
+  def allContractsCount: Int =
     if (useDatabase) {
       logErrorAndDefaultTo(db.contractCount(), 0)
     } else {
       contractById.size
     }
-  }
 
-  def activeContractsCount: Int = {
+  def activeContractsCount: Int =
     if (useDatabase) {
       logErrorAndDefaultTo(db.activeContractCount(), 0)
     } else {
       activeContractById.size
     }
-  }
 
-  def contract(id: ApiTypes.ContractId, types: PackageRegistry): Option[Contract] = {
+  def contract(id: ApiTypes.ContractId, types: PackageRegistry): Option[Contract] =
     if (useDatabase) {
       logErrorAndDefaultTo(db.contract(id, types), None)
     } else {
       contractById.get(id)
     }
-  }
 
-  def event(id: ApiTypes.EventId, types: PackageRegistry): Option[Event] = {
+  def event(id: ApiTypes.EventId, types: PackageRegistry): Option[Event] =
     if (useDatabase) {
       logErrorAndDefaultTo(db.eventById(id, types), None)
     } else {
       eventById.get(id)
     }
-  }
 
-  def childEvents(id: ApiTypes.EventId, types: PackageRegistry): List[Event] = {
+  def childEvents(id: ApiTypes.EventId, types: PackageRegistry): List[Event] =
     if (useDatabase) {
       logErrorAndDefaultTo(db.eventsByParentId(id, types), List.empty)
     } else {
       (for {
         ev <- eventById.get(id)
         tx <- transactionById.get(ev.transactionId)
-      } yield {
-        tx.events.filter(_.parentId.contains(id))
-      }).getOrElse(List.empty)
+      } yield tx.events.filter(_.parentId.contains(id))).getOrElse(List.empty)
     }
-  }
 
-  def transaction(id: ApiTypes.TransactionId, types: PackageRegistry): Option[Transaction] = {
+  def transaction(id: ApiTypes.TransactionId, types: PackageRegistry): Option[Transaction] =
     if (useDatabase) {
       logErrorAndDefaultTo(db.transactionById(id, types), None)
     } else {
       transactionById.get(id)
     }
-  }
 
-  def command(id: ApiTypes.CommandId, types: PackageRegistry): Option[Command] = {
+  def command(id: ApiTypes.CommandId, types: PackageRegistry): Option[Command] =
     if (useDatabase) {
       logErrorAndDefaultTo(db.commandById(id, types), None)
     } else {
       commandById.get(id)
     }
-  }
 
-  def commandStatus(id: ApiTypes.CommandId, types: PackageRegistry): Option[CommandStatus] = {
+  def commandStatus(id: ApiTypes.CommandId, types: PackageRegistry): Option[CommandStatus] =
     if (useDatabase) {
       logErrorAndDefaultTo(db.commandStatusByCommandId(id, types), None)
     } else {
       statusByCommandId.get(id)
     }
-  }
 
-  def createEventOf(contract: Contract, types: PackageRegistry): Try[ContractCreated] = {
+  def createEventOf(contract: Contract, types: PackageRegistry): Try[ContractCreated] =
     if (useDatabase) {
       db.createEventByContractId(contract.id, types)
     } else {
       Success(createEventByContractId(contract.id))
     }
-  }
 
-  def archiveEventOf(contract: Contract, types: PackageRegistry): Option[ChoiceExercised] = {
+  def archiveEventOf(contract: Contract, types: PackageRegistry): Option[ChoiceExercised] =
     if (useDatabase) {
       logErrorAndDefaultTo(db.archiveEventByContractId(contract.id, types), None)
     } else {
       archiveEventByContractId.get(contract.id)
     }
-  }
 
-  def exercisedEventsOf(contract: Contract, types: PackageRegistry): List[ChoiceExercised] = {
+  def exercisedEventsOf(contract: Contract, types: PackageRegistry): List[ChoiceExercised] =
     if (useDatabase) {
       logErrorAndDefaultTo(db.choiceExercisedEventByContractById(contract.id, types), List.empty)
     } else {
       choiceExercisedEventByContractById.getOrElse(contract.id, List.empty)
     }
-  }
 
-  def allContracts(types: PackageRegistry): LazyList[Contract] = {
+  def allContracts(types: PackageRegistry): LazyList[Contract] =
     if (useDatabase) {
       logErrorAndDefaultTo(db.contracts(types), List.empty[Contract]).to(LazyList)
     } else {
       contractById.values.to(LazyList)
     }
-  }
 
-  def activeContracts(types: PackageRegistry): LazyList[Contract] = {
+  def activeContracts(types: PackageRegistry): LazyList[Contract] =
     if (useDatabase) {
       logErrorAndDefaultTo(db.activeContracts(types), List.empty[Contract]).to(LazyList)
     } else {
       activeContractById.values.to(LazyList)
     }
-  }
 
-  def activeTemplateContractsOf(template: Template, types: PackageRegistry): LazyList[Contract] = {
+  def activeTemplateContractsOf(template: Template, types: PackageRegistry): LazyList[Contract] =
     if (useDatabase) {
       logErrorAndDefaultTo(
         db.activeContractsForTemplate(template.id, types),
@@ -302,9 +280,8 @@ case class Ledger(
         activeContractById.contains(contract.id)
       )
     }
-  }
 
-  def templateContractsOf(template: Template, types: PackageRegistry): LazyList[Contract] = {
+  def templateContractsOf(template: Template, types: PackageRegistry): LazyList[Contract] =
     if (useDatabase) {
       logErrorAndDefaultTo(
         db.contractsForTemplate(template.id, types),
@@ -313,23 +290,20 @@ case class Ledger(
     } else {
       contractsByTemplateId.getOrElse(template.id, Set.empty).to(LazyList)
     }
-  }
 
-  def allCommands(types: PackageRegistry): LazyList[Command] = {
+  def allCommands(types: PackageRegistry): LazyList[Command] =
     if (useDatabase) {
       logErrorAndDefaultTo(db.allCommands(types), List.empty[Command]).to(LazyList)
     } else {
       commandById.values.to(LazyList)
     }
-  }
 
-  def statusOf(commandId: ApiTypes.CommandId, types: PackageRegistry): Option[CommandStatus] = {
+  def statusOf(commandId: ApiTypes.CommandId, types: PackageRegistry): Option[CommandStatus] =
     if (useDatabase) {
       logErrorAndDefaultTo(db.commandStatusByCommandId(commandId, types), None)
     } else {
       statusByCommandId.get(commandId)
     }
-  }
 
   def databaseSchema(): Try[String] =
     if (useDatabase) {

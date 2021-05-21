@@ -134,7 +134,7 @@ final class StandaloneApiServer(
     owner.acquire()
   }
 
-  private def preloadPackages(packageContainer: InMemoryPackageStore): Unit = {
+  private def preloadPackages(packageContainer: InMemoryPackageStore): Unit =
     for {
       (pkgId, _) <- packageContainer.listLfPackagesSync()
       pkg <- packageContainer.getLfPackageSync(pkgId)
@@ -142,22 +142,15 @@ final class StandaloneApiServer(
       engine
         .preloadPackage(pkgId, pkg)
         .consume(
-          { _ =>
-            sys.error("Unexpected request of contract")
-          },
+          _ => sys.error("Unexpected request of contract"),
           packageContainer.getLfPackageSync,
-          { _ =>
-            sys.error("Unexpected request of contract key")
-          },
-          { _ =>
-            sys.error("Unexpected request of local contract key visibility")
-          },
+          _ => sys.error("Unexpected request of contract key"),
+          _ => sys.error("Unexpected request of local contract key visibility"),
         )
       ()
     }
-  }
 
-  private def loadDamlPackages(): InMemoryPackageStore = {
+  private def loadDamlPackages(): InMemoryPackageStore =
     // TODO is it sensible to have all the initial packages to be known since the epoch?
     config.archiveFiles
       .foldLeft[Either[(String, File), InMemoryPackageStore]](Right(InMemoryPackageStore.empty)) {
@@ -165,9 +158,8 @@ final class StandaloneApiServer(
           storeE.flatMap(_.withDarFile(Instant.now(), None, f).left.map(_ -> f))
       }
       .fold({ case (err, file) => sys.error(s"Could not load package $file: $err") }, identity)
-  }
 
-  private def writePortFile(port: Port): Try[Unit] = {
+  private def writePortFile(port: Port): Try[Unit] =
     config.portFile match {
       case Some(path) =>
         PortFiles.write(path, port) match {
@@ -177,5 +169,4 @@ final class StandaloneApiServer(
       case None =>
         Success(())
     }
-  }
 }

@@ -74,7 +74,7 @@ class DecodeV1Spec
       stringTable: ImmArraySeq[String] = ImmArraySeq.empty,
       dottedNameTable: ImmArraySeq[Ref.DottedName] = ImmArraySeq.empty,
       typeTable: ImmArraySeq[Ast.Type] = ImmArraySeq.empty,
-  ) = {
+  ) =
     new DecodeV1(version.minor).Env(
       Ref.PackageId.assertFromString("noPkgId"),
       stringTable,
@@ -84,7 +84,6 @@ class DecodeV1Spec
       Some(dummyModuleName),
       onlySerializableDataDefs = false,
     )
-  }
 
   "decodeKind" should {
 

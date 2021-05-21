@@ -127,7 +127,7 @@ class DamlLedgerClientTest
   private def testActiveContractSetClient(
       activeContractSetClient: ActiveContractsClient,
       activeContractsServiceImpl: ActiveContractsServiceImpl,
-  ): Assertion = {
+  ): Assertion =
     withClue(clueFor("ActiveContractsClient")) {
       activeContractSetClient
         .getActiveContracts(filterFor(someParty), false)
@@ -137,12 +137,11 @@ class DamlLedgerClientTest
         .toList
       activeContractsServiceImpl.getLastRequest.value.ledgerId shouldBe ledgerServices.ledgerId
     }
-  }
 
   private def testCommandClient(
       commandClient: CommandClient,
       commandServiceImpl: CommandServiceImpl,
-  ): Assertion = {
+  ): Assertion =
     withClue(clueFor("CommandClient")) {
       val recordId = new Identifier("recordPackageId", "recordModuleName", "recordEntityName")
       val record = new Record(recordId, List.empty[Record.Field].asJava)
@@ -164,12 +163,11 @@ class DamlLedgerClientTest
         .blockingGet()
       commandServiceImpl.getLastRequest.value.getCommands.ledgerId shouldBe ledgerServices.ledgerId
     }
-  }
 
   private def testCommandCompletionClient(
       commandCompletionClient: CommandCompletionClient,
       commandCompletionServiceImpl: CommandCompletionServiceImpl,
-  ): Assertion = {
+  ): Assertion =
     withClue(clueFor("CommandCompletionClient")) {
       commandCompletionClient
         .completionStream("applicationId", new Absolute(""), Set(someParty).asJava)
@@ -182,12 +180,11 @@ class DamlLedgerClientTest
         .blockingGet()
       commandCompletionServiceImpl.getLastCompletionEndRequest.value.ledgerId shouldBe ledgerServices.ledgerId
     }
-  }
 
   private def testCommandSubmissionClient(
       commandSubmissionClient: CommandSubmissionClient,
       commandSubmissionServiceImpl: CommandSubmissionServiceImpl,
-  ): Assertion = {
+  ): Assertion =
     withClue("CommandSubmissionClient") {
       val recordId = new Identifier("recordPackageId", "recordModuleName", "recordEntityName")
       val record = new Record(recordId, List.empty[Record.Field].asJava)
@@ -209,24 +206,22 @@ class DamlLedgerClientTest
         .blockingGet()
       commandSubmissionServiceImpl.getSubmittedRequest.value.getCommands.ledgerId shouldBe ledgerServices.ledgerId
     }
-  }
 
   private def testTimeClientGet(
       timeClient: TimeClient,
       timeServiceImpl: TimeServiceImpl,
-  ): Assertion = {
+  ): Assertion =
     withClue("TimeClientGet") {
       timeClient.getTime
         .timeout(TestConfiguration.timeoutInSeconds, TimeUnit.SECONDS)
         .blockingFirst()
       timeServiceImpl.getLastGetTimeRequest.value.ledgerId shouldBe ledgerServices.ledgerId
     }
-  }
 
   private def testTimeClientSet(
       timeClient: TimeClient,
       timeServiceImpl: TimeServiceImpl,
-  ): Assertion = {
+  ): Assertion =
     withClue("TimeClientSet") {
       timeClient
         .setTime(Instant.EPOCH, Instant.ofEpochSecond(10L))
@@ -234,24 +229,22 @@ class DamlLedgerClientTest
         .blockingGet()
       timeServiceImpl.getLastSetTimeRequest.value.ledgerId shouldBe ledgerServices.ledgerId
     }
-  }
 
   private def testLedgerConfigurationClient(
       ledgerConfigurationClient: LedgerConfigurationClient,
       ledgerConfigurationServiceImpl: LedgerConfigurationServiceImpl,
-  ): Assertion = {
+  ): Assertion =
     withClue("LedgerConfigurationClient") {
       ledgerConfigurationClient.getLedgerConfiguration
         .timeout(TestConfiguration.timeoutInSeconds, TimeUnit.SECONDS)
         .blockingFirst()
       ledgerConfigurationServiceImpl.getLastRequest.value.ledgerId shouldBe ledgerServices.ledgerId
     }
-  }
 
   private def testPackageClient(
       packageClient: PackageClient,
       packageServiceImpl: PackageServiceImpl,
-  ): Assertion = {
+  ): Assertion =
     withClue("PackageClient") {
       packageClient
         .listPackages()
@@ -269,12 +262,11 @@ class DamlLedgerClientTest
         .blockingGet()
       packageServiceImpl.getLastGetPackageStatusRequest.value.ledgerId shouldBe ledgerServices.ledgerId
     }
-  }
 
   // a custom withFakeLedgerServer that sets all parameters such that testing ledgerId is possible
   private def withFakeLedgerServer(
       authService: AuthService
-  )(f: (Server, LedgerServicesImpls) => Any): Any = {
+  )(f: (Server, LedgerServicesImpls) => Any): Any =
     ledgerServices.withFakeLedgerServer(
       Observable.fromArray(genGetActiveContractsResponse),
       Observable.empty(),
@@ -292,5 +284,4 @@ class DamlLedgerClientTest
       Future.successful(GetPackageStatusResponse(PackageStatus.values.head)),
       authService,
     )(f)
-  }
 }

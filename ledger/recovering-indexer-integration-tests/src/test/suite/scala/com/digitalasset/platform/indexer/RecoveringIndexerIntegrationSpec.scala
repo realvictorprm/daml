@@ -287,7 +287,7 @@ object RecoveringIndexerIntegrationSpec {
           var lastFailure: Option[Offset] = None
           // This spy inserts a failure after each state update to force the indexer to restart.
           val failingParticipantState = spy(delegate)
-          doAnswer(invocation => {
+          doAnswer { invocation =>
             val beginAfter = invocation.getArgument[Option[Offset]](0)
             delegate.stateUpdates(beginAfter).flatMapConcat { case value @ (offset, _) =>
               if (lastFailure.isEmpty || lastFailure.get < offset) {
@@ -297,7 +297,7 @@ object RecoveringIndexerIntegrationSpec {
                 Source.single(value)
               }
             }
-          }).when(failingParticipantState).stateUpdates(ArgumentMatchers.any[Option[Offset]]())
+          }.when(failingParticipantState).stateUpdates(ArgumentMatchers.any[Option[Offset]]())
           failingParticipantState
         }
 

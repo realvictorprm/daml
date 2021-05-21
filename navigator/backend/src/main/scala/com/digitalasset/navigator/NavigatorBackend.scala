@@ -32,12 +32,11 @@ object NavigatorBackend extends UIBackend {
     )
 
   /** Frontend config file */
-  private val frontendConfigRoute: Route = {
+  private val frontendConfigRoute: Route =
     path("api" / "config") {
       if (Files.exists(Paths.get(configFile)))
         getFromFile(configFile)
       else
         complete(StatusCodes.NotFound)
     }
-  }
 }

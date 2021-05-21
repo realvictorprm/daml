@@ -159,11 +159,11 @@ object Arguments {
         )
         .valueName("<bytes>")
         .validate(x => Either.cond(x > 0, (), "Buffer size must be positive"))
-        .action((ledgerInboundMessageSizeMax, arguments) => {
+        .action { (ledgerInboundMessageSizeMax, arguments) =>
           arguments.copy(
             ledgerInboundMessageSizeMax = ledgerInboundMessageSizeMax
           )
-        })
+        }
 
       opt[Unit]("ignore-project-parties")
         .hidden()

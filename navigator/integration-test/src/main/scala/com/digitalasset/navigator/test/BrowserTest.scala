@@ -182,7 +182,7 @@ class BrowserTest(args: Arguments)
     ()
   }
 
-  private def scrollDown(js: JavascriptExecutor, css: String, by: Int) = {
+  private def scrollDown(js: JavascriptExecutor, css: String, by: Int) =
     js.executeScript(s"""
       var element = document.querySelector("$css");
       if (element) {
@@ -193,10 +193,9 @@ class BrowserTest(args: Arguments)
         console.error("scrollDown: could not find element '$css'")
       }
     """)
-  }
 
   // Check if a row with the given content is visible in a ReactVirtualized table
-  private def isTableRowVisible(js: JavascriptExecutor, content: XPathQuery) = {
+  private def isTableRowVisible(js: JavascriptExecutor, content: XPathQuery) =
     js.executeScript(s"""
       // Table should always be rendered
       var table = document.querySelector("${contractsTable.queryString}");
@@ -221,7 +220,6 @@ class BrowserTest(args: Arguments)
       // console.log(`table: [$${tableViewTop}, $${tableViewBottom}], row: [$${rowTop}, $${rowBottom}]`);
       return ((rowBottom >= tableViewTop) && (rowTop <= tableViewBottom));
     """)
-  }
 
   // This config is used where we wait for the result in an "eventually" block
   // Note: Browser tests run on remote machines, we use a generous timeout.
@@ -241,34 +239,34 @@ class BrowserTest(args: Arguments)
   "The user" should "be able to sign in and out" in {
     signIn(user_bank1)
 
-    eventually { doClick(signOutButton) }
-    eventually { currentUrl should be(singInPage) }
+    eventually(doClick(signOutButton))
+    eventually(currentUrl should be(singInPage))
   }
 
   "Templates button" should "link to templates view" in {
     signIn(user_bank1)
 
-    eventually { doClick(templates) }
-    eventually { currentUrl should be(templatesPage) }
+    eventually(doClick(templates))
+    eventually(currentUrl should be(templatesPage))
   }
 
   "Contracts button" should "link to contracts view" in {
     signIn(user_bank1)
 
-    eventually { doClick(contracts) }
-    eventually { currentUrl should be(contractsPage) }
+    eventually(doClick(contracts))
+    eventually(currentUrl should be(contractsPage))
   }
 
   "Time" should "be settable after sign in" in {
     signIn(user_bank1)
 
-    eventually { doClick(timeButton) }
+    eventually(doClick(timeButton))
 
-    eventually { doClick(specificDate) }
+    eventually(doClick(specificDate))
 
-    eventually { doClick(setTimeButton) }
+    eventually(doClick(setTimeButton))
 
-    eventually { find(specificDateLabel).isDefined should be(true) }
+    eventually(find(specificDateLabel).isDefined should be(true))
   }
 
   // ------------------------------------------------------------------------------------------------------------------
@@ -280,11 +278,11 @@ class BrowserTest(args: Arguments)
     signIn(user_bank2)
 
     // Open templates view
-    eventually { doClick(templates) }
-    eventually { currentUrl should be(templatesPage) }
+    eventually(doClick(templates))
+    eventually(currentUrl should be(templatesPage))
 
     // Select the offer template - it might take a while to load the templates
-    eventually { doClick(rightOfUseOffer) }
+    eventually(doClick(rightOfUseOffer))
     eventually {
       currentUrl should startWith(s"http://localhost:$navigatorPort/templates/Main:RightOfUseOffer")
     }
@@ -296,36 +294,36 @@ class BrowserTest(args: Arguments)
       textField(addressInput).value = "McDuck Manor, Duckburg"
     }
 
-    eventually { click on expirationdateInput }
-    eventually { click on expirationdate }
-    eventually { doClick(setTimeButton) }
+    eventually(click on expirationdateInput)
+    eventually(click on expirationdate)
+    eventually(doClick(setTimeButton))
 
     // Submit - we may need some time to close the date picker
-    eventually { doClick(submitContract) }
+    eventually(doClick(submitContract))
 
     // Open templates view
-    eventually { doClick(contracts) }
-    eventually { currentUrl should be(contractsPage) }
+    eventually(doClick(contracts))
+    eventually(currentUrl should be(contractsPage))
 
     // There should be a single contract
     implicit def patienceConfig: PatienceConfig = commandSubmissionPatienceConfig
-    eventually { findAll(rightOfUseAgreement).toList.size should be(1) }
+    eventually(findAll(rightOfUseAgreement).toList.size should be(1))
   }
 
   "Choices" should "render properly" in {
     signIn(user_bank1)
 
-    eventually { doClick(choiceButton) }
+    eventually(doClick(choiceButton))
 
-    eventually { find(archiveChoice).orElse(find(accept)).isDefined should be(true) }
+    eventually(find(archiveChoice).orElse(find(accept)).isDefined should be(true))
   }
 
   "Contract data" should "be displayed" in {
     signIn(user_bank1)
 
-    eventually { doClick(contractRow) }
+    eventually(doClick(contractRow))
 
-    eventually { find(contractDetails).isDefined should be(true) }
+    eventually(find(contractDetails).isDefined should be(true))
 
     find(landlord).isDefined should be(true)
   }
@@ -334,16 +332,16 @@ class BrowserTest(args: Arguments)
     signIn(user_operator)
 
     doClick(templates)
-    eventually { currentUrl should be(templatesPage) }
+    eventually(currentUrl should be(templatesPage))
 
     // Open template contracts page
-    eventually { doClick(spanWith("1000")) }
+    eventually(doClick(spanWith("1000")))
     eventually {
       currentUrl should startWith(s"http://localhost:$navigatorPort/templates/Main:Counter")
     }
 
     // Sort by index
-    eventually { doClick(spanWith("index")) }
+    eventually(doClick(spanWith("index")))
 
     // Wait until table is sorted by index
     eventually {
@@ -377,7 +375,7 @@ class BrowserTest(args: Arguments)
     scrollDown(js, contractsTable.queryString, 2 * tableRowHeight)
 
     // Check the presence of the first on-demand loaded contract
-    eventually { find(spanWith(firstNewElement)).isDefined should be(true) }
+    eventually(find(spanWith(firstNewElement)).isDefined should be(true))
   }
 
   // ------------------------------------------------------------------------------------------------------------------
@@ -417,7 +415,7 @@ class BrowserTest(args: Arguments)
   }
 
   private def retry[R](action: => R, maxRetries: Int, delayMillis: Int): Try[R] = {
-    def retry0(count: Int): Try[R] = {
+    def retry0(count: Int): Try[R] =
       Try(action) match {
         case Success(r) => Success(r)
         case Failure(e) =>
@@ -428,7 +426,6 @@ class BrowserTest(args: Arguments)
             retry0(count + 1)
           }
       }
-    }
 
     retry0(0)
   }

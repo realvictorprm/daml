@@ -28,7 +28,7 @@ final class ProgramResource[Context: HasExecutionContext, T](
     )
   }
 
-  def run(newContext: ExecutionContext => Context): Unit = {
+  def run(newContext: ExecutionContext => Context): Unit =
     newLoggingContext { implicit loggingContext =>
       val resource = {
         implicit val context: Context = newContext(ExecutionContext.fromExecutor(executorService))
@@ -42,14 +42,15 @@ final class ProgramResource[Context: HasExecutionContext, T](
         ()
       }
 
-      sys.runtime.addShutdownHook(new Thread(() => {
-        try {
-          stop()
-        } catch {
-          case NonFatal(exception) =>
-            logger.error("Failed to stop successfully.", exception)
-        }
-      }))
+      sys.runtime.addShutdownHook(
+        new Thread(() =>
+          try stop()
+          catch {
+            case NonFatal(exception) =>
+              logger.error("Failed to stop successfully.", exception)
+          }
+        )
+      )
 
       // On failure, shut down immediately.
       resource.asFuture.failed.foreach { exception =>
@@ -66,7 +67,6 @@ final class ProgramResource[Context: HasExecutionContext, T](
         sys.exit(1) // `stop` will be triggered by the shutdown hook.
       }(ExecutionContext.global) // Run on the global execution context to avoid deadlock.
     }
-  }
 }
 
 object ProgramResource {

@@ -36,7 +36,7 @@ final case class TlsConfiguration(
     )
 
   /** If enabled and all required fields are present, it returns an SslContext suitable for client usage */
-  def client: Option[SslContext] = {
+  def client: Option[SslContext] =
     if (enabled)
       Some(
         GrpcSslContexts
@@ -47,7 +47,6 @@ final case class TlsConfiguration(
           .build()
       )
     else None
-  }
 
   /** If enabled and all required fields are present, it returns an SslContext suitable for server usage */
   def server: Option[SslContext] =

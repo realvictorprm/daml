@@ -172,7 +172,7 @@ private[kvutils] class PartyAllocationCommitter(
       recordTime: Option[Timestamp],
       result: Result,
       addErrorDetails: DamlPartyAllocationRejectionEntry.Builder => DamlPartyAllocationRejectionEntry.Builder,
-  ): DamlLogEntry = {
+  ): DamlLogEntry =
     buildLogEntryWithOptionalRecordTime(
       recordTime,
       _.setPartyAllocationRejectionEntry(
@@ -183,13 +183,11 @@ private[kvutils] class PartyAllocationCommitter(
         )
       ),
     )
-  }
 
-  private def setOutOfTimeBoundsLogEntry(result: Result, commitContext: CommitContext): Unit = {
+  private def setOutOfTimeBoundsLogEntry(result: Result, commitContext: CommitContext): Unit =
     commitContext.outOfTimeBoundsLogEntry = Some(
       buildRejectionLogEntry(recordTime = None, result, identity)
     )
-  }
 
   override protected val steps: Steps[Result] = Iterable(
     "authorize_submission" -> authorizeSubmission,

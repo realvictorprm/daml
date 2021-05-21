@@ -51,9 +51,8 @@ object Session {
     user
   }
 
-  def close(sessionId: String): Unit = {
+  def close(sessionId: String): Unit =
     sessions -= sessionId
-  }
 
   // method for debugging and testing purposes
   private[navigator] def clean(): Unit = synchronized {
@@ -118,12 +117,11 @@ object SessionJsonProtocol extends DefaultJsonProtocol {
   }
 
   implicit object sessionWriter extends RootJsonWriter[Session] {
-    override def write(obj: Session): JsValue = {
+    override def write(obj: Session): JsValue =
       JsObject(
         typeFieldName -> sessionType,
         userFieldName -> obj.user.toJson,
       )
-    }
   }
 
   implicit object statusWriter extends RootJsonWriter[Status] {
@@ -191,7 +189,7 @@ object SessionJsonProtocol extends DefaultJsonProtocol {
         )
       )
 
-    def fromFields(fields: Map[String, JsValue]): SignIn = {
+    def fromFields(fields: Map[String, JsValue]): SignIn =
       (fields.get(methodFieldName), fields.get(errorFieldName)) match {
         case (None, _) =>
           throw DeserializationException(
@@ -210,7 +208,6 @@ object SessionJsonProtocol extends DefaultJsonProtocol {
             },
           )
       }
-    }
 
     override def read(json: JsValue): SignIn =
       deserialize2(json, signInType)(fromFields)
@@ -239,7 +236,7 @@ object SessionJsonProtocol extends DefaultJsonProtocol {
     */
   private def deserialize2[T](json: JsValue, typeExpected: JsString)(
       f: Map[String, JsValue] => T
-  )(implicit tag: ClassTag[T]): T = {
+  )(implicit tag: ClassTag[T]): T =
     deserialize[T](json) { case (typeStr, fields) =>
       if (typeExpected != typeStr) {
         throw new DeserializationException(
@@ -250,7 +247,6 @@ object SessionJsonProtocol extends DefaultJsonProtocol {
         f(fields)
       }
     }
-  }
 
   /** Tries to retrieve a field from a `jsObject` and convert it to `T` if `f` is given. Throws
     * `DeserializationException` if the `jsObject` doesn't contain the field

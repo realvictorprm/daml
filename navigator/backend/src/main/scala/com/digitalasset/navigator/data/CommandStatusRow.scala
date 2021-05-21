@@ -20,7 +20,7 @@ final case class CommandStatusRow(
 
   def toCommandStatus(
       transactionById: ApiTypes.TransactionId => Try[Option[Transaction]]
-  ): Try[CommandStatus] = {
+  ): Try[CommandStatus] =
     subclassType match {
       case "CommandStatusWaiting" =>
         Success(CommandStatusWaiting())
@@ -28,9 +28,7 @@ final case class CommandStatusRow(
         (for {
           c <- code
           d <- details
-        } yield {
-          CommandStatusError(c, d)
-        }).fold[Try[CommandStatus]](
+        } yield CommandStatusError(c, d)).fold[Try[CommandStatus]](
           Failure(
             DeserializationFailed(s"Failed to deserialize CommandStatusError from row: $this")
           )
@@ -63,12 +61,11 @@ final case class CommandStatusRow(
         Success(CommandStatusUnknown())
       case s => Failure(DeserializationFailed(s"unknown subclass type for CommandStatus: $s"))
     }
-  }
 }
 
 object CommandStatusRow {
 
-  def fromCommandStatus(commandId: ApiTypes.CommandId, cs: CommandStatus): CommandStatusRow = {
+  def fromCommandStatus(commandId: ApiTypes.CommandId, cs: CommandStatus): CommandStatusRow =
     cs match {
       case w: CommandStatusWaiting =>
         CommandStatusRow(commandId.unwrap, w.isCompleted, "CommandStatusWaiting", None, None, None)
@@ -93,5 +90,4 @@ object CommandStatusRow {
       case u: CommandStatusUnknown =>
         CommandStatusRow(commandId.unwrap, u.isCompleted, "CommandStatusUnknown", None, None, None)
     }
-  }
 }

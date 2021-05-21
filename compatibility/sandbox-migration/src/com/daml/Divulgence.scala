@@ -129,17 +129,15 @@ final class Divulgence(
       newDivulgeeAssets <- Future.traverse(newAssets.collect(divulged))(
         model.fetchDivulgedAsset(_, divulgee)
       )
-    } yield {
-      saveAsJson(
-        config.outputFile,
-        Divulgence
-          .Result(
-            oldAssets.map(Application.ContractResult.fromCreateEvent),
-            newAssets.map(Application.ContractResult.fromCreateEvent),
-            oldDivulgeeAssets,
-            newDivulgeeAssets,
-          ),
-      )
-    }
+    } yield saveAsJson(
+      config.outputFile,
+      Divulgence
+        .Result(
+          oldAssets.map(Application.ContractResult.fromCreateEvent),
+          newAssets.map(Application.ContractResult.fromCreateEvent),
+          oldDivulgeeAssets,
+          newDivulgeeAssets,
+        ),
+    )
 
 }

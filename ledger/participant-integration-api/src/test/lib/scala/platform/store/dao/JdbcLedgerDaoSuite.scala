@@ -44,9 +44,7 @@ private[dao] trait JdbcLedgerDaoSuite extends JdbcLedgerDaoBackend {
   protected final val nextOffset: () => Offset = {
     val base = BigInt(1) << 32
     val counter = new AtomicLong(0)
-    () => {
-      Offset.fromByteArray((base + counter.getAndIncrement()).toByteArray)
-    }
+    () => Offset.fromByteArray((base + counter.getAndIncrement()).toByteArray)
   }
 
   protected final implicit class OffsetToLong(offset: Offset) {
@@ -54,7 +52,7 @@ private[dao] trait JdbcLedgerDaoSuite extends JdbcLedgerDaoBackend {
   }
 
   private[this] val Success(dar) = {
-    val reader = DarReader { (_, stream) => Try(DamlLf.Archive.parseFrom(stream)) }
+    val reader = DarReader((_, stream) => Try(DamlLf.Archive.parseFrom(stream)))
     val fileName = new File(rlocation(ModelTestDar.path))
     reader.readArchiveFromFile(fileName)
   }

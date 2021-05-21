@@ -8,8 +8,7 @@ import java.util
 private[tracking] class SizeCappedMap[K, V](initialCapacity: Int, maxCapacity: Int)
     extends util.LinkedHashMap[K, V](initialCapacity) {
 
-  override def removeEldestEntry(eldest: util.Map.Entry[K, V]): Boolean = {
+  override def removeEldestEntry(eldest: util.Map.Entry[K, V]): Boolean =
     size() > maxCapacity
-  }
 
 }

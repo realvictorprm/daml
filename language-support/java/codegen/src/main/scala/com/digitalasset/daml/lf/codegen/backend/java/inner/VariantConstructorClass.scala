@@ -23,7 +23,7 @@ object VariantConstructorClass extends StrictLogging {
       javaName: String,
       body: Type,
       packagePrefixes: Map[PackageId, String],
-  ): TypeSpec = {
+  ): TypeSpec =
     TrackLineage.of("variant constructor", constructorName) {
       logger.info("Start")
 
@@ -58,7 +58,6 @@ object VariantConstructorClass extends StrictLogging {
         .addMethods(ObjectMethods(className.rawType, typeArgs, Vector(variantFieldName)).asJava)
         .build()
     }
-  }
 
   private def toValue(
       constructor: String,

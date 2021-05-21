@@ -14,9 +14,7 @@ class HealthServiceIT extends LedgerTestSuite {
     implicit ec => { case Participants(Participant(ledger)) =>
       for {
         health <- ledger.checkHealth()
-      } yield {
-        assertEquals("HSisServing", health.status, HealthCheckResponse.ServingStatus.SERVING)
-      }
+      } yield assertEquals("HSisServing", health.status, HealthCheckResponse.ServingStatus.SERVING)
     }
   )
 

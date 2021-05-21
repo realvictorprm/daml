@@ -298,8 +298,8 @@ private[http] object ContractsFetch {
       )
       val as = b.add(Flow[A \/ B].collect { case -\/(a) => a })
       val bs = b.add(Flow[A \/ B].collect { case \/-(b) => b })
-      discard { split ~> as }
-      discard { split ~> bs }
+      discard(split ~> as)
+      discard(split ~> bs)
       new FanOutShape2(split.in, as.out, bs.out)
     }
 
@@ -309,8 +309,8 @@ private[http] object ContractsFetch {
       val split = b add Broadcast[(A, B)](2)
       val left = b add Flow.fromFunction((_: (A, B))._1)
       val right = b add Flow.fromFunction((_: (A, B))._2)
-      discard { split ~> left }
-      discard { split ~> right }
+      discard(split ~> left)
+      discard(split ~> right)
       new FanOutShape2(split.in, left.out, right.out)
     }
 
@@ -329,8 +329,8 @@ private[http] object ContractsFetch {
     import lav1.event.Event
     import Event.Event._
     txes foreach {
-      case Event(Created(c)) => discard { csb += c }
-      case Event(Archived(a)) => discard { asb += ((a.contractId, a)) }
+      case Event(Created(c)) => discard(csb += c)
+      case Event(Archived(a)) => discard(asb += ((a.contractId, a)))
       case Event(Empty) => () // nonsense
     }
     val as = asb.result()
@@ -381,11 +381,11 @@ private[http] object ContractsFetch {
       val txns = b add transactionsFollowingBoundary(transactionsSince)
       val allSteps = b add Concat[ContractStreamStep.LAV1](3)
       // format: off
-      discard { dupOff <~ acs.out1 }
-      discard {           acs.out0.map(ces => Acs(ces.toVector)) ~> allSteps }
-      discard { dupOff       ~> liveStart                        ~> allSteps }
-      discard {                      txns.out0                   ~> allSteps }
-      discard { dupOff            ~> txns.in }
+      discard {dupOff <~ acs.out1}
+      discard {acs.out0.map(ces => Acs(ces.toVector)) ~> allSteps}
+      discard {dupOff       ~> liveStart                        ~> allSteps}
+      discard {txns.out0                   ~> allSteps}
+      discard {dupOff            ~> txns.in}
       // format: on
       new FanOutShape2(acs.in, allSteps.out, txns.out1)
     }
@@ -417,9 +417,9 @@ private[http] object ContractsFetch {
         max(LedgerBegin: BeginBookmark[domain.Offset])
       )
       // format: off
-      discard { txnSplit.in <~ txns <~ dupOff }
-      discard {                        dupOff                                       ~> mergeOff ~> maxOff }
-      discard { txnSplit.out1.map(off => AbsoluteBookmark(off.unwrap)) ~> lastTxOff ~> mergeOff }
+      discard {txnSplit.in <~ txns <~ dupOff}
+      discard {dupOff                                       ~> mergeOff ~> maxOff}
+      discard {txnSplit.out1.map(off => AbsoluteBookmark(off.unwrap)) ~> lastTxOff ~> mergeOff}
       // format: on
       new FanOutShape2(dupOff.in, txnSplit.out0, maxOff.out)
     }
@@ -439,8 +439,8 @@ private[http] object ContractsFetch {
       val off = b add Flow[GACR]
         .collect { case gacr if gacr.offset.nonEmpty => AbsoluteBookmark(gacr.offset) }
         .via(last(LedgerBegin: BeginBookmark[String]))
-      discard { dup ~> acs }
-      discard { dup ~> off }
+      discard(dup ~> acs)
+      discard(dup ~> off)
       new FanOutShape2(dup.in, acs.out, off.out)
     }
 

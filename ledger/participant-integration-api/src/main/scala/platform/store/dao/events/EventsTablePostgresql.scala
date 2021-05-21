@@ -74,7 +74,7 @@ case class EventsTablePostgresql(idempotentEventInsertions: Boolean) extends Eve
 
     val submittersValue = tx.submitterInfo.map(_.actAs.mkString("|")).orNull
 
-    for (((nodeId, node), i) <- info.events.zipWithIndex) {
+    for (((nodeId, node), i) <- info.events.zipWithIndex)
       node match {
         case create: Create =>
           submitters(i) = submittersValue
@@ -110,7 +110,6 @@ case class EventsTablePostgresql(idempotentEventInsertions: Boolean) extends Eve
             .mkString("|")
         case _ => throw new UnexpectedNodeException(nodeId, tx.transactionId)
       }
-    }
 
     val inserts = insertEvents(
       eventIds,

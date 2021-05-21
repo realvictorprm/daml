@@ -39,10 +39,10 @@ object ServerStreamingBenchmark extends AkkaStreamPerformanceTest {
             .to(clients)
             .map(i => resource.value() -> new AkkaExecutionSequencerPool(s"client-$i")(system))
           _ <- 1.to(callsPerClient)
-        } yield {
-          serverStreamingCall(totalElements / clients / callsPerClient, channel)(schedulerPool)
-            .map(_ => channel -> schedulerPool)
-        }
+        } yield serverStreamingCall(totalElements / clients / callsPerClient, channel)(
+          schedulerPool
+        )
+          .map(_ => channel -> schedulerPool)
         val eventualTuples = Future.sequence(eventualDones)
         await(eventualTuples).foreach { case (channel, pool) =>
           channel.shutdown()
@@ -56,12 +56,11 @@ object ServerStreamingBenchmark extends AkkaStreamPerformanceTest {
 
   private def serverStreamingCall(streamedElements: Int, managedChannel: ManagedChannel)(implicit
       executionSequencerFactory: ExecutionSequencerFactory
-  ): Future[Done] = {
+  ): Future[Done] =
     ClientAdapter
       .serverStreaming(
         HelloRequest(streamedElements),
         HelloServiceGrpc.stub(managedChannel).serverStreaming,
       )
       .runWith(Sink.ignore)(materializer)
-  }
 }

@@ -52,9 +52,8 @@ object HttpBasicAuth {
   val BASIC = "Basic";
   val AUTHORIZATION = "Authorization";
 
-  def encodeCredentials(username: String, password: String): String = {
-    new String(Base64.encodeBase64String((username + ":" + password).getBytes));
-  };
+  def encodeCredentials(username: String, password: String): String =
+    new String(Base64.encodeBase64String((username + ":" + password).getBytes));;
 
   def getHeader(username: String, password: String): String =
     BASIC + " " + encodeCredentials(username, password);
@@ -102,9 +101,7 @@ object BrowserStack extends LazyLogging {
       )
       sessions <- decode[List[SessionInfo]](sessionsJson).toTry
       session <- getSession(sessions, sessionName)
-    } yield {
-      session.automation_session.public_url.getOrElse("N/A")
-    }
+    } yield session.automation_session.public_url.getOrElse("N/A")
 
     public_url.fold(
       e => logger.error(s"Failed to get BrowserStack log: '$e'"),

@@ -22,9 +22,8 @@ import org.openjdk.jmh.annotations._
 
 class CollectAuthority {
   @Benchmark @BenchmarkMode(Array(Mode.AverageTime)) @OutputTimeUnit(TimeUnit.MILLISECONDS)
-  def bench(state: CollectAuthorityState): Unit = {
+  def bench(state: CollectAuthorityState): Unit =
     state.run()
-  }
 }
 
 @State(Scope.Benchmark)

@@ -13,9 +13,8 @@ import com.daml.lf.speedy.SValue._
 
 private[speedy] object PrettyLightweight { // lightweight pretty printer for CEK machine states
 
-  def ppMachine(m: Machine): String = {
+  def ppMachine(m: Machine): String =
     s"[${m.envBase}] ${ppEnv(m.env)} -- ${ppCtrl(m.ctrl, m.returnValue)} -- ${ppKontStack(m.kontStack)}"
-  }
 
   def ppCtrl(e: SExpr, v: SValue): String =
     if (v != null) {
@@ -24,13 +23,11 @@ private[speedy] object PrettyLightweight { // lightweight pretty printer for CEK
       s"E-${pp(e)}"
     }
 
-  def ppEnv(env: Env): String = {
+  def ppEnv(env: Env): String =
     s"#${env.size()}={${commas(env.asScala.map(pp))}}"
-  }
 
-  def ppKontStack(ks: util.ArrayList[Kont]): String = {
+  def ppKontStack(ks: util.ArrayList[Kont]): String =
     s"[${ppKont(ks.get(ks.size - 1))}... #${ks.size()}]" // head kont & size
-  }
 
   def ppKont(k: Kont): String = k.getClass.getSimpleName
 
@@ -40,9 +37,8 @@ private[speedy] object PrettyLightweight { // lightweight pretty printer for CEK
     case SELocF(n) => s"F#$n"
   }
 
-  def pp(x: SDefinitionRef): String = {
+  def pp(x: SDefinitionRef): String =
     s"${x.ref.qualifiedName.name}"
-  }
 
   def pp(e: SExpr): String = e match {
     case SEValue(v) => s"(VALUE)${pp(v)}"

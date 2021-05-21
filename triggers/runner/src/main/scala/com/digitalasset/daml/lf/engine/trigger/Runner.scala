@@ -80,20 +80,17 @@ final case class Trigger(
 // Utilities for interacting with the speedy machine.
 object Machine extends StrictLogging {
   // Run speedy until we arrive at a value.
-  def stepToValue(machine: Speedy.Machine): SValue = {
+  def stepToValue(machine: Speedy.Machine): SValue =
     machine.run() match {
       case SResultFinalValue(v) => v
-      case SResultError(err) => {
+      case SResultError(err) =>
         logger.error(Pretty.prettyError(err).render(80))
         throw err
-      }
-      case res => {
+      case res =>
         val errMsg = s"Unexpected speedy result: $res"
         logger.error(errMsg)
         throw new RuntimeException(errMsg)
-      }
     }
-  }
 }
 
 object Trigger extends StrictLogging {
@@ -179,7 +176,7 @@ object Trigger extends StrictLogging {
       )
     val machine = Speedy.Machine.fromPureSExpr(compiledPackages, registeredTemplates)
     Machine.stepToValue(machine) match {
-      case SVariant(_, "AllInDar", _, _) => {
+      case SVariant(_, "AllInDar", _, _) =>
         val packages: Seq[(PackageId, PackageSignature)] = compiledPackages.packageIds
           .map(pkgId => (pkgId, compiledPackages.getSignature(pkgId).get))
           .toSeq
@@ -191,7 +188,6 @@ object Trigger extends StrictLogging {
           })
         })
         Right(Filters(Some(InclusiveFilters(templateIds))))
-      }
       case SVariant(_, "RegisteredTemplates", _, v) =>
         converter.toRegisteredTemplates(v) match {
           case Right(tpls) => Right(Filters(Some(InclusiveFilters(tpls.map(toApiIdentifier(_))))))
@@ -531,9 +527,8 @@ class Runner(
       case x @ HeartbeatMsg() => List(x) // Hearbeats don't carry any information.
     }
 
-  def makeApp(func: SExpr, values: Array[SValue]): SExpr = {
+  def makeApp(func: SExpr, values: Array[SValue]): SExpr =
     SEApp(func, values.map(SEValue(_)))
-  }
 
   private[this] def makeAppD(func: SValue, values: SValue*) = makeApp(SEValue(func), values.toArray)
 
@@ -542,7 +537,7 @@ class Runner(
   def queryACS()(implicit
       materializer: Materializer,
       executionContext: ExecutionContext,
-  ): Future[(Seq[CreatedEvent], LedgerOffset)] = {
+  ): Future[(Seq[CreatedEvent], LedgerOffset)] =
     for {
       acsResponses <- client.activeContractSetClient
         .getActiveContracts(transactionFilter, verbose = false)
@@ -552,7 +547,6 @@ class Runner(
           LedgerOffset().withAbsolute(resp.offset)
         )
     } yield (acsResponses.flatMap(x => x.activeContracts), offset)
-  }
 
   private[this] def submitOrFail(implicit
       ec: ExecutionContext
@@ -624,13 +618,12 @@ object Runner extends StrictLogging {
     (250 * (1 << (afterTries - 1))).milliseconds
 
   // Return the time provider for a given time provider type.
-  def getTimeProvider(ty: TimeProviderType): TimeProvider = {
+  def getTimeProvider(ty: TimeProviderType): TimeProvider =
     ty match {
       case TimeProviderType.Static => TimeProvider.Constant(Instant.EPOCH)
       case TimeProviderType.WallClock => TimeProvider.UTC
       case _ => throw new RuntimeException(s"Unexpected TimeProviderType: $ty")
     }
-  }
 
   private object DamlFun {
     def unapply(v: SPAP): Some[SPAP] = Some(v)
@@ -653,12 +646,11 @@ object Runner extends StrictLogging {
       else
         retryable(value).flatMap(
           _.cata(
-            Future.successful, {
-              Future {
-                try Thread.sleep(backoff(initialTries - tries + 1).toMillis)
-                catch { case _: InterruptedException => }
-              }.flatMap(_ => trial(tries - 1, value))
-            },
+            Future.successful,
+            Future {
+              try Thread.sleep(backoff(initialTries - tries + 1).toMillis)
+              catch { case _: InterruptedException => }
+            }.flatMap(_ => trial(tries - 1, value)),
           )
         )
     Flow[A].mapAsync(parallelism)(trial(initialTries, _))

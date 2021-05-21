@@ -39,9 +39,7 @@ private[dao] trait JdbcLedgerDaoTransactionsSpec extends OptionValues with Insid
       (_, tx) <- store(singleCreate)
       result <- ledgerDao.transactionsReader
         .lookupFlatTransactionById(transactionId = "WRONG", tx.actAs.toSet)
-    } yield {
-      result shouldBe None
-    }
+    } yield result shouldBe None
   }
 
   it should "return nothing for a mismatching party" in {
@@ -49,9 +47,7 @@ private[dao] trait JdbcLedgerDaoTransactionsSpec extends OptionValues with Insid
       (_, tx) <- store(singleCreate)
       result <- ledgerDao.transactionsReader
         .lookupFlatTransactionById(tx.transactionId, Set("WRONG"))
-    } yield {
-      result shouldBe None
-    }
+    } yield result shouldBe None
   }
 
   it should "return the expected flat transaction for a correct request (create)" in {
@@ -59,28 +55,26 @@ private[dao] trait JdbcLedgerDaoTransactionsSpec extends OptionValues with Insid
       (offset, tx) <- store(singleCreate)
       result <- ledgerDao.transactionsReader
         .lookupFlatTransactionById(tx.transactionId, tx.actAs.toSet)
-    } yield {
-      inside(result.value.transaction) { case Some(transaction) =>
-        transaction.commandId shouldBe tx.commandId.get
-        transaction.offset shouldBe ApiOffset.toApiString(offset)
-        transaction.effectiveAt.value.seconds shouldBe tx.ledgerEffectiveTime.getEpochSecond
-        transaction.effectiveAt.value.nanos shouldBe tx.ledgerEffectiveTime.getNano
-        transaction.transactionId shouldBe tx.transactionId
-        transaction.workflowId shouldBe tx.workflowId.getOrElse("")
-        inside(transaction.events.loneElement.event.created) { case Some(created) =>
-          val (nodeId, createNode: NodeCreate[ContractId]) =
-            tx.transaction.nodes.head
-          created.eventId shouldBe EventId(tx.transactionId, nodeId).toLedgerString
-          created.witnessParties should contain only (tx.actAs: _*)
-          created.agreementText.getOrElse("") shouldBe createNode.coinst.agreementText
-          created.contractKey shouldBe None
-          created.createArguments shouldNot be(None)
-          created.signatories should contain theSameElementsAs createNode.signatories
-          created.observers should contain theSameElementsAs createNode.stakeholders.diff(
-            createNode.signatories
-          )
-          created.templateId shouldNot be(None)
-        }
+    } yield inside(result.value.transaction) { case Some(transaction) =>
+      transaction.commandId shouldBe tx.commandId.get
+      transaction.offset shouldBe ApiOffset.toApiString(offset)
+      transaction.effectiveAt.value.seconds shouldBe tx.ledgerEffectiveTime.getEpochSecond
+      transaction.effectiveAt.value.nanos shouldBe tx.ledgerEffectiveTime.getNano
+      transaction.transactionId shouldBe tx.transactionId
+      transaction.workflowId shouldBe tx.workflowId.getOrElse("")
+      inside(transaction.events.loneElement.event.created) { case Some(created) =>
+        val (nodeId, createNode: NodeCreate[ContractId]) =
+          tx.transaction.nodes.head
+        created.eventId shouldBe EventId(tx.transactionId, nodeId).toLedgerString
+        created.witnessParties should contain only (tx.actAs: _*)
+        created.agreementText.getOrElse("") shouldBe createNode.coinst.agreementText
+        created.contractKey shouldBe None
+        created.createArguments shouldNot be(None)
+        created.signatories should contain theSameElementsAs createNode.signatories
+        created.observers should contain theSameElementsAs createNode.stakeholders.diff(
+          createNode.signatories
+        )
+        created.templateId shouldNot be(None)
       }
     }
   }
@@ -91,22 +85,20 @@ private[dao] trait JdbcLedgerDaoTransactionsSpec extends OptionValues with Insid
       (offset, exercise) <- store(singleExercise(nonTransient(create).loneElement))
       result <- ledgerDao.transactionsReader
         .lookupFlatTransactionById(exercise.transactionId, exercise.actAs.toSet)
-    } yield {
-      inside(result.value.transaction) { case Some(transaction) =>
-        transaction.commandId shouldBe exercise.commandId.get
-        transaction.offset shouldBe ApiOffset.toApiString(offset)
-        transaction.transactionId shouldBe exercise.transactionId
-        transaction.effectiveAt.value.seconds shouldBe exercise.ledgerEffectiveTime.getEpochSecond
-        transaction.effectiveAt.value.nanos shouldBe exercise.ledgerEffectiveTime.getNano
-        transaction.workflowId shouldBe exercise.workflowId.getOrElse("")
-        inside(transaction.events.loneElement.event.archived) { case Some(archived) =>
-          val (nodeId, exerciseNode: NodeExercises[NodeId, ContractId]) =
-            exercise.transaction.nodes.head
-          archived.eventId shouldBe EventId(transaction.transactionId, nodeId).toLedgerString
-          archived.witnessParties should contain only (exercise.actAs: _*)
-          archived.contractId shouldBe exerciseNode.targetCoid.coid
-          archived.templateId shouldNot be(None)
-        }
+    } yield inside(result.value.transaction) { case Some(transaction) =>
+      transaction.commandId shouldBe exercise.commandId.get
+      transaction.offset shouldBe ApiOffset.toApiString(offset)
+      transaction.transactionId shouldBe exercise.transactionId
+      transaction.effectiveAt.value.seconds shouldBe exercise.ledgerEffectiveTime.getEpochSecond
+      transaction.effectiveAt.value.nanos shouldBe exercise.ledgerEffectiveTime.getNano
+      transaction.workflowId shouldBe exercise.workflowId.getOrElse("")
+      inside(transaction.events.loneElement.event.archived) { case Some(archived) =>
+        val (nodeId, exerciseNode: NodeExercises[NodeId, ContractId]) =
+          exercise.transaction.nodes.head
+        archived.eventId shouldBe EventId(transaction.transactionId, nodeId).toLedgerString
+        archived.witnessParties should contain only (exercise.actAs: _*)
+        archived.contractId shouldBe exerciseNode.targetCoid.coid
+        archived.templateId shouldNot be(None)
       }
     }
   }
@@ -141,9 +133,7 @@ private[dao] trait JdbcLedgerDaoTransactionsSpec extends OptionValues with Insid
       (_, tx) <- store(singleCreate(createNode(_, signatories, stakeholders), actAs))
       result <- ledgerDao.transactionsReader
         .lookupFlatTransactionById(tx.transactionId, Set(charlie))
-    } yield {
-      result.value.transaction.value.commandId shouldBe ""
-    }
+    } yield result.value.transaction.value.commandId shouldBe ""
   }
 
   it should "hide events on transient contracts to the original submitter" in {
@@ -151,16 +141,14 @@ private[dao] trait JdbcLedgerDaoTransactionsSpec extends OptionValues with Insid
       (offset, tx) <- store(fullyTransient)
       result <- ledgerDao.transactionsReader
         .lookupFlatTransactionById(tx.transactionId, tx.actAs.toSet)
-    } yield {
-      inside(result.value.transaction) { case Some(transaction) =>
-        transaction.commandId shouldBe tx.commandId.get
-        transaction.offset shouldBe ApiOffset.toApiString(offset)
-        transaction.transactionId shouldBe tx.transactionId
-        transaction.effectiveAt.value.seconds shouldBe tx.ledgerEffectiveTime.getEpochSecond
-        transaction.effectiveAt.value.nanos shouldBe tx.ledgerEffectiveTime.getNano
-        transaction.workflowId shouldBe tx.workflowId.getOrElse("")
-        transaction.events shouldBe Seq.empty
-      }
+    } yield inside(result.value.transaction) { case Some(transaction) =>
+      transaction.commandId shouldBe tx.commandId.get
+      transaction.offset shouldBe ApiOffset.toApiString(offset)
+      transaction.transactionId shouldBe tx.transactionId
+      transaction.effectiveAt.value.seconds shouldBe tx.ledgerEffectiveTime.getEpochSecond
+      transaction.effectiveAt.value.nanos shouldBe tx.ledgerEffectiveTime.getNano
+      transaction.workflowId shouldBe tx.workflowId.getOrElse("")
+      transaction.events shouldBe Seq.empty
     }
   }
 
@@ -179,9 +167,7 @@ private[dao] trait JdbcLedgerDaoTransactionsSpec extends OptionValues with Insid
             verbose = true,
           )
       )
-    } yield {
-      comparable(result) should contain theSameElementsInOrderAs comparable(lookups)
-    }
+    } yield comparable(result) should contain theSameElementsInOrderAs comparable(lookups)
   }
 
   it should "filter correctly by party" in {
@@ -257,11 +243,9 @@ private[dao] trait JdbcLedgerDaoTransactionsSpec extends OptionValues with Insid
             verbose = true,
           )
       )
-    } yield {
-      inside(result.loneElement.events.loneElement.event.created) { case Some(create) =>
-        create.witnessParties.loneElement shouldBe alice
-        create.templateId.value shouldBe LfEngineToApi.toApiIdentifier(otherTemplateId)
-      }
+    } yield inside(result.loneElement.events.loneElement.event.created) { case Some(create) =>
+      create.witnessParties.loneElement shouldBe alice
+      create.templateId.value shouldBe LfEngineToApi.toApiIdentifier(otherTemplateId)
     }
   }
 
@@ -462,9 +446,7 @@ private[dao] trait JdbcLedgerDaoTransactionsSpec extends OptionValues with Insid
         )
         .runWith(Sink.seq)
 
-    } yield {
-      extractAllTransactions(result) shouldBe empty
-    }
+    } yield extractAllTransactions(result) shouldBe empty
   }
 
   // TODO(Leo): this should be converted to scalacheck test with random offset gaps and pageSize

@@ -58,13 +58,12 @@ object PackagedSandbox {
       sandboxProcess = Some(Runner.executeAsync(command, Some(new LazyProcessLogger("[sandbox] "))))
     }
 
-    def shutdown(): Unit = {
+    def shutdown(): Unit =
       if (sandboxProcess.exists(_.isAlive())) {
         logger.info("Shutting down sandbox process")
         sandboxProcess.foreach(_.destroy())
         sandboxProcess = None
       }
-    }
   }
 
   object SandboxContext {

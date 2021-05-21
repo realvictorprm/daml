@@ -22,14 +22,14 @@ object ServerAdapter {
       )
     Sink
       .fromSubscriber(subscriber)
-      .mapMaterializedValue(_ => {
+      .mapMaterializedValue { _ =>
         val promise = Promise[Unit]()
-        subscriber.completionFuture.handle[Unit]((_, throwable) => {
+        subscriber.completionFuture.handle[Unit] { (_, throwable) =>
           if (throwable == null) promise.success(()) else promise.failure(throwable)
           ()
-        })
+        }
         promise.future
-      })
+      }
   }
 
 }

@@ -15,7 +15,7 @@ class PartyValidator(partyNameChecker: PartyNameChecker) {
     for {
       ps <- requireParties(parties.toSet)
       knownParties <- requireKnownParties(ps)
-    } yield (knownParties)
+    } yield knownParties
 
   private def requireKnownParties(partiesInRequest: Set[Party]): Result[Set[Party]] = {
     val unknownParties = partiesInRequest.filterNot(partyNameChecker.isKnownParty)

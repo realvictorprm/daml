@@ -11,7 +11,7 @@ object DecoderClass {
 
   // Generates the Decoder class to lookup template decoders for known templates
   // from Record => $TemplateClass
-  def generateCode(simpleClassName: String, templateNames: Iterable[ClassName]): TypeSpec = {
+  def generateCode(simpleClassName: String, templateNames: Iterable[ClassName]): TypeSpec =
     TypeSpec
       .classBuilder(simpleClassName)
       .addModifiers(Modifier.PUBLIC)
@@ -20,7 +20,6 @@ object DecoderClass {
       .addMethod(getDecoder)
       .addStaticBlock(generateStaticInitializer(templateNames))
       .build()
-  }
 
   private val contractType = ClassName.get(
     classOf[Contract]

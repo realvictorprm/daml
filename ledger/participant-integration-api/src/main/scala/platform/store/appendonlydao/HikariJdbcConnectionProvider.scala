@@ -70,7 +70,7 @@ private[platform] final class HikariConnection(
           new HikariDataSource(config)
         }
       }
-    )(conn => Future { conn.close() })
+    )(conn => Future(conn.close()))
   }
 
   private def configureAsyncCommit(config: HikariConfig, dbType: DbType): Unit =
@@ -119,7 +119,7 @@ private[platform] class HikariJdbcConnectionProvider(
   private val transientFailureCount = new AtomicInteger(0)
 
   private val checkHealth = new TimerTask {
-    override def run(): Unit = {
+    override def run(): Unit =
       try {
         dataSource.getConnection().close()
         transientFailureCount.set(0)
@@ -127,7 +127,6 @@ private[platform] class HikariJdbcConnectionProvider(
         case _: SQLTransientConnectionException =>
           val _ = transientFailureCount.incrementAndGet()
       }
-    }
   }
 
   healthPoller.schedule(checkHealth, 0, HealthPollingSchedule.toMillis)
@@ -159,9 +158,7 @@ private[platform] class HikariJdbcConnectionProvider(
         // Log the error in the caller with access to more logging context (such as the sql statement description)
         conn.rollback()
         throw t
-    } finally {
-      conn.close()
-    }
+    } finally conn.close()
   }
 }
 

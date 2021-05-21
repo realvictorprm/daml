@@ -56,12 +56,11 @@ private[state] object Conversions {
   def stateKeyToContractId(key: DamlStateKey): ContractId =
     decodeContractId(key.getContractId)
 
-  def encodeGlobalKey(key: GlobalKey): DamlContractKey = {
+  def encodeGlobalKey(key: GlobalKey): DamlContractKey =
     DamlContractKey.newBuilder
       .setTemplateId(ValueCoder.encodeIdentifier(key.templateId))
       .setHash(key.hash.bytes.toByteString)
       .build
-  }
 
   def encodeContractKey(tmplId: Identifier, key: Value[ContractId]): DamlContractKey =
     encodeGlobalKey(
@@ -99,7 +98,7 @@ private[state] object Conversions {
       participantId: String,
       submissionId: String,
       submissionKind: DamlSubmissionDedupKey.SubmissionKind,
-  ): DamlStateKey = {
+  ): DamlStateKey =
     DamlStateKey.newBuilder
       .setSubmissionDedup(
         DamlSubmissionDedupKey.newBuilder
@@ -109,7 +108,6 @@ private[state] object Conversions {
           .build
       )
       .build
-  }
 
   def packageUploadDedupKey(participantId: String, submissionId: String): DamlStateKey =
     submissionDedupKey(
@@ -168,16 +166,14 @@ private[state] object Conversions {
   def parseHash(bytes: com.google.protobuf.ByteString): crypto.Hash =
     crypto.Hash.assertFromBytes(data.Bytes.fromByteString(bytes))
 
-  def buildDuration(dur: Duration): com.google.protobuf.Duration = {
+  def buildDuration(dur: Duration): com.google.protobuf.Duration =
     com.google.protobuf.Duration.newBuilder
       .setSeconds(dur.getSeconds)
       .setNanos(dur.getNano)
       .build
-  }
 
-  def parseDuration(dur: com.google.protobuf.Duration): Duration = {
+  def parseDuration(dur: com.google.protobuf.Duration): Duration =
     Duration.ofSeconds(dur.getSeconds, dur.getNanos.toLong)
-  }
 
   private def assertDecode[X](context: => String, x: Either[ValueCoder.DecodeError, X]): X =
     x.fold(err => throw Err.DecodeError(context, err.errorMessage), identity)

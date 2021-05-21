@@ -124,14 +124,13 @@ object ProjectConfig {
   def loadFromString(
       projectPath: Path,
       content: String,
-  ): Either[ConfigLoadingError, ProjectConfig] = {
+  ): Either[ConfigLoadingError, ProjectConfig] =
     for {
       json <- yaml.parser.parse(content).left.map(e => ConfigParseError(e.getMessage))
     } yield ProjectConfig(json, projectPath)
-  }
 
   /** Loads a project configuration from a file */
-  def loadFromFile(file: File): Either[ConfigLoadingError, ProjectConfig] = {
+  def loadFromFile(file: File): Either[ConfigLoadingError, ProjectConfig] =
     for {
       _ <- Either.cond(
         Files.exists(file.toPath),
@@ -147,17 +146,15 @@ object ProjectConfig {
       ).toEither.left.map(e => ConfigLoadError(e.getMessage))
       result <- loadFromString(file.getParentFile.toPath, content)
     } yield result
-  }
 
   /** Loads the project configuration from a config file,
     * with the path to the config file given by environment variables set by the SDK Assistant.
     * This is the preferred way of loading the SDK project configuration.
     */
-  def loadFromEnv(): Either[ConfigLoadingError, ProjectConfig] = {
+  def loadFromEnv(): Either[ConfigLoadingError, ProjectConfig] =
     for {
       path <- projectConfigPath()
       result <- loadFromFile(path)
     } yield result
-  }
 
 }

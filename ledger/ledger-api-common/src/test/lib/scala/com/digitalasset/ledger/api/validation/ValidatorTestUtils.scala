@@ -57,11 +57,10 @@ trait ValidatorTestUtils extends Matchers with Inside with OptionValues { self: 
     }
   }
 
-  protected def hasExpectedTraceContext(req: transaction.GetTransactionsRequest) = {
+  protected def hasExpectedTraceContext(req: transaction.GetTransactionsRequest) =
     inside(req.traceContext.value) { case e =>
       isExpectedTraceContext(e)
     }
-  }
 
   protected def isExpectedTraceContext(e: propagation.TraceContext) = {
     e.traceIdHigh() shouldEqual traceIdHigh
@@ -84,9 +83,8 @@ trait ValidatorTestUtils extends Matchers with Inside with OptionValues { self: 
       request: Either[StatusRuntimeException, _],
       code: Code,
       description: String,
-  ): Assertion = {
+  ): Assertion =
     inside(request)(isError(code, description))
-  }
   protected def isError(
       expectedCode: Code,
       expectedDescription: String,

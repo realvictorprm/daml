@@ -73,7 +73,7 @@ package object events {
       source: Source[A, Mat]
   )(by: A => K): Source[Vector[A], Mat] =
     source
-      .statefulMapConcat(() => {
+      .statefulMapConcat { () =>
         var previousSegmentKey: K = null.asInstanceOf[K]
         entry => {
           val keyForEntry = by(entry)
@@ -81,7 +81,7 @@ package object events {
           previousSegmentKey = keyForEntry
           List(entryWithSplit)
         }
-      })
+      }
       .splitWhen(_._2)
       .map(_._1)
       .fold(Vector.empty[A])(_ :+ _)

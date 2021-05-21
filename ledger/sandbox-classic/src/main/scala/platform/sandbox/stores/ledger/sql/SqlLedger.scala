@@ -217,11 +217,11 @@ private[sandbox] object SqlLedger {
       val packageDetails = store.listLfPackagesSync()
       if (packageDetails.nonEmpty) {
         logger.info(s"Copying initial packages ${packageDetails.keys.mkString(",")}")
-        val packages = packageDetails.toList.map(pkg => {
+        val packages = packageDetails.toList.map { pkg =>
           val archive =
             store.getLfArchiveSync(pkg._1).getOrElse(sys.error(s"Package ${pkg._1} not found"))
           archive -> PackageDetails(archive.getPayload.size.toLong, knownSince, None)
-        })
+        }
 
         ledgerDao
           .storePackageEntry(CurrentOffset(newLedgerEnd), packages, None)
@@ -371,7 +371,7 @@ private final class SqlLedger(
   private def checkTimeModel(
       ledgerTime: Instant,
       recordTime: Instant,
-  ): Either[RejectionReason, Unit] = {
+  ): Either[RejectionReason, Unit] =
     currentConfiguration
       .get()
       .fold[Either[RejectionReason, Unit]](
@@ -382,7 +382,6 @@ private final class SqlLedger(
       )(
         _.timeModel.checkTime(ledgerTime, recordTime).left.map(RejectionReason.InvalidLedgerTime)
       )
-  }
 
   override def publishTransaction(
       submitterInfo: SubmitterInfo,
@@ -449,7 +448,7 @@ private final class SqlLedger(
       submissionId: SubmissionId,
       party: Party,
       displayName: Option[String],
-  )(implicit loggingContext: LoggingContext): Future[SubmissionResult] = {
+  )(implicit loggingContext: LoggingContext): Future[SubmissionResult] =
     enqueue { offset =>
       ledgerDao
         .storePartyEntry(
@@ -467,7 +466,6 @@ private final class SqlLedger(
           ()
         }(DEC)
     }
-  }
 
   override def uploadPackages(
       submissionId: SubmissionId,

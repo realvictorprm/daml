@@ -33,7 +33,7 @@ object Main {
     val StartupError = 101
   }
 
-  def main(args: Array[String]): Unit = {
+  def main(args: Array[String]): Unit =
     instanceUUIDLogCtx(implicit lc =>
       Cli.parseConfig(
         args,
@@ -46,7 +46,6 @@ object Main {
           sys.exit(ErrorCodes.InvalidUsage)
       }
     )
-  }
 
   private def main(config: Config)(implicit lc: LoggingContextOf[InstanceUUID]): Unit = {
     config.logLevel.foreach(GlobalLogLevel.set("Ledger HTTP-JSON API"))
@@ -75,7 +74,7 @@ object Main {
       new AkkaExecutionSequencerPool("clientPool")(asys)
     implicit val ec: ExecutionContext = asys.dispatcher
 
-    def terminate(): Unit = discard { Await.result(asys.terminate(), 10.seconds) }
+    def terminate(): Unit = discard(Await.result(asys.terminate(), 10.seconds))
 
     val contractDao = config.jdbcConfig.map(c => ContractDao(c.driver, c.url, c.user, c.password))
 

@@ -10,7 +10,7 @@ import com.daml.lf.validation.Util._
 private[validation] object ExprIterable {
   that =>
 
-  private[iterable] def iterator(x: Expr): Iterator[Expr] = {
+  private[iterable] def iterator(x: Expr): Iterator[Expr] =
     x match {
       case EVar(_) | EBuiltin(_) | EPrimCon(_) | EPrimLit(_) | EVal(_) | EEnumCon(_, _) |
           // stupid formatter !
@@ -65,9 +65,8 @@ private[validation] object ExprIterable {
       case EFromAnyException(typ @ _, value) =>
         Iterator(value)
     }
-  }
 
-  private[iterable] def iterator(x: Update): Iterator[Expr] = {
+  private[iterable] def iterator(x: Update): Iterator[Expr] =
     x match {
       case UpdatePure(typ @ _, expr) =>
         Iterator(expr)
@@ -91,9 +90,8 @@ private[validation] object ExprIterable {
       case UpdateTryCatch(typ @ _, body, binder @ _, handler) =>
         Iterator(body, handler)
     }
-  }
 
-  private[iterable] def iterator(x: Scenario): Iterator[Expr] = {
+  private[iterable] def iterator(x: Scenario): Iterator[Expr] =
     x match {
       case ScenarioPure(typ @ _, expr) =>
         Iterator(expr)
@@ -111,7 +109,6 @@ private[validation] object ExprIterable {
       case ScenarioEmbedExpr(typ @ _, body) =>
         Iterator(body)
     }
-  }
 
   private[iterable] def iterator(x: Definition): Iterator[Expr] =
     x match {

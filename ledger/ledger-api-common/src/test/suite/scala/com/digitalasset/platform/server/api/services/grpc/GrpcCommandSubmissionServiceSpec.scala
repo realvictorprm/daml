@@ -53,17 +53,15 @@ class GrpcCommandSubmissionServiceSpec
 
       val span = anEmptySpan()
       val scope = span.makeCurrent()
-      try {
-        grpcCommandSubmissionService
-          .submit(aSubmitRequest)
-          .map { _ =>
-            val spanAttributes = spanExporter.finishedSpanAttributes
-            spanAttributes should contain(SpanAttribute.ApplicationId -> applicationId)
-            spanAttributes should contain(SpanAttribute.CommandId -> commandId)
-            spanAttributes should contain(SpanAttribute.Submitter -> party)
-            spanAttributes should contain(SpanAttribute.WorkflowId -> workflowId)
-          }
-      } finally {
+      try grpcCommandSubmissionService
+        .submit(aSubmitRequest)
+        .map { _ =>
+          val spanAttributes = spanExporter.finishedSpanAttributes
+          spanAttributes should contain(SpanAttribute.ApplicationId -> applicationId)
+          spanAttributes should contain(SpanAttribute.CommandId -> commandId)
+          spanAttributes should contain(SpanAttribute.Submitter -> party)
+          spanAttributes should contain(SpanAttribute.WorkflowId -> workflowId)
+        } finally {
         scope.close()
         span.end()
       }
@@ -72,7 +70,7 @@ class GrpcCommandSubmissionServiceSpec
 }
 
 object GrpcCommandSubmissionServiceSpec {
-  private val aCommand = {
+  private val aCommand =
     Command(
       Command.Command.Create(
         CreateCommand(
@@ -86,7 +84,6 @@ object GrpcCommandSubmissionServiceSpec {
         )
       )
     )
-  }
 
   private val aSubmitRequest = submitRequest.copy(
     commands = Some(commands.copy(commands = Seq(aCommand)))

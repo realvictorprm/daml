@@ -261,12 +261,8 @@ object ValueCoder {
               else {
                 assertUntil(TransactionVersion.minTypeErasure, "enum_id field in message Enum")
                 decodeIdentifier(enum.getEnumId).fold(
-                  { err =>
-                    throw Err(err.errorMessage)
-                  },
-                  { id =>
-                    Some(id)
-                  },
+                  err => throw Err(err.errorMessage),
+                  id => Some(id),
                 )
               }
             ValueEnum(id, identifier(enum.getValue))
@@ -282,7 +278,7 @@ object ValueCoder {
               }
             ValueRecord(
               id,
-              ImmArray(protoValue.getRecord.getFieldsList.asScala.map(fld => {
+              ImmArray(protoValue.getRecord.getFieldsList.asScala.map { fld =>
                 val lbl =
                   if (fld.getLabel.isEmpty) {
                     None
@@ -294,7 +290,7 @@ object ValueCoder {
                     Option(identifier(fld.getLabel))
                   }
                 (lbl, go(newNesting, fld.getValue))
-              })),
+              }),
             )
 
           case proto.Value.SumCase.OPTIONAL =>
@@ -332,9 +328,8 @@ object ValueCoder {
       }
     }
 
-    try {
-      Right(go(0, protoValue0))
-    } catch {
+    try Right(go(0, protoValue0))
+    catch {
       case Err(msg) => Left(DecodeError(msg))
     }
   }
@@ -383,7 +378,7 @@ object ValueCoder {
       if (valueVersion < minVersion)
         throw Err(s"$description is not supported by value version $valueVersion")
 
-    def go(nesting: Int, v: Value[Cid]): proto.Value = {
+    def go(nesting: Int, v: Value[Cid]): proto.Value =
       if (nesting > MAXIMUM_NESTING) {
         throw Err(
           s"Provided DAML-LF value to encode exceeds maximum nesting level of $MAXIMUM_NESTING"
@@ -413,10 +408,10 @@ object ValueCoder {
             builder.setContractIdStruct(encodeCid.encode(coid)).build()
           case ValueList(elems) =>
             val listBuilder = proto.List.newBuilder()
-            elems.foreach(elem => {
+            elems.foreach { elem =>
               listBuilder.addElements(go(newNesting, elem))
               ()
-            })
+            }
             builder.setList(listBuilder).build()
 
           case ValueRecord(id, fields) =>
@@ -482,11 +477,9 @@ object ValueCoder {
 
         }
       }
-    }
 
-    try {
-      Right(go(0, v0))
-    } catch {
+    try Right(go(0, v0))
+    catch {
       case Err(msg) => Left(EncodeError(msg))
     }
   }
@@ -494,7 +487,6 @@ object ValueCoder {
   private[value] def valueFromBytes[Cid](
       decodeCid: DecodeCid[Cid],
       bytes: Array[Byte],
-  ): Either[DecodeError, Value[Cid]] = {
+  ): Either[DecodeError, Value[Cid]] =
     decodeValue(decodeCid, proto.VersionedValue.parseFrom(bytes))
-  }
 }

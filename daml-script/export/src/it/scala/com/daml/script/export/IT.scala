@@ -227,9 +227,7 @@ final class IT
       // check that the new transaction trees are the same
       after <- collectTrees(client, newParties)
       afterCmp = after.drop(after.length - beforeCmp.length)
-    } yield {
-      TransactionEq.equivalent(beforeCmp, afterCmp).fold(fail(_), _ => succeed)
-    }
+    } yield TransactionEq.equivalent(beforeCmp, afterCmp).fold(fail(_), _ => succeed)
 
   private def testIou: (LedgerClient, Seq[Ref.Party]) => Future[Unit] = {
     case (client, Seq(p1, p2)) =>
@@ -314,9 +312,9 @@ final class IT
   }
 
   "Generated export for IOU transfer compiles" - {
-    "offset 0 - empty ACS" in { testOffset(2, 0)(testIou) }
-    "offset 2 - skip split" in { testOffset(2, 2)(testIou) }
-    "offset 4 - no trees" in { testOffset(2, 4)(testIou) }
+    "offset 0 - empty ACS" in testOffset(2, 0)(testIou)
+    "offset 2 - skip split" in testOffset(2, 2)(testIou)
+    "offset 4 - no trees" in testOffset(2, 4)(testIou)
   }
 
   private def transactionFilter(ps: Ref.Party*) =

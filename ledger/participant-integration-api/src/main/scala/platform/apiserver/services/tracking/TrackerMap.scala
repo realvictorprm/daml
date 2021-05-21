@@ -84,13 +84,12 @@ private[services] final class TrackerMap(retentionPeriod: FiniteDuration)(implic
     trackerBySubmitter -= submitter
   }
 
-  def close(): Unit = {
+  def close(): Unit =
     lock.synchronized {
       logger.info(s"Shutting down ${trackerBySubmitter.size} trackers")
       trackerBySubmitter.values.foreach(_.close())
       trackerBySubmitter = HashMap.empty
     }
-  }
 }
 
 private[services] object TrackerMap {
@@ -127,13 +126,12 @@ private[services] object TrackerMap {
         state.set(Closed)
     })(DirectExecutionContext)
 
-    def flatMap[U](f: T => Future[U])(implicit ex: ExecutionContext): Future[U] = {
+    def flatMap[U](f: T => Future[U])(implicit ex: ExecutionContext): Future[U] =
       state.get() match {
         case Waiting => future.flatMap(f)
         case Closed => throw new IllegalStateException()
         case Ready(t) => f(t)
       }
-    }
 
     def map[U](f: T => U)(implicit ex: ExecutionContext): Future[U] =
       flatMap(t => Future.successful(f(t)))

@@ -85,7 +85,7 @@ class MaxInFlightTest
           },
         )
 
-        private def flush() = {
+        private def flush() =
           accumulator match {
             case h :: t =>
               push(out, h)
@@ -93,7 +93,6 @@ class MaxInFlightTest
             case _ =>
               scheduleOnce(scheduledFlushTimerKey, flushAfter)
           }
-        }
 
         override def preStart(): Unit = {
           pull(in)
@@ -101,7 +100,7 @@ class MaxInFlightTest
           super.preStart()
         }
 
-        override protected def onTimer(timerKey: Any): Unit = {
+        override protected def onTimer(timerKey: Any): Unit =
           timerKey match {
             case `replaceHandlerTimerKey` =>
               setHandler(
@@ -117,7 +116,6 @@ class MaxInFlightTest
             case `scheduledFlushTimerKey` =>
               flush()
           }
-        }
       }
 
     override def shape = FlowShape(in, out)

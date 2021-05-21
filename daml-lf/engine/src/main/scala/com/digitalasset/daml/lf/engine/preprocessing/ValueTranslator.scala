@@ -26,14 +26,13 @@ private[engine] final class ValueTranslator(compiledPackages: CompiledPackages) 
     def go(
         fields: ImmArray[(Option[String], Value[ContractId])],
         map: Map[String, Value[ContractId]],
-    ): Option[Map[String, Value[ContractId]]] = {
+    ): Option[Map[String, Value[ContractId]]] =
       fields match {
         case ImmArray() => Some(map)
         case ImmArrayCons((None, _), _) => None
         case ImmArrayCons((Some(label), value), tail) =>
           go(tail, map + (label -> value))
       }
-    }
 
     go(fields, Map.empty)
   }

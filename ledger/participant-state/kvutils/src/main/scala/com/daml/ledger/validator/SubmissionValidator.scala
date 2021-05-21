@@ -244,7 +244,7 @@ class SubmissionValidator[LogResult] private[validator] (
   private def verifyAllInputsArePresent[T](
       declaredInputs: collection.Seq[DamlStateKey],
       readInputs: DamlStateMap,
-  ): Future[Unit] = {
+  ): Future[Unit] =
     if (checkForMissingInputs) {
       val missingInputs = declaredInputs.toSet -- readInputs.filter(_._2.isDefined).keySet
       if (missingInputs.nonEmpty) {
@@ -255,7 +255,6 @@ class SubmissionValidator[LogResult] private[validator] (
     } else {
       Future.unit
     }
-  }
 
   private def flattenInputStates(
       inputs: DamlStateMap
@@ -325,7 +324,7 @@ object SubmissionValidator {
       stateValueCache: StateValueCache = Cache.none,
       engine: Engine,
       metrics: Metrics,
-  ): SubmissionValidator[LogResult] = {
+  ): SubmissionValidator[LogResult] =
     createForTimeMode(
       ledgerStateAccess,
       allocateNextLogEntryId,
@@ -335,7 +334,6 @@ object SubmissionValidator {
       metrics,
       inStaticTimeMode = false,
     )
-  }
 
   // Internal method to enable proper command dedup in sandbox with static time mode
   private[daml] def createForTimeMode[LogResult](

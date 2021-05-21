@@ -32,9 +32,8 @@ private[lf] object Anf {
   /** * Entry point for the ANF transformation phase
     */
   @throws[CompilationError]
-  def flattenToAnf(exp: SExpr): SExpr = {
+  def flattenToAnf(exp: SExpr): SExpr =
     flattenToAnfInternal(exp).wrapped
-  }
 
   /** `AExpr` tracks when an expression has been transformed. It is
     * private to this file.
@@ -174,9 +173,8 @@ private[lf] object Anf {
     }
   }
 
-  private[this] def makeRelativeB(depth: DepthA, binding: AbsBinding): Int = {
+  private[this] def makeRelativeB(depth: DepthA, binding: AbsBinding): Int =
     (depth.n - binding.abs.n)
-  }
 
   private[this] type AbsAtom = Either[SExprAtomic, AbsBinding]
 
@@ -207,13 +205,12 @@ private[lf] object Anf {
 
   private[this] def flattenExp[A](depth: DepthA, env: Env, exp: SExpr)(
       k: K[AExpr, A]
-  ): Trampoline[A] = {
+  ): Trampoline[A] =
     Bounce(() =>
       transformExp[A](depth, env, exp, k) { (_, sexpr, txK) =>
         Bounce(() => txK(AExpr(sexpr)))
       }
     )
-  }
 
   private[this] def transformLet1[A](
       depth: DepthA,
@@ -222,7 +219,7 @@ private[lf] object Anf {
       body: SExpr,
       k: K[AExpr, A],
       transform: Tx[SExpr, A],
-  ): Trampoline[A] = {
+  ): Trampoline[A] =
     Bounce(() =>
       transformExp(depth, env, rhs, k) { (depth, rhs, txK) =>
         val depth1 = depth.incr(1)
@@ -232,18 +229,15 @@ private[lf] object Anf {
             depth1,
             env1,
             body,
-            { body1 =>
-              Bounce(() => txK(AExpr(SELet1(rhs, body1.wrapped))))
-            },
+            body1 => Bounce(() => txK(AExpr(SELet1(rhs, body1.wrapped)))),
           )(transform)
         )
       }
     )
-  }
 
   private[this] def flattenAlts[A](depth: DepthA, env: Env, alts: Array[SCaseAlt])(
       k: K[Array[SCaseAlt], A]
-  ): Trampoline[A] = {
+  ): Trampoline[A] =
     // Note: this could be made properly CPS and thus constant stack through
     // trampoline by implementing a CPS version of map. However, map on an
     // array is implemented as a loop so this should be fine.
@@ -251,12 +245,11 @@ private[lf] object Anf {
       k(alts.map { case SCaseAlt(pat, body0) =>
         val n = patternNArgs(pat)
         val env1 = trackBindings(depth, env, n)
-        flattenExp(depth.incr(n), env1, body0)(body => {
+        flattenExp(depth.incr(n), env1, body0) { body =>
           Land(SCaseAlt(pat, body.wrapped))
-        }).bounce
+        }.bounce
       })
     )
-  }
 
   private[this] def patternNArgs(pat: SCasePat): Int = pat match {
     case _: SCPEnum | _: SCPPrimCon | SCPNil | SCPDefault | SCPNone => 0
@@ -304,11 +297,11 @@ private[lf] object Anf {
         }
 
       case SEMakeClo(fvs0, arity, body0) =>
-        val fvs = fvs0.map((loc) => makeRelativeL(depth)(makeAbsoluteL(env, loc)))
+        val fvs = fvs0.map(loc => makeRelativeL(depth)(makeAbsoluteL(env, loc)))
         val body = flattenToAnfInternal(body0).wrapped
         Bounce(() => transform(depth, SEMakeClo(fvs, arity, body), k))
 
-      case SECase(scrut, alts0) => {
+      case SECase(scrut, alts0) =>
         Bounce(() =>
           atomizeExp(depth, env, scrut, k) { (depth, scrut, txK) =>
             val scrut1 = makeRelativeA(depth)(scrut)
@@ -319,7 +312,6 @@ private[lf] object Anf {
             )
           }
         )
-      }
 
       case SELet(rhss, body) =>
         val expanded = expandMultiLet(rhss, body)
@@ -341,21 +333,19 @@ private[lf] object Anf {
           }
         )
 
-      case SELocation(loc, body) => {
+      case SELocation(loc, body) =>
         Bounce(() =>
           transformExp(depth, env, body, k) { (depth, body, txK) =>
             Bounce(() => transform(depth, SELocation(loc, body), txK))
           }
         )
-      }
 
-      case SELabelClosure(label, exp) => {
+      case SELabelClosure(label, exp) =>
         Bounce(() =>
           transformExp(depth, env, exp, k) { (depth, exp, txK) =>
             Bounce(() => transform(depth, SELabelClosure(label, exp), txK))
           }
         )
-      }
 
       case SETryCatch(body0, handler0) =>
         // we must not lift applications from either the body or the handler outside of
@@ -399,10 +389,10 @@ private[lf] object Anf {
 
   private[this] def atomizeExp[A](depth: DepthA, env: Env, exp: SExpr, k: K[AExpr, A])(
       transform: Tx[AbsAtom, A]
-  ): Trampoline[A] = {
+  ): Trampoline[A] =
     exp match {
       case ea: SExprAtomic => Bounce(() => transform(depth, makeAbsoluteA(env, ea), k))
-      case _ => {
+      case _ =>
         Bounce(() =>
           transformExp(depth, env, exp, k) { (depth, anf, txK) =>
             val atom = Right(AbsBinding(depth))
@@ -410,26 +400,21 @@ private[lf] object Anf {
               transform(
                 depth.incr(1),
                 atom,
-                { body =>
-                  Bounce(() => txK(AExpr(SELet1(anf, body.wrapped))))
-                },
+                body => Bounce(() => txK(AExpr(SELet1(anf, body.wrapped)))),
               )
             )
           }
         )
-      }
     }
-  }
 
   private[this] def expandMultiLet(rhss: List[SExpr], body: SExpr): SExpr = {
     //loop over rhss in reverse order
     @tailrec
-    def loop(acc: SExpr, xs: List[SExpr]): SExpr = {
+    def loop(acc: SExpr, xs: List[SExpr]): SExpr =
       xs match {
         case Nil => acc
         case rhs :: xs => loop(SELet1General(rhs, acc), xs)
       }
-    }
     loop(body, rhss.reverse)
   }
 
@@ -442,7 +427,7 @@ private[lf] object Anf {
       func: SExpr,
       args: Array[SExpr],
       k: K[AExpr, A],
-  )(transform: Tx[SExpr, A]): Trampoline[A] = {
+  )(transform: Tx[SExpr, A]): Trampoline[A] =
     Bounce(() =>
       atomizeExp(depth, env, func, k) { (depth, func, txK1) =>
         Bounce(() =>
@@ -454,7 +439,6 @@ private[lf] object Anf {
         )
       }
     )
-  }
 
   /* This function must be used when transforming an application of unknown function.  The
    translated application is *not* in proper ANF form.
@@ -466,8 +450,7 @@ private[lf] object Anf {
       func: SExpr,
       args: Array[SExpr],
       k: K[AExpr, A],
-  )(transform: Tx[SExpr, A]): Trampoline[A] = {
-
+  )(transform: Tx[SExpr, A]): Trampoline[A] =
     Bounce(() =>
       atomizeExp(depth, env, func, k) { (depth, func, txK) =>
         val func1 = makeRelativeA(depth)(func)
@@ -479,7 +462,5 @@ private[lf] object Anf {
         )
       }
     )
-
-  }
 
 }

@@ -17,7 +17,7 @@ object CompressionMetrics {
 
   final class Field(val compressed: Histogram, val uncompressed: Histogram)
 
-  def apply(metrics: Metrics): CompressionMetrics = {
+  def apply(metrics: Metrics): CompressionMetrics =
     new CompressionMetrics(
       createArgument = new Field(
         compressed = metrics.daml.index.db.compression.createArgumentCompressed,
@@ -36,6 +36,5 @@ object CompressionMetrics {
         uncompressed = metrics.daml.index.db.compression.exerciseResultUncompressed,
       ),
     )
-  }
 
 }

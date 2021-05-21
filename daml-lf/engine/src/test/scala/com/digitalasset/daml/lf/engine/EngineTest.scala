@@ -139,9 +139,8 @@ class EngineTest
 
   val lookupContract = defaultContracts.get(_)
 
-  def lookupPackage(pkgId: PackageId): Option[Package] = {
+  def lookupPackage(pkgId: PackageId): Option[Package] =
     allPackages.get(pkgId)
-  }
 
   def lookupKey(key: GlobalKeyWithMaintainers): Option[ContractId] =
     (key.globalKey.templateId, key.globalKey.key) match {
@@ -1357,24 +1356,22 @@ class EngineTest
         "",
       )
 
-    def lookupContract(id: ContractId): Option[ContractInst[Value.VersionedValue[ContractId]]] = {
+    def lookupContract(id: ContractId): Option[ContractInst[Value.VersionedValue[ContractId]]] =
       id match {
         case `fetchedCid` => Some(makeContract(fetchedStrTid, fetchedTArgs))
         case `fetcher1Cid` => Some(makeContract(fetcherStrTid, fetcher1TArgs))
         case `fetcher2Cid` => Some(makeContract(fetcherStrTid, fetcher2TArgs))
         case _ => None
       }
-    }
 
     val let = Time.Timestamp.now()
     val seeding = Engine.initialSeeding(submissionSeed, participant, let)
 
-    def actFetchActors[Nid, Cid](n: Node.GenNode[Nid, Cid]): Set[Party] = {
+    def actFetchActors[Nid, Cid](n: Node.GenNode[Nid, Cid]): Set[Party] =
       n match {
         case Node.NodeFetch(_, _, _, actingParties, _, _, _, _, _) => actingParties
         case _ => Set()
       }
-    }
 
     def txFetchActors[Nid, Cid](tx: GenTx[Nid, Cid]): Set[Party] =
       tx.fold(Set[Party]()) { case (actors, (_, n)) =>
@@ -1482,12 +1479,11 @@ class EngineTest
       "",
     )
 
-    def lookupContract(id: ContractId): Option[ContractInst[Value.VersionedValue[ContractId]]] = {
+    def lookupContract(id: ContractId): Option[ContractInst[Value.VersionedValue[ContractId]]] =
       id match {
         case `fetchedCid` => Some(fetchedContract)
         case _ => None
       }
-    }
 
     "succeed with a fresh engine, correctly compiling packages" in {
       val engine = Engine.DevEngine()
@@ -1532,7 +1528,7 @@ class EngineTest
       "",
     )
 
-    def lookupKey(key: GlobalKeyWithMaintainers): Option[ContractId] = {
+    def lookupKey(key: GlobalKeyWithMaintainers): Option[ContractId] =
       (key.globalKey.templateId, key.globalKey.key) match {
         case (
               BasicTests_WithKey,
@@ -1542,7 +1538,6 @@ class EngineTest
         case _ =>
           None
       }
-    }
 
     def lookupContractMap = Map(
       lookedUpCid -> withKeyContractInst,
@@ -1782,7 +1777,7 @@ class EngineTest
         "",
       )
 
-      def lookupKey(key: GlobalKeyWithMaintainers): Option[ContractId] = {
+      def lookupKey(key: GlobalKeyWithMaintainers): Option[ContractId] =
         (key.globalKey.templateId, key.globalKey.key) match {
           case (
                 BasicTests_WithKey,
@@ -1792,7 +1787,6 @@ class EngineTest
           case _ =>
             None
         }
-      }
 
       val lookupContractMap = Map(fetchedCid -> withKeyContractInst, fetcherCid -> fetcherInst)
 
@@ -2048,7 +2042,7 @@ class EngineTest
         .consume(_ => None, lookupPackage, lookupKey, VisibleByKey.fromSubmitters(submitters))
       result shouldBe a[Left[_, _]]
       val Left(err) = result
-      err.msg should not include ("Boom")
+      err.msg should not include "Boom"
       err.msg should include("precondition violation")
     }
 

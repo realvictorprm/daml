@@ -14,12 +14,10 @@ class LedgerConfigurationServiceIT extends LedgerTestSuite {
     implicit ec => { case Participants(Participant(ledger)) =>
       for {
         config <- ledger.configuration()
-      } yield {
-        assert(
-          config.maxDeduplicationTime.isDefined,
-          "The maxDeduplicationTime field of the configuration is empty",
-        )
-      }
+      } yield assert(
+        config.maxDeduplicationTime.isDefined,
+        "The maxDeduplicationTime field of the configuration is empty",
+      )
     }
   )
 
@@ -30,9 +28,11 @@ class LedgerConfigurationServiceIT extends LedgerTestSuite {
         failure <- ledger
           .configuration(overrideLedgerId = Some(invalidLedgerId))
           .mustFail("retrieving ledger configuration with an invalid ledger ID")
-      } yield {
-        assertGrpcError(failure, Status.Code.NOT_FOUND, s"Ledger ID '$invalidLedgerId' not found.")
-      }
+      } yield assertGrpcError(
+        failure,
+        Status.Code.NOT_FOUND,
+        s"Ledger ID '$invalidLedgerId' not found.",
+      )
     }
   )
 
@@ -70,8 +70,6 @@ class LedgerConfigurationServiceIT extends LedgerTestSuite {
           )
         )
         .mustFail("submitting a command with a deduplication time that is too big")
-    } yield {
-      assertGrpcError(failure, Status.Code.INVALID_ARGUMENT, "")
-    }
+    } yield assertGrpcError(failure, Status.Code.INVALID_ARGUMENT, "")
   })
 }

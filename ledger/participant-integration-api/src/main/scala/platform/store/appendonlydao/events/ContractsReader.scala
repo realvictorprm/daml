@@ -150,8 +150,7 @@ private[appendonlydao] sealed class ContractsReader(
   override def lookupActiveContractAndLoadArgument(
       readers: Set[Party],
       contractId: ContractId,
-  )(implicit loggingContext: LoggingContext): Future[Option[Contract]] = {
-
+  )(implicit loggingContext: LoggingContext): Future[Option[Contract]] =
     Timed.future(
       metrics.daml.index.db.lookupActiveContract,
       dispatcher
@@ -173,15 +172,13 @@ private[appendonlydao] sealed class ContractsReader(
           )
         }),
     )
-  }
 
   /** Lookup of a contract in the case the contract value is already known (loaded from a cache) */
   override def lookupActiveContractWithCachedArgument(
       readers: Set[Party],
       contractId: ContractId,
       createArgument: Value,
-  )(implicit loggingContext: LoggingContext): Future[Option[Contract]] = {
-
+  )(implicit loggingContext: LoggingContext): Future[Option[Contract]] =
     Timed.future(
       metrics.daml.index.db.lookupActiveContract,
       dispatcher
@@ -198,7 +195,6 @@ private[appendonlydao] sealed class ContractsReader(
           )
         ),
     )
-  }
 
   override def lookupContractKey(
       key: Key,

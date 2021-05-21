@@ -126,13 +126,12 @@ object Config {
   )
 
   private def actionExportScript[T](f: (T, ExportScript) => ExportScript): (T, Config) => Config = {
-    case (x, c) => {
+    case (x, c) =>
       val exportScript = c.exportType match {
         case Some(exportScript: ExportScript) => exportScript
         case _ => EmptyExportScript
       }
       c.copy(exportType = Some(f(x, exportScript)))
-    }
   }
 
   val Empty = Config(

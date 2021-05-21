@@ -66,10 +66,10 @@ case class DefaultGraphQLHandler(
       ast <- QueryParser.parse(query)
     } yield ParseResult(ast, operationName, vars)
 
-  def executeQuery(parsed: ParseResult, party: PartyState): Future[(StatusCode, JsValue)] = {
+  def executeQuery(parsed: ParseResult, party: PartyState): Future[(StatusCode, JsValue)] =
     platformStore.fold[Future[(StatusCode, JsValue)]](
       Future.successful(InternalServerError -> JsString("Platform store not available"))
-    )(store => {
+    ) { store =>
       val context = GraphQLContext(party, store)
       Executor
         .execute(
@@ -91,8 +91,7 @@ case class DefaultGraphQLHandler(
             logger.error("Failed to execute GraphQL query", error)
             InternalServerError -> error.resolveError
         }
-    })
-  }
+    }
 
   def renderSchema: String = SchemaRenderer.renderSchema(schema)
 }

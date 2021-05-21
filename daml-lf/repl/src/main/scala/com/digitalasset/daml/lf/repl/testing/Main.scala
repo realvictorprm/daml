@@ -105,11 +105,9 @@ object Repl {
     var state = state0
     state.history.load
     println("DAML-LF -- REPL")
-    try {
-      while (!state.quit) {
-        val line = state.reader.readLine("daml> ")
-        state = dispatch(state, line)
-      }
+    try while (!state.quit) {
+      val line = state.reader.readLine("daml> ")
+      state = dispatch(state, line)
     } catch {
       case _: org.jline.reader.EndOfFileException => ()
     }
@@ -244,12 +242,11 @@ object Repl {
   final val commandCompleter = new ArgumentCompleter(new StringsCompleter(commands.keys.asJava))
 
   final class DalfFileCompleter extends Completers.FileNameCompleter {
-    override def accept(path: Path): Boolean = {
+    override def accept(path: Path): Boolean =
       if (path.toFile.isDirectory)
         true
       else
         path.toString.endsWith(".dalf")
-    }
   }
 
   final val loadCompleter = {
@@ -296,7 +293,7 @@ object Repl {
         .build
     )
 
-  def dispatch(state: State, line: String): State = {
+  def dispatch(state: State, line: String): State =
     line.trim.split(" ").toList match {
       case Nil => state
       case "" :: _ => state
@@ -306,9 +303,8 @@ object Repl {
           case None => invokePure(state, cmdS, args); state
         }
     }
-  }
 
-  def list(state: State): Unit = {
+  def list(state: State): Unit =
     state.packages.foreach { case (pkgId, pkg) =>
       println(pkgId)
       pkg.modules.foreach { case (mname, mod) =>
@@ -322,7 +318,6 @@ object Repl {
         }
       }
     }
-  }
 
   def prettyDefinitionType(defn: Definition, pkgId: PackageId, modId: ModuleName): String =
     defn match {
@@ -331,7 +326,7 @@ object Repl {
       case DValue(typ, _, _, _) => prettyType(typ, pkgId, modId)
     }
 
-  def prettyQualified(pkgId: PackageId, modId: ModuleName, m: Identifier): String = {
+  def prettyQualified(pkgId: PackageId, modId: ModuleName, m: Identifier): String =
     if (pkgId == m.packageId)
       if (modId == m.qualifiedName.module)
         m.qualifiedName.name.toString
@@ -339,7 +334,6 @@ object Repl {
         m.qualifiedName.toString
     else
       m.qualifiedName.toString + "@" + m.packageId
-  }
 
   def prettyType(typ: Type, pkgId: PackageId, modId: ModuleName): String = {
     val precTApp = 2
@@ -423,12 +417,11 @@ object Repl {
         )
       )
     } catch {
-      case ex: Throwable => {
+      case ex: Throwable =>
         val sw = new StringWriter
         ex.printStackTrace(new PrintWriter(sw))
         println("Failed to load packages: " + ex.toString + ", stack trace: " + sw.toString)
         (false, state)
-      }
     }
   }
 
@@ -459,8 +452,7 @@ object Repl {
   // The identifier can be fully-qualified (Foo.Bar@<package id>). If package is not
   // specified, the last used package is used.
   // If the resulting type is a scenario it is automatically executed.
-  def invokePure(state: State, id: String, args: Seq[String]): Unit = {
-
+  def invokePure(state: State, id: String, args: Seq[String]): Unit =
     parser.parseExprs[this.type](args.mkString(" ")) match {
 
       case Left(error @ _) =>
@@ -501,7 +493,6 @@ object Repl {
             println("Error: " + id + " not a value.")
         }
     }
-  }
 
   def buildExprFromTest(state: State, idAndArgs: Seq[String]): Option[Expr] =
     idAndArgs match {
@@ -522,7 +513,7 @@ object Repl {
         None
     }
 
-  def invokeTest(state: State, idAndArgs: Seq[String]): (Boolean, State) = {
+  def invokeTest(state: State, idAndArgs: Seq[String]): (Boolean, State) =
     buildExprFromTest(state, idAndArgs)
       .map { expr =>
         val (machine, errOrLedger) =
@@ -541,7 +532,6 @@ object Repl {
         }
       }
       .getOrElse((false, state))
-  }
 
   def cmdTestAll(state0: State): (Boolean, State) = {
     val allTests =
@@ -584,14 +574,13 @@ object Repl {
     (failures == 0, state)
   }
 
-  def cmdProfile(state: State, testId: String, outputFile: Path): (Boolean, State) = {
+  def cmdProfile(state: State, testId: String, outputFile: Path): (Boolean, State) =
     buildExprFromTest(state, Seq(testId))
       .map { expr =>
         println("Warming up JVM for 10s...")
         val start = System.nanoTime()
-        while (System.nanoTime() - start < 10L * 1000 * 1000 * 1000) {
+        while (System.nanoTime() - start < 10L * 1000 * 1000 * 1000)
           state.scenarioRunner.run(expr)
-        }
         println("Collecting profile...")
         val (machine, errOrLedger) =
           state.scenarioRunner.run(expr)
@@ -609,7 +598,6 @@ object Repl {
         }
       }
       .getOrElse((false, state))
-  }
 
   private val unknownPackageId = PackageId.assertFromString("-unknownPackage-")
 

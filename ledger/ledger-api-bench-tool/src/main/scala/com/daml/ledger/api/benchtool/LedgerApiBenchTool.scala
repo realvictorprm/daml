@@ -27,7 +27,7 @@ import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
 
 object LedgerApiBenchTool {
-  def main(args: Array[String]): Unit = {
+  def main(args: Array[String]): Unit =
     Cli.config(args) match {
       case Some(config) =>
         val benchmark = runBenchmark(config)(ExecutionContext.Implicits.global)
@@ -36,7 +36,6 @@ object LedgerApiBenchTool {
       case _ =>
         logger.error("Invalid configuration arguments.")
     }
-  }
 
   private def runBenchmark(config: Config)(implicit ec: ExecutionContext): Future[Unit] = {
     val printer = pprint.PPrinter(200, 1000)

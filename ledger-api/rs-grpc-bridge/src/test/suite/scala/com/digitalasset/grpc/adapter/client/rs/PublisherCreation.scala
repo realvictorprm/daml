@@ -73,7 +73,7 @@ trait PublisherCreation {
               logger.trace("RECEIVED DEMAND FOR {} elements", integer)
               Future {
                 1.to(integer)
-                  .foreach(_ => {
+                  .foreach { _ =>
                     if (testRunning) {
                       if (!completed.get()) {
                         val emitted = emittedElements.getAndIncrement()
@@ -88,7 +88,7 @@ trait PublisherCreation {
                         "Stopping emission of elements due to test termination"
                       ) with NoStackTrace
                     }
-                  })
+                  }
               }(ec)
               ()
 

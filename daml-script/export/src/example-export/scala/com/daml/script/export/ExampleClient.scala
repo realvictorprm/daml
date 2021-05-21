@@ -29,7 +29,7 @@ object ExampleClientConfig {
 
   private def parseExportOut(
       envVar: String
-  ): Either[String, ExampleClientConfig => ExampleClientConfig] = {
+  ): Either[String, ExampleClientConfig => ExampleClientConfig] =
     if (envVar.isEmpty) Left("Environment variable EXPORT_OUT must not be empty")
     else
       envVar.split(" ") match {
@@ -47,7 +47,6 @@ object ExampleClientConfig {
           }
         case _ => Left("Environment variable EXPORT_OUT must contain one path")
       }
-  }
 
   private val parser = new scopt.OptionParser[ExampleClientConfig]("script-export") {
     help("help")
@@ -75,12 +74,11 @@ object ExampleClientConfig {
 }
 
 object ExampleClient {
-  def main(args: Array[String]): Unit = {
+  def main(args: Array[String]): Unit =
     ExampleClientConfig.parse(args) match {
       case Some(clientConfig) => main(clientConfig)
       case None => sys.exit(1)
     }
-  }
   def main(clientConfig: ExampleClientConfig): Unit = {
     RunnerMain.main(
       RunnerConfig(

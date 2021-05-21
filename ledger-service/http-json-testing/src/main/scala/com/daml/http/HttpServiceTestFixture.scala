@@ -251,11 +251,10 @@ object HttpServiceTestFixture extends LazyLogging with Assertions with Inside {
   }
   type LeakPasswords = LeakPasswords.T
 
-  private val List(serverCrt, serverPem, caCrt, clientCrt, clientPem) = {
+  private val List(serverCrt, serverPem, caCrt, clientCrt, clientPem) =
     List("server.crt", "server.pem", "ca.crt", "client.crt", "client.pem").map { src =>
       Some(new File(rlocation("ledger/test-common/test-certificates/" + src)))
     }
-  }
 
   private val serverTlsConfig = TlsConfiguration(enabled = true, serverCrt, serverPem, caCrt)
   private val clientTlsConfig = TlsConfiguration(enabled = true, clientCrt, clientPem, caCrt)
@@ -290,7 +289,7 @@ object HttpServiceTestFixture extends LazyLogging with Assertions with Inside {
       as: ActorSystem,
       ec: ExecutionContext,
       mat: Materializer,
-  ): Future[(StatusCode, JsValue)] = {
+  ): Future[(StatusCode, JsValue)] =
     Http()
       .singleRequest(
         HttpRequest(
@@ -302,11 +301,10 @@ object HttpServiceTestFixture extends LazyLogging with Assertions with Inside {
       )
       .flatMap { resp =>
         val bodyF: Future[String] = getResponseDataBytes(resp, debug = true)
-        bodyF.map(body => {
+        bodyF.map { body =>
           (resp.status, body.parseJson)
-        })
+        }
       }
-  }
 
   def postJsonStringRequestEncoded(uri: Uri, jsonString: String, headers: List[HttpHeader])(implicit
       as: ActorSystem,
@@ -385,7 +383,7 @@ object HttpServiceTestFixture extends LazyLogging with Assertions with Inside {
       as: ActorSystem,
       ec: ExecutionContext,
       mat: Materializer,
-  ): Future[(StatusCode, String)] = {
+  ): Future[(StatusCode, String)] =
     Http()
       .singleRequest(
         HttpRequest(method = HttpMethods.GET, uri = uri, headers = headers)
@@ -394,7 +392,6 @@ object HttpServiceTestFixture extends LazyLogging with Assertions with Inside {
         val bodyF: Future[String] = getResponseDataBytes(resp, debug = true)
         bodyF.map(body => (resp.status, body))
       }
-  }
 
   def getRequest(uri: Uri, headers: List[HttpHeader])(implicit
       as: ActorSystem,

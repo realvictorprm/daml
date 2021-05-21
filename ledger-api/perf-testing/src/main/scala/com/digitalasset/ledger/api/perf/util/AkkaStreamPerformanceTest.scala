@@ -49,9 +49,8 @@ abstract class AkkaStreamPerformanceTest extends PerformanceTest {
           }
         }
         .tearDown { _ =>
-          try {
-            teardown()
-          } catch {
+          try teardown()
+          catch {
             case t: Throwable =>
               logger.error("Teardown failed.", t)
               throw t

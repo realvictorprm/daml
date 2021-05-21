@@ -99,11 +99,10 @@ class KVUtilsConfigSpec extends AnyWordSpec with Matchers {
       for {
         // Set a configuration with an authorized participant id
         logEntry0 <- submitConfig(
-          { c =>
+          c =>
             c.copy(
               generation = c.generation + 1
-            )
-          },
+            ),
           submissionId = Ref.LedgerString.assertFromString("submission-id-1"),
         )
 
@@ -113,11 +112,10 @@ class KVUtilsConfigSpec extends AnyWordSpec with Matchers {
 
         logEntry1 <- withParticipantId(p0) {
           submitConfig(
-            { c =>
+            c =>
               c.copy(
                 generation = c.generation + 1
-              )
-            },
+              ),
             submissionId = Ref.LedgerString.assertFromString("submission-id-2"),
           )
         }
@@ -128,11 +126,10 @@ class KVUtilsConfigSpec extends AnyWordSpec with Matchers {
 
         logEntry2 <- withParticipantId(p1) {
           submitConfig(
-            { c =>
+            c =>
               c.copy(
                 generation = c.generation + 1
-              )
-            },
+              ),
             submissionId = Ref.LedgerString.assertFromString("submission-id-3"),
           )
         }
@@ -152,20 +149,18 @@ class KVUtilsConfigSpec extends AnyWordSpec with Matchers {
     "reject duplicate" in KVTest.runTest {
       for {
         logEntry0 <- submitConfig(
-          { c =>
+          c =>
             c.copy(
               generation = c.generation + 1
-            )
-          },
+            ),
           submissionId = Ref.LedgerString.assertFromString("submission-id-1"),
         )
 
         logEntry1 <- submitConfig(
-          { c =>
+          c =>
             c.copy(
               generation = c.generation + 1
-            )
-          },
+            ),
           submissionId = Ref.LedgerString.assertFromString("submission-id-1"),
         )
 
@@ -183,20 +178,18 @@ class KVUtilsConfigSpec extends AnyWordSpec with Matchers {
       for {
         //Submit config twice to force one acceptance and one rejection on duplicate
         _ <- submitConfig(
-          { c =>
+          c =>
             c.copy(
               generation = c.generation + 1
-            )
-          },
+            ),
           submissionId = Ref.LedgerString.assertFromString("submission-id-1"),
         )
 
         _ <- submitConfig(
-          { c =>
+          c =>
             c.copy(
               generation = c.generation + 1
-            )
-          },
+            ),
           submissionId = Ref.LedgerString.assertFromString("submission-id-1"),
         )
       } yield {

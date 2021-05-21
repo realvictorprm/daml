@@ -11,12 +11,11 @@ import scala.concurrent.{Await, ExecutionContext}
 import scala.util.{Failure, Success}
 
 object Main extends StrictLogging {
-  def main(args: Array[String]): Unit = {
+  def main(args: Array[String]): Unit =
     Config.parseConfig(args) match {
       case Some(config) => main(config)
       case None => sys.exit(1)
     }
-  }
 
   private def main(config: Config): Unit = {
     implicit val system: ActorSystem = ActorSystem("system")

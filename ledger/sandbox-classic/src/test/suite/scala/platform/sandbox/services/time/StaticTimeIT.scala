@@ -101,9 +101,8 @@ class StaticTimeIT
       val readerInstance = getTimeReader
       try {
         val timeIsSynchronized = new Callable[lang.Boolean] {
-          override def call(): lang.Boolean = {
+          override def call(): lang.Boolean =
             readerInstance.getCurrentTime == timeToSet
-          }
         }
 
         Awaitility
@@ -111,9 +110,7 @@ class StaticTimeIT
           .until(timeIsSynchronized)
 
         succeed
-      } finally {
-        readerInstance.close()
-      }
+      } finally readerInstance.close()
     }
   }
 

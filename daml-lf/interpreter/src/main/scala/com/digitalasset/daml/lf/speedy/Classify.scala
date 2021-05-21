@@ -24,7 +24,7 @@ private[speedy] object Classify { // classify the machine state w.r.t what step 
     }
   }
 
-  def classifyMachine(machine: Machine, counts: Counts): Unit = {
+  def classifyMachine(machine: Machine, counts: Counts): Unit =
     if (machine.returnValue != null) {
       // classify a value by the continution it is about to return to
       counts.ctrlValue += 1
@@ -35,5 +35,4 @@ private[speedy] object Classify { // classify the machine state w.r.t what step 
       val expr = machine.ctrl.getClass.getSimpleName
       val _ = counts.exprs += expr -> (counts.exprs.get(expr).getOrElse(0) + 1)
     }
-  }
 }

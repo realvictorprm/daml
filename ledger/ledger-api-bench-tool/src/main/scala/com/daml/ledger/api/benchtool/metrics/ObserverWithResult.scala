@@ -16,9 +16,8 @@ abstract class ObserverWithResult[T](logger: Logger) extends StreamObserver[T] {
 
   private val promise = Promise[Unit]()
 
-  override def onNext(value: T): Unit = {
+  override def onNext(value: T): Unit =
     ()
-  }
 
   override def onError(t: Throwable): Unit = {
     logger.error(withStreamName(s"Received error: $t"))

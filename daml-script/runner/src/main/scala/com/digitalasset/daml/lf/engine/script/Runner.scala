@@ -238,7 +238,7 @@ object Runner {
   )(implicit
       ec: ExecutionContext,
       seq: ExecutionSequencerFactory,
-  ): Future[Participants[GrpcLedgerClient]] = {
+  ): Future[Participants[GrpcLedgerClient]] =
     for {
       defaultClient <- participantParams.default_participant.traverse(x =>
         connectApiParameters(x, tlsConfig, maxInboundMessageSize)
@@ -247,7 +247,6 @@ object Runner {
         connectApiParameters(v, tlsConfig, maxInboundMessageSize)
       )
     } yield Participants(defaultClient, participantClients, participantParams.party_participants)
-  }
 
   def jsonClients(
       participantParams: Participants[ApiParameters],
@@ -429,10 +428,9 @@ class Runner(compiledPackages: CompiledPackages, script: Script.Action, timeMode
               .flatMap(run(_))
           case Left(v) =>
             v match {
-              case SRecord(_, _, JavaList(newState, _)) => {
+              case SRecord(_, _, JavaList(newState, _)) =>
                 // Unwrap the Tuple2 we get from the inlined StateT.
-                Future { newState }
-              }
+                Future(newState)
               case _ => Future.failed(new ConverterException(s"Expected Tuple2 but got $v"))
             }
         }
@@ -444,7 +442,7 @@ class Runner(compiledPackages: CompiledPackages, script: Script.Action, timeMode
       expr <- result match {
         // Unwrap Script type and apply to ()
         // For backwards-compatibility we support the 1 and the 2-field versions.
-        case SRecord(_, _, vals) if vals.size == 1 || vals.size == 2 => {
+        case SRecord(_, _, vals) if vals.size == 1 || vals.size == 2 =>
           vals.get(0) match {
             case SPAP(_, _, _) =>
               Future(SEApp(SEValue(vals.get(0)), Array(SEValue(SUnit))))
@@ -457,7 +455,6 @@ class Runner(compiledPackages: CompiledPackages, script: Script.Action, timeMode
                 )
               )
           }
-        }
         case v => Future.failed(new ConverterException(s"Expected record with 1 field but got $v"))
       }
       v <- run(expr)

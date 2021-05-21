@@ -17,9 +17,8 @@ class ImmutablesOnlyCacheUpdatePolicySpec extends AnyWordSpec with Matchers {
     }
 
     "not allow write-through caching of non-packages" in {
-      for (stateKey <- nonPackageKeyTypes) {
+      for (stateKey <- nonPackageKeyTypes)
         policy.shouldCacheOnWrite(stateKey) shouldBe false
-      }
     }
 
     "allow caching of read packages or parties" in {
@@ -28,9 +27,8 @@ class ImmutablesOnlyCacheUpdatePolicySpec extends AnyWordSpec with Matchers {
     }
 
     "not allow caching of read mutable values" in {
-      for (stateKey <- nonPackageKeyTypes if stateKey.getParty.isEmpty) {
+      for (stateKey <- nonPackageKeyTypes if stateKey.getParty.isEmpty)
         policy.shouldCacheOnRead(stateKey) shouldBe false
-      }
     }
   }
 

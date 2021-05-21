@@ -55,13 +55,11 @@ object LedgerClientConfig {
 
   }
 
-  def create(config: Config = ConfigFactory.load()): Try[LedgerClientConfig] = {
+  def create(config: Config = ConfigFactory.load()): Try[LedgerClientConfig] =
     wrapError(ConfigSource.fromConfig(config).at("ledger-client").load[LedgerClientConfig])
-  }
 
   private def wrapError[T](
       failuresOrConfig: Either[pureconfig.error.ConfigReaderFailures, T]
-  ): Try[T] = {
+  ): Try[T] =
     failuresOrConfig.left.map(MalformedTypesafeConfig).toTry
-  }
 }

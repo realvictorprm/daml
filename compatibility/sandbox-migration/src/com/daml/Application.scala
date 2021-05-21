@@ -27,7 +27,7 @@ object Application {
 
   final case class Choice(template: Template, name: String)
 
-  private def toEventResult(e: Event): EventResult = {
+  private def toEventResult(e: Event): EventResult =
     e.event match {
       case Event.Event.Created(created) =>
         CreatedResult(
@@ -45,7 +45,6 @@ object Application {
       case Event.Event.Empty =>
         throw new RuntimeException("Invalid empty event")
     }
-  }
 
   object ContractResult {
     def fromCreateEvent(event: CreatedEvent): ContractResult =

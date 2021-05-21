@@ -34,7 +34,7 @@ class DarReader[A](
       name: String,
       darStream: ZipInputStream,
       entrySizeThreshold: Int = EntrySizeThreshold,
-  ): Try[Dar[A]] = {
+  ): Try[Dar[A]] =
     for {
       entries <- bracket(Try(darStream))(zis => Try(zis.close())).flatMap(zis =>
         loadZipEntries(name, zis, entrySizeThreshold)
@@ -43,7 +43,6 @@ class DarReader[A](
       main <- parseOne(entries.getInputStreamFor)(names.main): Try[A]
       deps <- parseAll(entries.getInputStreamFor)(names.dependencies): Try[List[A]]
     } yield Dar(main, deps)
-  }
 
   // Fails if a zip bomb is detected
   private def slurpWithCaution(
@@ -129,12 +128,11 @@ object DarReader {
 
   private[archive] case class ZipEntries(name: String, entries: Map[String, (Long, InputStream)]) {
 
-    def getInputStreamFor(entryName: String): Try[(Long, InputStream)] = {
+    def getInputStreamFor(entryName: String): Try[(Long, InputStream)] =
       entries.get(entryName) match {
         case Some((size, is)) => Success(size -> is)
         case None => Failure(InvalidZipEntry(entryName, this))
       }
-    }
 
     def readDalfNames(
         readDalfNamesFromManifest: InputStream => Try[Dar[String]]

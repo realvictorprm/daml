@@ -79,7 +79,7 @@ class DispatcherSpec
       publishTo: Option[Dispatcher[Index]] = None,
       meanDelayMs: Int = 0,
   ): IndexedSeq[(Index, Value)] = {
-    def genManyHelper(i: Index, count: Int): LazyList[(Index, Value)] = {
+    def genManyHelper(i: Index, count: Int): LazyList[(Index, Value)] =
       if (count == 0) {
         LazyList.empty
       } else {
@@ -96,7 +96,6 @@ class DispatcherSpec
         Thread.sleep(r.nextInt(meanDelayMs + 1).toLong * 2)
         LazyList.cons((i, v), genManyHelper(next, count - 1))
       }
-    }
 
     genManyHelper(nextIndex.get(), count).toIndexedSeq.map { case (i, v) => (i, v) }
   }
@@ -116,7 +115,7 @@ class DispatcherSpec
       src: Dispatcher[Index],
       subSrc: SubSource[Index, Value],
       delayMs: Int = 0,
-  ): Future[immutable.IndexedSeq[(Index, Value)]] = {
+  ): Future[immutable.IndexedSeq[(Index, Value)]] =
     if (delayMs > 0) {
       src
         .startingAt(start, subSrc, Some(stop))
@@ -127,7 +126,6 @@ class DispatcherSpec
         .startingAt(start, subSrc, Some(stop))
         .runWith(Sink.collection)
     }
-  }
 
   private val oneAfterAnotherSteppingMode =
     OneAfterAnother[Index, Value](_.next, i => successful(store.get()(i)))
@@ -373,7 +371,7 @@ class DispatcherSpec
       out25F: Future[immutable.IndexedSeq[(Index, Value)]],
       out50F: Future[immutable.IndexedSeq[(Index, Value)]],
       out75F: Future[immutable.IndexedSeq[(Index, Value)]],
-  ) = {
+  ) =
     for {
       out <- outF
       out25 <- out25F
@@ -385,7 +383,6 @@ class DispatcherSpec
       out50 shouldEqual pairs75 ++ pairs100
       out75 shouldEqual pairs100
     }
-  }
 
   override def timeLimit: Span = scaled(30.seconds)
 }

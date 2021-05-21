@@ -401,18 +401,18 @@ class WebSocketService(
   ): Flow[A, A, NotUsed] =
     Flow[A]
       .watchTermination() { (_, future) =>
-        discard { numConns.incrementAndGet }
+        discard(numConns.incrementAndGet)
         logger.info(
           s"New websocket client has connected, current number of clients:${numConns.get()}"
         )
         future onComplete {
           case Success(_) =>
-            discard { numConns.decrementAndGet }
+            discard(numConns.decrementAndGet)
             logger.info(
               s"Websocket client has disconnected. Current number of clients: ${numConns.get()}"
             )
           case Failure(ex) =>
-            discard { numConns.decrementAndGet }
+            discard(numConns.decrementAndGet)
             logger.info(
               s"Websocket client interrupted on Failure: ${ex.getMessage}. remaining number of clients: ${numConns.get()}"
             )
@@ -460,7 +460,7 @@ class WebSocketService(
       }
     case bm: BinaryMessage =>
       // ignore binary messages but drain content to avoid the stream being clogged
-      discard { bm.dataStream.runWith(Sink.ignore) }
+      discard(bm.dataStream.runWith(Sink.ignore))
       Future successful -\/(
         InvalidUserInput(
           "Invalid request. Expected a single TextMessage with JSON payload, got BinaryMessage"

@@ -26,19 +26,17 @@ private[codegen] final case class InterfaceTree(
     interface: Interface,
 ) {
 
-  def process(f: NodeWithContext => Future[Unit])(implicit ec: ExecutionContext): Future[Unit] = {
+  def process(f: NodeWithContext => Future[Unit])(implicit ec: ExecutionContext): Future[Unit] =
     bfs(Future.unit) { case (a, nodeWithContext) =>
       a.zipWith(f(nodeWithContext))((_, _) => ())(ec)
     }
-  }
 
   def bfs[A](z: A)(f: (A, NodeWithContext) => A): A = {
     val nodeWithLineages = mutable.Queue.empty[NodeWithContext]
-    for ((name, module) <- modules) {
+    for ((name, module) <- modules)
       nodeWithLineages += ModuleWithContext(interface, BackStack.empty, name, module)
-    }
     @tailrec
-    def go(result: A): A = {
+    def go(result: A): A =
       if (nodeWithLineages.isEmpty) {
         result
       } else {
@@ -46,7 +44,6 @@ private[codegen] final case class InterfaceTree(
         nodeWithLineages ++= nodeWithContext.childrenLineages
         go(f(result, nodeWithContext))
       }
-    }
     go(z)
   }
 }
@@ -141,7 +138,7 @@ private[codegen] object InterfaceTree extends StrictLogging {
       Module(modules.view.mapValues(_.build()).toMap, types.view.mapValues(_.build()).toMap)
 
     @tailrec
-    def insert(module: ImmArray[String], name: ImmArray[String], `type`: InterfaceType): Unit = {
+    def insert(module: ImmArray[String], name: ImmArray[String], `type`: InterfaceType): Unit =
       if (module.isEmpty) {
         // at this point name cannot be empty
         assert(name.length > 0)
@@ -154,7 +151,6 @@ private[codegen] object InterfaceTree extends StrictLogging {
       } else {
         modules.getOrElseUpdate(module.head, ModuleBuilder.empty).insert(module.tail, name, `type`)
       }
-    }
   }
 
   private object ModuleBuilder {
@@ -165,16 +161,15 @@ private[codegen] object InterfaceTree extends StrictLogging {
       var typ: Option[InterfaceType],
       children: mutable.HashMap[String, TypeBuilder],
   ) extends NodeBuilder {
-    def build(): Type = {
+    def build(): Type =
       typ match {
         // we allow TypeBuilder nodes with no InterfaceType if they have children nodes
         case None if children.isEmpty =>
           throw new IllegalStateException(s"Found a Type node without a type at build() time")
         case definedTypeOpt => Type(definedTypeOpt, children.view.mapValues(_.build()).toMap)
       }
-    }
     @tailrec
-    def insert(name: String, names: ImmArray[String], `type`: InterfaceType): Unit = {
+    def insert(name: String, names: ImmArray[String], `type`: InterfaceType): Unit =
       if (names.isEmpty) {
         children
           .getOrElseUpdate(name, new TypeBuilder(Some(`type`), mutable.HashMap.empty))
@@ -184,9 +179,8 @@ private[codegen] object InterfaceTree extends StrictLogging {
           .getOrElseUpdate(name, new TypeBuilder(None, mutable.HashMap.empty))
           .insert(names.head, names.tail, `type`)
       }
-    }
 
-    def setTypeOrThrow(typ: InterfaceType): Unit = {
+    def setTypeOrThrow(typ: InterfaceType): Unit =
       this.typ match {
         case Some(otherTyp) if typ != otherTyp =>
           throw new IllegalStateException(
@@ -194,7 +188,6 @@ private[codegen] object InterfaceTree extends StrictLogging {
           )
         case _ => this.typ = Some(typ)
       }
-    }
   }
 
   private object TypeBuilder {
@@ -210,11 +203,10 @@ private[codegen] object InterfaceTree extends StrictLogging {
     def build(interface: Interface): InterfaceTree =
       InterfaceTree(children.view.mapValues(_.build()).toMap, interface)
 
-    def insert(qualifiedName: Ref.QualifiedName, `type`: InterfaceType): Unit = {
+    def insert(qualifiedName: Ref.QualifiedName, `type`: InterfaceType): Unit =
       children
         .getOrElseUpdate(qualifiedName.module.segments.head, ModuleBuilder.empty)
         .insert(qualifiedName.module.segments.tail, qualifiedName.name.segments, `type`)
-    }
   }
 
   private object InterfaceTreeBuilder {

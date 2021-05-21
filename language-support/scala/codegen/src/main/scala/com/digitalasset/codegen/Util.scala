@@ -87,9 +87,8 @@ abstract class Util(val packageName: String, val outputDir: File) { self =>
       new File(outputDir, relPath)
     }
 
-    def toRefTreeWithInnerTypes(innerTypes: Array[String]): RefTree = {
+    def toRefTreeWithInnerTypes(innerTypes: Array[String]): RefTree =
       qualifiedNameToRefTree(qualifiedNameParts ++ innerTypes)
-    }
 
     def toRefTree: RefTree = toRefTreeWithInnerTypes(Array())
 
@@ -174,20 +173,18 @@ object Util {
     (s.init.toArray, s.last)
   }
 
-  def qualifiedNameToRefTree(ss: Array[String]): RefTree = {
+  def qualifiedNameToRefTree(ss: Array[String]): RefTree =
     ss match {
       case Array() =>
         throw new RuntimeException("""|packageNameToRefTree: This function should never be called
            |with an empty list""".stripMargin)
       case Array(name) => toIdent(name)
-      case Array(firstQual, rest @ _*) => {
+      case Array(firstQual, rest @ _*) =>
         val base: RefTree = toIdent(firstQual)
-        rest.foldLeft(base)((refTree: RefTree, nm: String) => {
+        rest.foldLeft(base) { (refTree: RefTree, nm: String) =>
           RefTree(refTree, TermName(nm))
-        })
-      }
+        }
     }
-  }
 
   private[codegen] def genTypeTopLevelDeclNames(genType: IType): List[Ref.Identifier] =
     genType foldMapConsPrims {

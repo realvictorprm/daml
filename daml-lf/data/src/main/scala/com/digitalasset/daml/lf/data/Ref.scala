@@ -60,14 +60,14 @@ object Ref {
     val segments = ImmArray.newBuilder[String]
     val currentString = new java.lang.StringBuilder()
     s.codePoints()
-      .forEach(ch => {
+      .forEach { ch =>
         if (ch == splitCodepoint) {
           segments += currentString.toString
           currentString.setLength(0)
         } else {
           val _ = currentString.appendCodePoint(ch)
         }
-      })
+      }
     segments += currentString.toString
     segments.result()
   }
@@ -143,9 +143,8 @@ object Ref {
     /** You better know what you're doing if you use this one -- specifically you need to comply
       * to the lexical specification embodied by `fromStrings`.
       */
-    def unsafeFromNames(segments: ImmArray[Name]): DottedName = {
+    def unsafeFromNames(segments: ImmArray[Name]): DottedName =
       new DottedName(segments)
-    }
   }
 
   final case class QualifiedName private (module: ModuleName, name: DottedName)
@@ -195,7 +194,7 @@ object Ref {
   }
 
   object Identifier {
-    def fromString(s: String): Either[String, Identifier] = {
+    def fromString(s: String): Either[String, Identifier] =
       splitInTwo(s, ':').fold[Either[String, Identifier]](
         Left(s"Separator ':' between package identifier and qualified name not found in $s")
       ) { case (packageIdString, qualifiedNameString) =>
@@ -204,7 +203,6 @@ object Ref {
           qualifiedName <- QualifiedName.fromString(qualifiedNameString)
         } yield Identifier(packageId, qualifiedName)
       }
-    }
 
     @throws[IllegalArgumentException]
     def assertFromString(s: String): Identifier =

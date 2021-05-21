@@ -105,12 +105,12 @@ final class CommandsValidator(ledgerId: LedgerId) {
   ): Either[StatusRuntimeException, immutable.Seq[ApiCommand]] =
     commands.foldLeft[Either[StatusRuntimeException, Vector[ApiCommand]]](
       Right(Vector.empty[ApiCommand])
-    )((commandz, command) => {
+    ) { (commandz, command) =>
       for {
         validatedInnerCommands <- commandz
         validatedInnerCommand <- validateInnerCommand(command.command)
       } yield validatedInnerCommands :+ validatedInnerCommand
-    })
+    }
 
   private def validateInnerCommand(
       command: ProtoCommand.Command
@@ -188,9 +188,8 @@ object CommandsValidator {
     */
   case class Submitters[T](actAs: Set[T], readAs: Set[T])
 
-  def effectiveSubmitters(commands: Option[ProtoCommands]): Submitters[String] = {
+  def effectiveSubmitters(commands: Option[ProtoCommands]): Submitters[String] =
     commands.fold(noSubmitters)(effectiveSubmitters)
-  }
 
   def effectiveSubmitters(commands: ProtoCommands): Submitters[String] = {
     val effectiveActAs =

@@ -9,7 +9,6 @@ import io.grpc.Metadata
 
 /** An AuthService that rejects all calls by always returning the [[ClaimSet.Unauthenticated]] */
 object AuthServiceNone extends AuthService {
-  override def decodeMetadata(headers: Metadata): CompletionStage[ClaimSet] = {
+  override def decodeMetadata(headers: Metadata): CompletionStage[ClaimSet] =
     CompletableFuture.completedFuture(ClaimSet.Unauthenticated)
-  }
 }

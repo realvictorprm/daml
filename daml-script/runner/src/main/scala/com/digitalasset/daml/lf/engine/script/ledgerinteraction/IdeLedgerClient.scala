@@ -44,12 +44,10 @@ import scala.util.{Failure, Success}
 class IdeLedgerClient(val compiledPackages: CompiledPackages) extends ScriptLedgerClient {
   class ArrayBufferTraceLog extends TraceLog {
     val buffer = ArrayBuffer[(String, Option[Location])]()
-    override def add(message: String, optLocation: Option[Location]): Unit = {
-      discard { buffer.append((message, optLocation)) }
-    }
-    override def iterator: Iterator[(String, Option[Location])] = {
+    override def add(message: String, optLocation: Option[Location]): Unit =
+      discard(buffer.append((message, optLocation)))
+    override def iterator: Iterator[(String, Option[Location])] =
       buffer.iterator
-    }
     def clear: Unit = buffer.clear()
   }
 
@@ -102,7 +100,7 @@ class IdeLedgerClient(val compiledPackages: CompiledPackages) extends ScriptLedg
   )(implicit
       ec: ExecutionContext,
       mat: Materializer,
-  ): Future[Option[ScriptLedgerClient.ActiveContract]] = {
+  ): Future[Option[ScriptLedgerClient.ActiveContract]] =
     scenarioRunner.ledger.lookupGlobalContract(
       view = ScenarioLedger.ParticipantView(Set(), Set(parties.toList: _*)),
       effectiveAt = scenarioRunner.ledger.currentTime,
@@ -119,7 +117,6 @@ class IdeLedgerClient(val compiledPackages: CompiledPackages) extends ScriptLedg
         // and the contract not being active.
         Future.successful(None)
     }
-  }
 
   override def queryContractKey(
       parties: OneAnd[Set, Ref.Party],
@@ -129,7 +126,7 @@ class IdeLedgerClient(val compiledPackages: CompiledPackages) extends ScriptLedg
   )(implicit
       ec: ExecutionContext,
       mat: Materializer,
-  ): Future[Option[ScriptLedgerClient.ActiveContract]] = {
+  ): Future[Option[ScriptLedgerClient.ActiveContract]] =
     GlobalKey
       .build(templateId, key.toValue)
       .fold(err => Future.failed(new ConverterException(err)), Future.successful(_))
@@ -139,7 +136,6 @@ class IdeLedgerClient(val compiledPackages: CompiledPackages) extends ScriptLedg
           case Some(cid) => queryContractId(parties, templateId, cid)
         }
       }
-  }
 
   // unsafe version of submit that does not clear the commit.
   private def unsafeSubmit(
@@ -161,7 +157,7 @@ class IdeLedgerClient(val compiledPackages: CompiledPackages) extends ScriptLedg
       machine.setExpressionToEvaluate(SEApp(translated, Array(SEValue.Token)))
       onLedger.committers = actAs.toSet
       var result: RichTransaction = null
-      while (result == null) {
+      while (result == null)
         machine.run() match {
           case SResultNeedContract(coid, tid @ _, committers @ _, cbMissing, cbPresent) =>
             scenarioRunner.lookupContract(coid, actAs.toSet, readAs, cbMissing, cbPresent).toTry.get
@@ -226,7 +222,6 @@ class IdeLedgerClient(val compiledPackages: CompiledPackages) extends ScriptLedg
               "FATAL: Encountered scenario instruction getParty in Daml Script"
             )
         }
-      }
       Right(result)
     }
 
@@ -273,7 +268,7 @@ class IdeLedgerClient(val compiledPackages: CompiledPackages) extends ScriptLedg
       readAs: Set[Ref.Party],
       commands: List[command.ApiCommand],
       optLocation: Option[Location],
-  )(implicit ec: ExecutionContext, mat: Materializer): Future[Either[Unit, Unit]] = {
+  )(implicit ec: ExecutionContext, mat: Materializer): Future[Either[Unit, Unit]] =
     unsafeSubmit(actAs, readAs, commands, optLocation)
       .map({
         case Right(_) => Left(())
@@ -286,7 +281,6 @@ class IdeLedgerClient(val compiledPackages: CompiledPackages) extends ScriptLedg
         machine.clearCommit
         Future.successful(Right(()))
       })
-  }
 
   override def submitTree(
       actAs: OneAnd[Set, Ref.Party],
@@ -296,7 +290,7 @@ class IdeLedgerClient(val compiledPackages: CompiledPackages) extends ScriptLedg
   )(implicit
       ec: ExecutionContext,
       mat: Materializer,
-  ): Future[ScriptLedgerClient.TransactionTree] = {
+  ): Future[ScriptLedgerClient.TransactionTree] =
     unsafeSubmit(actAs, readAs, commands, optLocation).map {
       case Right(richTransaction) =>
         // Expected successful commit so clear.
@@ -323,13 +317,11 @@ class IdeLedgerClient(val compiledPackages: CompiledPackages) extends ScriptLedg
         )
       case Left(err) => throw new IllegalStateException(err)
     }
-  }
 
   // All parties known to the ledger. This may include parties that were not
   // allocated explicitly, e.g. parties created by `partyFromText`.
-  private def getLedgerParties(): Iterable[Ref.Party] = {
+  private def getLedgerParties(): Iterable[Ref.Party] =
     scenarioRunner.ledger.ledgerData.nodeInfos.values.flatMap(_.disclosures.keys)
-  }
 
   override def allocateParty(partyIdHint: String, displayName: String)(implicit
       ec: ExecutionContext,
@@ -371,9 +363,8 @@ class IdeLedgerClient(val compiledPackages: CompiledPackages) extends ScriptLedg
       ec: ExecutionContext,
       esf: ExecutionSequencerFactory,
       mat: Materializer,
-  ): Future[Time.Timestamp] = {
+  ): Future[Time.Timestamp] =
     Future.successful(scenarioRunner.ledger.currentTime)
-  }
 
   override def setStaticTime(time: Time.Timestamp)(implicit
       ec: ExecutionContext,

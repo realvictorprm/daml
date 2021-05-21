@@ -464,7 +464,7 @@ class ComparisonSBuiltinTest extends AnyWordSpec with Matchers with TableDrivenP
       )
 
       val tests = Table(
-        ("test cases"),
+        "test cases",
         Test(
           typ = funT,
           negativeTestCases = List.empty,
@@ -651,12 +651,10 @@ class ComparisonSBuiltinTest extends AnyWordSpec with Matchers with TableDrivenP
     )
     val machine =
       Speedy.Machine.fromPureSExpr(compiledPackages, SExpr.SEApp(sexpr, contractIds))
-    try {
-      machine.run() match {
-        case SResult.SResultFinalValue(v) => Right(v)
-        case SResultError(err) => throw Goodbye(err)
-        case res => throw new RuntimeException(s"Got unexpected interpretation result $res")
-      }
+    try machine.run() match {
+      case SResult.SResultFinalValue(v) => Right(v)
+      case SResultError(err) => throw Goodbye(err)
+      case res => throw new RuntimeException(s"Got unexpected interpretation result $res")
     } catch { case Goodbye(err) => Left(err) }
   }
 

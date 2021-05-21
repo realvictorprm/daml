@@ -25,7 +25,7 @@ trait PostgresAround {
 
   private val started: AtomicBoolean = new AtomicBoolean(false)
 
-  protected def connectToPostgresqlServer(): Unit = {
+  protected def connectToPostgresqlServer(): Unit =
     (
       sys.env.get("POSTGRESQL_HOST"),
       sys.env.get("POSTGRESQL_PORT").map(port => Port(port.toInt)),
@@ -37,7 +37,6 @@ trait PostgresAround {
       case _ =>
         startEphemeralServer()
     }
-  }
 
   private def connectToSharedServer(
       hostName: String,
@@ -94,18 +93,17 @@ trait PostgresAround {
         "Attempted to start PostgreSQL, but it has already been started."
       )
     }
-    try {
-      run(
-        "start PostgreSQL",
-        Tool.pg_ctl,
-        "-w",
-        "-D",
-        dataDir.toString,
-        "-l",
-        logFile.toString,
-        "start",
-      )
-    } catch {
+    try run(
+      "start PostgreSQL",
+      Tool.pg_ctl,
+      "-w",
+      "-D",
+      dataDir.toString,
+      "-l",
+      logFile.toString,
+      "start",
+    )
+    catch {
       case NonFatal(e) =>
         logger.error("Starting PostgreSQL failed.", e)
         started.set(false)
@@ -113,7 +111,7 @@ trait PostgresAround {
     }
   }
 
-  private def stopPostgresql(dataDir: Path): Unit = {
+  private def stopPostgresql(dataDir: Path): Unit =
     if (started.compareAndSet(true, false)) {
       logger.info("Stopping PostgreSQL...")
       run(
@@ -128,7 +126,6 @@ trait PostgresAround {
       )
       logger.info("PostgreSQL has stopped.")
     }
-  }
 
   protected def createNewRandomDatabase(): PostgresDatabase =
     createNewDatabase(UUID.randomUUID().toString)

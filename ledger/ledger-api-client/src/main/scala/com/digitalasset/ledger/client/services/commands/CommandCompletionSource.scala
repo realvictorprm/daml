@@ -31,7 +31,7 @@ object CommandCompletionSource {
   def apply(
       request: CompletionStreamRequest,
       stub: (CompletionStreamRequest, StreamObserver[CompletionStreamResponse]) => Unit,
-  )(implicit esf: ExecutionSequencerFactory): Source[CompletionStreamElement, NotUsed] = {
+  )(implicit esf: ExecutionSequencerFactory): Source[CompletionStreamElement, NotUsed] =
     ClientAdapter
       .serverStreaming(request, stub)
       .mapConcat(toStreamElements)
@@ -42,5 +42,4 @@ object CommandCompletionSource {
           case CompletionStreamElement.CompletionElement(c) => s"Completion $c"
         },
       )
-  }
 }

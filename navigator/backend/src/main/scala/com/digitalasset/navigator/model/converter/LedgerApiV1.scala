@@ -105,7 +105,7 @@ case object LedgerApiV1 {
   def readTransactionTree(
       tx: V1.transaction.TransactionTree,
       ctx: Context,
-  ): Result[Model.Transaction] = {
+  ): Result[Model.Transaction] =
     for {
       events <- Converter
         .sequence(
@@ -124,16 +124,13 @@ case object LedgerApiV1 {
         .map(_.flatten)
       effectiveAt <- Converter.checkExists("Transaction.effectiveAt", tx.effectiveAt)
       offset <- readLedgerOffset(tx.offset)
-    } yield {
-      Model.Transaction(
-        id = ApiTypes.TransactionId(tx.transactionId),
-        commandId = if (tx.commandId.isEmpty) None else Some(ApiTypes.CommandId(tx.commandId)),
-        effectiveAt = Instant.ofEpochSecond(effectiveAt.seconds, effectiveAt.nanos.toLong),
-        offset = offset,
-        events = events,
-      )
-    }
-  }
+    } yield Model.Transaction(
+      id = ApiTypes.TransactionId(tx.transactionId),
+      commandId = if (tx.commandId.isEmpty) None else Some(ApiTypes.CommandId(tx.commandId)),
+      effectiveAt = Instant.ofEpochSecond(effectiveAt.seconds, effectiveAt.nanos.toLong),
+      offset = offset,
+      events = events,
+    )
 
   private def readTreeEvent(
       event: V1.transaction.TreeEvent,
@@ -142,7 +139,7 @@ case object LedgerApiV1 {
       ctx: Context,
       workflowId: ApiTypes.WorkflowId,
       parentId: Option[ApiTypes.EventId],
-  ): Result[List[Model.Event]] = {
+  ): Result[List[Model.Event]] =
     event match {
       case V1.transaction.TreeEvent(V1.transaction.TreeEvent.Kind.Created(ev)) =>
         readEventCreated(ev, transactionId, workflowId, parentId, ctx).map(List(_))
@@ -153,7 +150,6 @@ case object LedgerApiV1 {
       case V1.transaction.TreeEvent(V1.transaction.TreeEvent.Kind.Empty) =>
         Left(RequiredFieldDoesNotExistError("TreeEvent.value"))
     }
-  }
 
   private def getTemplate(
       id: Model.DamlLfIdentifier,
@@ -164,12 +160,11 @@ case object LedgerApiV1 {
       .map(Right(_))
       .getOrElse(Left(TypeNotFoundError(id)))
 
-  private def readLedgerOffset(offset: String): Result[String] = {
+  private def readLedgerOffset(offset: String): Result[String] =
     // Ledger offset may change to become a number in the future
     // Try(BigInt(offset)).toEither
     //  .left.map(t => GenericConversionError(s"Could not parse ledger offset '$offset'"))
     Right(offset)
-  }
 
   private def readEventCreated(
       event: V1.event.CreatedEvent,
@@ -432,7 +427,7 @@ case object LedgerApiV1 {
       case v: Model.ApiVariant => fillInVariantTI(v, typ, ctx)
     }
 
-  def readCompletion(completion: V1.completion.Completion): Result[Option[Model.CommandStatus]] = {
+  def readCompletion(completion: V1.completion.Completion): Result[Option[Model.CommandStatus]] =
     for {
       status <- Converter.checkExists("Completion.status", completion.status)
     } yield {
@@ -445,7 +440,6 @@ case object LedgerApiV1 {
       else
         Some(Model.CommandStatusError(code.toString(), status.message))
     }
-  }
 
   // ------------------------------------------------------------------------------------------------------------------
   // Write methods (Model -> V1)
@@ -481,62 +475,55 @@ case object LedgerApiV1 {
       command: Model.Command,
       ledgerId: String,
       applicationId: Ref.LedgerString,
-  ): Result[V1.commands.Commands] = {
+  ): Result[V1.commands.Commands] =
     for {
       ledgerCommand <- writeCommand(party, command)
-    } yield {
-      V1.commands.Commands(
-        ledgerId,
-        Tag.unwrap(command.workflowId),
-        applicationId,
-        Tag.unwrap(command.id),
-        Tag.unwrap(party.name),
-        List(ledgerCommand),
-      )
-    }
-  }
+    } yield V1.commands.Commands(
+      ledgerId,
+      Tag.unwrap(command.workflowId),
+      applicationId,
+      Tag.unwrap(command.id),
+      Tag.unwrap(party.name),
+      List(ledgerCommand),
+    )
 
   def writeCommand(
       party: Model.PartyState,
       command: Model.Command,
-  ): Result[V1.commands.Command] = {
+  ): Result[V1.commands.Command] =
     command match {
       case cmd: Model.CreateCommand =>
         writeCreateContract(party, cmd.template, cmd.argument)
       case cmd: Model.ExerciseCommand =>
         writeExerciseChoice(party, cmd.contract, cmd.choice, cmd.argument)
     }
-  }
 
   def writeCreateContract(
       party: Model.PartyState,
       templateId: Model.DamlLfIdentifier,
       value: Model.ApiRecord,
-  ): Result[V1.commands.Command] = {
+  ): Result[V1.commands.Command] =
     for {
       template <- Converter.checkExists(
         party.packageRegistry.template(templateId),
         GenericConversionError(s"Template '$templateId' not found"),
       )
       argument <- writeRecordArgument(value)
-    } yield {
-      V1.commands.Command(
-        V1.commands.Command.Command.Create(
-          V1.commands.CreateCommand(
-            Some(template.id.asApi),
-            Some(argument),
-          )
+    } yield V1.commands.Command(
+      V1.commands.Command.Command.Create(
+        V1.commands.CreateCommand(
+          Some(template.id.asApi),
+          Some(argument),
         )
       )
-    }
-  }
+    )
 
   def writeExerciseChoice(
       party: Model.PartyState,
       contractId: ApiTypes.ContractId,
       choiceId: ApiTypes.Choice,
       value: Model.ApiValue,
-  ): Result[V1.commands.Command] = {
+  ): Result[V1.commands.Command] =
     for {
       contract <- Converter.checkExists(
         party.ledger.contract(contractId, party.packageRegistry),
@@ -547,17 +534,14 @@ case object LedgerApiV1 {
         GenericConversionError(s"Choice '${Tag.unwrap(choiceId)}' not found"),
       )
       argument <- writeArgument(value)
-    } yield {
-      V1.commands.Command(
-        V1.commands.Command.Command.Exercise(
-          V1.commands.ExerciseCommand(
-            Some(contract.template.id.asApi),
-            Tag.unwrap(contractId),
-            Tag.unwrap(choiceId),
-            Some(argument),
-          )
+    } yield V1.commands.Command(
+      V1.commands.Command.Command.Exercise(
+        V1.commands.ExerciseCommand(
+          Some(contract.template.id.asApi),
+          Tag.unwrap(contractId),
+          Tag.unwrap(choiceId),
+          Some(argument),
         )
       )
-    }
-  }
+    )
 }

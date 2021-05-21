@@ -69,7 +69,7 @@ private[index] object ReadOnlySqlLedgerWithMutableCache {
         generalDispatcher: Dispatcher[Offset],
         contractStore: MutableCacheBackedContractStore,
         dispatcherLagger: DispatcherLagMeter,
-    ) = {
+    ) =
       ResourceOwner
         .forCloseable(() =>
           new ReadOnlySqlLedgerWithMutableCache(
@@ -81,7 +81,6 @@ private[index] object ReadOnlySqlLedgerWithMutableCache {
             dispatcherLagger,
           )
         )
-    }
 
     private def contractStoreOwner(
         signalNewLedgerHead: SignalNewLedgerHead,
@@ -106,13 +105,12 @@ private[index] object ReadOnlySqlLedgerWithMutableCache {
         maxKeyCacheSize = maxContractKeyStateCacheSize,
       )
 
-    private def dispatcherOffsetSeqIdOwner(ledgerEnd: Offset, evtSeqId: Long) = {
+    private def dispatcherOffsetSeqIdOwner(ledgerEnd: Offset, evtSeqId: Long) =
       Dispatcher.owner(
         name = "contract-state-events",
         zeroIndex = (Offset.beforeBegin, EventSequentialId.beforeBegin),
         headAtInitialization = (ledgerEnd, evtSeqId),
       )
-    }
 
     private def dispatcherOwner(ledgerEnd: Offset): ResourceOwner[Dispatcher[Offset]] =
       Dispatcher.owner(

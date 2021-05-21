@@ -1503,13 +1503,11 @@ object SBuiltinTest {
   val compiledPackages =
     PureCompiledPackages(Map(defaultParserParameters.defaultPackageId -> pkg)).toOption.get
 
-  private def eval(e: Expr, onLedger: Boolean = true): Either[SError, SValue] = {
+  private def eval(e: Expr, onLedger: Boolean = true): Either[SError, SValue] =
     evalSExpr(compiledPackages.compiler.unsafeCompile(e), onLedger)
-  }
 
-  private def evalApp(e: Expr, args: Array[SValue], onLedger: Boolean): Either[SError, SValue] = {
+  private def evalApp(e: Expr, args: Array[SValue], onLedger: Boolean): Either[SError, SValue] =
     evalSExpr(SEApp(compiledPackages.compiler.unsafeCompile(e), args.map(SEValue(_))), onLedger)
-  }
 
   private def evalSExpr(e: SExpr, onLedger: Boolean): Either[SError, SValue] = {
     val machine = if (onLedger) {

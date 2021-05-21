@@ -126,7 +126,7 @@ final class LfValueTranslation(
   )(implicit
       ec: ExecutionContext,
       loggingContext: LoggingContext,
-  ): Future[V] = {
+  ): Future[V] =
     result match {
       case LfEngine.ResultDone(r) => Future.successful(r)
       case LfEngine.ResultError(e) => Future.failed(new RuntimeException(e.msg))
@@ -141,7 +141,6 @@ final class LfValueTranslation(
       case result =>
         Future.failed(new RuntimeException(s"Unexpected ValueEnricher result: $result"))
     }
-  }
 
   private[this] def toApiValue(
       value: LfValue,
@@ -157,16 +156,14 @@ final class LfValueTranslation(
         consumeEnricherResult(enrich(value))
       else
         Future.successful(value.value)
-  } yield {
-    LfEngineToApi.assertOrRuntimeEx(
-      failureContext = s"attempting to deserialize persisted $attribute to value",
-      LfEngineToApi
-        .lfValueToApiValue(
-          verbose = verbose,
-          value0 = enrichedValue,
-        ),
-    )
-  }
+  } yield LfEngineToApi.assertOrRuntimeEx(
+    failureContext = s"attempting to deserialize persisted $attribute to value",
+    LfEngineToApi
+      .lfValueToApiValue(
+        verbose = verbose,
+        value0 = enrichedValue,
+      ),
+  )
 
   private[this] def toApiRecord(
       value: LfValue,
@@ -182,16 +179,14 @@ final class LfValueTranslation(
         consumeEnricherResult(enrich(value))
       else
         Future.successful(value.value)
-  } yield {
-    LfEngineToApi.assertOrRuntimeEx(
-      failureContext = s"attempting to deserialize persisted $attribute to record",
-      LfEngineToApi
-        .lfValueToApiRecord(
-          verbose = verbose,
-          recordValue = enrichedValue,
-        ),
-    )
-  }
+  } yield LfEngineToApi.assertOrRuntimeEx(
+    failureContext = s"attempting to deserialize persisted $attribute to record",
+    LfEngineToApi
+      .lfValueToApiRecord(
+        verbose = verbose,
+        recordValue = enrichedValue,
+      ),
+  )
 
   private[this] def apiIdentifierToDamlLfIdentifier(id: ApiIdentifier): LfIdentifier =
     LfIdentifier(
@@ -208,7 +203,7 @@ final class LfValueTranslation(
   private def decompressAndDeserialize(algorithm: Compression.Algorithm, value: InputStream) =
     ValueSerializer.deserializeValue(algorithm.decompress(value))
 
-  private[this] def enricher: ValueEnricher = {
+  private[this] def enricher: ValueEnricher =
     // Note: LfValueTranslation is used by JdbcLedgerDao for both serialization and deserialization.
     // Sometimes the JdbcLedgerDao is used in a way that it never needs to deserialize data in verbose mode
     // (e.g., the indexer, or some tests). In this case, the enricher is not required.
@@ -217,7 +212,6 @@ final class LfValueTranslation(
         "LfValueTranslation used to deserialize values in verbose mode without a ValueEnricher"
       )
     )
-  }
 
   def deserialize[E](
       raw: Raw.Created[E],
@@ -260,12 +254,10 @@ final class LfValueTranslation(
           ).map(Some(_))
         case None => Future.successful(None)
       }
-    } yield {
-      raw.partial.copy(
-        createArguments = Some(createArguments),
-        contractKey = contractKey,
-      )
-    }
+    } yield raw.partial.copy(
+      createArguments = Some(createArguments),
+      contractKey = contractKey,
+    )
   }
 
   def deserialize(
@@ -312,11 +304,9 @@ final class LfValueTranslation(
           ).map(Some(_))
         case None => Future.successful(None)
       }
-    } yield {
-      raw.partial.copy(
-        choiceArgument = Some(choiceArgument),
-        exerciseResult = exerciseResult,
-      )
-    }
+    } yield raw.partial.copy(
+      choiceArgument = Some(choiceArgument),
+      exerciseResult = exerciseResult,
+    )
   }
 }

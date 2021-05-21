@@ -64,9 +64,8 @@ final case class LFUtil(
     mkDamlScalaNameFromDirsAndName(damlNameSpace, name.capitalize)
   }
 
-  def mkDamlScalaNameFromDirsAndName(nameSpace: Array[String], name: String): DamlScalaName = {
+  def mkDamlScalaNameFromDirsAndName(nameSpace: Array[String], name: String): DamlScalaName =
     DamlScalaName(nameSpace, name)
-  }
 
   /**  This method is responsible for generating Scala reflection API "tree"s.
     *  It maps from Core package interface types to:
@@ -260,12 +259,11 @@ final case class LFUtil(
       }.toList
   }
 
-  override def templateCount(interface: Interface): Int = {
+  override def templateCount(interface: Interface): Int =
     interface.typeDecls.count {
       case (_, InterfaceType.Template(_, _)) => true
       case _ => false
     }
-  }
 
   private[this] def foldTemplateReferencedTypeDeclRoots[Z](interface: Interface, z: Z)(
       f: (Z, ScopedDataType.Name) => Z

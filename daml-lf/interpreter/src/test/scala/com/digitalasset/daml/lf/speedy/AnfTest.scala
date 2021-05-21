@@ -252,11 +252,10 @@ class AnfTest extends AnyWordSpec with Matchers {
       println(s"**transformed:\n${pp(transformed)}\n")
       println(s"**expected:\n${pp(expected)}\n")
     }
-    transformed shouldBe (expected)
+    transformed shouldBe expected
   }
 
-  private def pp(e: SExpr): String = {
+  private def pp(e: SExpr): String =
     prettySExpr(0)(e).render(80)
-  }
 
 }

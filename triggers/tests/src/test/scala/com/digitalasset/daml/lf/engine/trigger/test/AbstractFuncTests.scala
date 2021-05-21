@@ -327,9 +327,7 @@ abstract class AbstractFuncTests
           // 1 for completion
           _ <- runner.runWithACS(acs, offset, msgFlow = Flow[TriggerMsg].take(2))._2
           acs <- queryACS(client, party)
-        } yield {
-          assert(acs(tId).length == 50001)
-        }
+        } yield assert(acs(tId).length == 50001)
       }
     }
 
@@ -368,14 +366,12 @@ abstract class AbstractFuncTests
           // 1 for archive on T
           // 1 for completion
           finalState <- runner.runWithACS(acs, offset, msgFlow = Flow[TriggerMsg].take(4))._2
-        } yield {
-          inside(finalState) { case SList(commandIds) =>
-            commandIds.toSet should have size 2
-            // ensure all are UUIDs
-            commandIds.map(inside(_) { case SText(s) =>
-              SText(UUID.fromString(s).toString)
-            }) should ===(commandIds)
-          }
+        } yield inside(finalState) { case SList(commandIds) =>
+          commandIds.toSet should have size 2
+          // ensure all are UUIDs
+          commandIds.map(inside(_) { case SText(s) =>
+            SText(UUID.fromString(s).toString)
+          }) should ===(commandIds)
         }
       }
     }
@@ -491,9 +487,7 @@ abstract class AbstractFuncTests
           (acs, offset) <- runner.queryACS()
           // 2 heartbeats
           finalState <- runner.runWithACS(acs, offset, msgFlow = Flow[TriggerMsg].take(2))._2
-        } yield {
-          assert(finalState == SInt64(2))
-        }
+        } yield assert(finalState == SInt64(2))
       }
     }
 
@@ -505,25 +499,23 @@ abstract class AbstractFuncTests
           runner = getRunner(client, QualifiedName.assertFromString("Time:test"), party)
           (acs, offset) <- runner.queryACS()
           finalState <- runner.runWithACS(acs, offset, msgFlow = Flow[TriggerMsg].take(4))._2
-        } yield {
-          finalState match {
-            case SRecord(_, _, values) if values.size == 2 =>
-              values.get(1) match {
-                case SList(items) if items.length == 2 =>
-                  val t0 = items.slowApply(0).asInstanceOf[STimestamp].value
-                  val t1 = items.slowApply(1).asInstanceOf[STimestamp].value
-                  config.timeProviderType match {
-                    case None => fail("No time provider type specified")
-                    case Some(TimeProviderType.WallClock) =>
-                      // Given the limited resolution it can happen that t0 == t1
-                      assert(t0 >= t1)
-                    case Some(TimeProviderType.Static) =>
-                      assert(t0 == t1)
-                  }
-                case v => fail(s"Expected list with 2 elements but got $v")
-              }
-            case _ => fail(s"Expected Tuple2 but got $finalState")
-          }
+        } yield finalState match {
+          case SRecord(_, _, values) if values.size == 2 =>
+            values.get(1) match {
+              case SList(items) if items.length == 2 =>
+                val t0 = items.slowApply(0).asInstanceOf[STimestamp].value
+                val t1 = items.slowApply(1).asInstanceOf[STimestamp].value
+                config.timeProviderType match {
+                  case None => fail("No time provider type specified")
+                  case Some(TimeProviderType.WallClock) =>
+                    // Given the limited resolution it can happen that t0 == t1
+                    assert(t0 >= t1)
+                  case Some(TimeProviderType.Static) =>
+                    assert(t0 == t1)
+                }
+              case v => fail(s"Expected list with 2 elements but got $v")
+            }
+          case _ => fail(s"Expected Tuple2 but got $finalState")
         }
       }
     }

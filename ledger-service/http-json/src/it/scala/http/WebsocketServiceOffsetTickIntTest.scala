@@ -38,11 +38,9 @@ class WebsocketServiceOffsetTickIntTest
       msgs <- singleClientQueryStream(jwt, uri, """{"templateIds": ["Iou:Iou"]}""")
         .take(10)
         .runWith(collectResultsAsTextMessage)
-    } yield {
-      inside(eventsBlockVector(msgs.toVector)) { case \/-(offsetTicks) =>
-        offsetTicks.forall(isOffsetTick) shouldBe true
-        offsetTicks should have length 10
-      }
+    } yield inside(eventsBlockVector(msgs.toVector)) { case \/-(offsetTicks) =>
+      offsetTicks.forall(isOffsetTick) shouldBe true
+      offsetTicks should have length 10
     }
   }
 
@@ -54,13 +52,11 @@ class WebsocketServiceOffsetTickIntTest
         msgs <- singleClientQueryStream(jwt, uri, """{"templateIds": ["Iou:Iou"]}""")
           .take(10)
           .runWith(collectResultsAsTextMessage)
-      } yield {
-        inside(eventsBlockVector(msgs.toVector)) { case \/-(acs +: offsetTicks) =>
-          isAcs(acs) shouldBe true
-          acs.events should have length 1
-          offsetTicks.forall(isAbsoluteOffsetTick) shouldBe true
-          offsetTicks should have length 9
-        }
+      } yield inside(eventsBlockVector(msgs.toVector)) { case \/-(acs +: offsetTicks) =>
+        isAcs(acs) shouldBe true
+        acs.events should have length 1
+        offsetTicks.forall(isAbsoluteOffsetTick) shouldBe true
+        offsetTicks should have length 9
       }
   }
   "Given an offset to resume at, we should immediately start emitting ticks" in withHttpServiceAndClient {
@@ -76,11 +72,9 @@ class WebsocketServiceOffsetTickIntTest
         )
           .take(10)
           .runWith(collectResultsAsTextMessage)
-      } yield {
-        inside(eventsBlockVector(msgs.toVector)) { case \/-(offsetTicks) =>
-          offsetTicks.forall(isAbsoluteOffsetTick) shouldBe true
-          offsetTicks should have length 10
-        }
+      } yield inside(eventsBlockVector(msgs.toVector)) { case \/-(offsetTicks) =>
+        offsetTicks.forall(isAbsoluteOffsetTick) shouldBe true
+        offsetTicks should have length 10
       }
   }
 }

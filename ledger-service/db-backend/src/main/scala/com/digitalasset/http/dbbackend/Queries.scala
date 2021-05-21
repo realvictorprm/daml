@@ -199,7 +199,7 @@ sealed abstract class Queries {
           insert.updateMany(newParties.toList.map(p => (p, tpid, newOffset)))
         }
       updated <- update.cata(_.update.run, Applicative[ConnectionIO].pure(0))
-    } yield { inserted + updated }
+    } yield inserted + updated
   }
 
   // different databases encode contract keys in different formats
@@ -217,7 +217,7 @@ sealed abstract class Queries {
 
   final def deleteContracts[F[_]: Foldable](
       cids: F[String]
-  )(implicit log: LogHandler): ConnectionIO[Int] = {
+  )(implicit log: LogHandler): ConnectionIO[Int] =
     cids.toVector match {
       case Vector(hd, tl @ _*) =>
         (sql"DELETE FROM contract WHERE contract_id IN ("
@@ -225,7 +225,6 @@ sealed abstract class Queries {
           ++ sql")").update.run
       case _ => free.connection.pure(0)
     }
-  }
 
   private[http] final def selectContracts(
       parties: OneAnd[Set, String],

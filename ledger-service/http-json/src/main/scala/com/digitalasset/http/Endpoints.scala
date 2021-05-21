@@ -395,15 +395,14 @@ class Endpoints(
 
   private[http] def input(req: HttpRequest)(implicit
       lc: LoggingContextOf[InstanceUUID with RequestID]
-  ): Future[Unauthorized \/ (Jwt, String)] = {
+  ): Future[Unauthorized \/ (Jwt, String)] =
     findJwt(req) match {
       case e @ -\/(_) =>
-        discard { req.entity.discardBytes(mat) }
+        discard(req.entity.discardBytes(mat))
         Future.successful(e)
       case \/-(j) =>
         data(req.entity).map(d => \/-((j, d)))
     }
-  }
 
   private[http] def inputJsVal(req: HttpRequest)(implicit
       lc: LoggingContextOf[InstanceUUID with RequestID]
@@ -439,7 +438,7 @@ class Endpoints(
   ): Error \/ (Jwt, Source[ByteString, Any]) =
     findJwt(req) match {
       case e @ -\/(_) =>
-        discard { req.entity.discardBytes(mat) }
+        discard(req.entity.discardBytes(mat))
         e
       case \/-(j) =>
         \/-((j, req.entity.dataBytes))
@@ -533,12 +532,11 @@ object Endpoints {
   private def lfValueToApiValue(a: LfValue): Error \/ ApiValue =
     JsValueToApiValueConverter.lfValueToApiValue(a).liftErr(ServerError)
 
-  private def lfAcToJsValue(a: domain.ActiveContract[LfValue]): Error \/ JsValue = {
+  private def lfAcToJsValue(a: domain.ActiveContract[LfValue]): Error \/ JsValue =
     for {
       b <- a.traverse(lfValueToJsValue): Error \/ domain.ActiveContract[JsValue]
       c <- toJsValue(b)
     } yield c
-  }
 
   private[http] val nonHttpsErrorMessage =
     "missing HTTPS reverse-proxy request headers; for development launch with --allow-insecure-tokens"
@@ -555,9 +553,8 @@ object Endpoints {
     domain.OkResponse(parties, warnings)
   }
 
-  private def toJsValue[A: JsonWriter](a: A): Error \/ JsValue = {
+  private def toJsValue[A: JsonWriter](a: A): Error \/ JsValue =
     SprayJson.encode(a).liftErr(ServerError)
-  }
 
   // avoid case class to avoid using the wrong unapply in isForwardedForHttps
   private[http] final class Forwarded(override val value: String)

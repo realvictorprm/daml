@@ -15,7 +15,7 @@ import org.scalatest.{Args, ConfigMap, Reporter}
 import scala.util.Try
 
 object Main extends LazyLogging {
-  def main(args: Array[String]): Unit = {
+  def main(args: Array[String]): Unit =
     Arguments.parse(args) match {
       case None =>
         System.exit(1)
@@ -59,7 +59,6 @@ object Main extends LazyLogging {
         logger.info(footer)
         System.exit(exitCode)
     }
-  }
 }
 
 class LoggerReporter extends Reporter {
@@ -68,7 +67,7 @@ class LoggerReporter extends Reporter {
   val results: concurrent.Map[String, Option[String]] =
     new ConcurrentHashMap[String, Option[String]]().asScala
 
-  override def apply(e: Event): Unit = {
+  override def apply(e: Event): Unit =
     e match {
       case t: TestSucceeded =>
         results.put(s"  Test succeeded: ${t.testName}", None)
@@ -82,7 +81,5 @@ class LoggerReporter extends Reporter {
 
       case _ => ()
     }
-
-  }
 
 }

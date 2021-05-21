@@ -96,17 +96,15 @@ final class KeyTransfer(
       _ <- model.transfer(asset = toTransfer, to = receiver)
       newTransactions <- owner.transactions(Seq(model.Asset))
       newAssets <- owner.activeContracts(model.Asset)
-    } yield {
-      saveAsJson(
-        config.outputFile,
-        KeyTransfer
-          .Result(
-            oldAssets.map(Application.ContractResult.fromCreateEvent),
-            newAssets.map(Application.ContractResult.fromCreateEvent),
-            oldTransactions.map(Application.TransactionResult.fromTransaction),
-            newTransactions.map(Application.TransactionResult.fromTransaction),
-          ),
-      )
-    }
+    } yield saveAsJson(
+      config.outputFile,
+      KeyTransfer
+        .Result(
+          oldAssets.map(Application.ContractResult.fromCreateEvent),
+          newAssets.map(Application.ContractResult.fromCreateEvent),
+          oldTransactions.map(Application.TransactionResult.fromTransaction),
+          newTransactions.map(Application.TransactionResult.fromTransaction),
+        ),
+    )
 
 }

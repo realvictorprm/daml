@@ -33,7 +33,7 @@ sealed abstract class SortingPager[N <: Node[_]](
             l1: List[Option[ProjectValue]],
             l2: List[Option[ProjectValue]],
             criteria: List[SortCriterion],
-        ): Int = {
+        ): Int =
           l1 match {
             case Nil => 0
             case x1 :: xs1 =>
@@ -43,12 +43,11 @@ sealed abstract class SortingPager[N <: Node[_]](
                 case 0 => loop(xs1, xs2, cs)
                 case x =>
                   c.direction match {
-                    case SortDirection.DESCENDING => x * (-1)
+                    case SortDirection.DESCENDING => x * -1
                     case SortDirection.ASCENDING => x
                   }
               }
           }
-        }
         loop(l1, l2, criteria)
       }
     }

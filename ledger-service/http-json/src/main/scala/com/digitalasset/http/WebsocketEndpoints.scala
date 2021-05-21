@@ -24,13 +24,12 @@ object WebsocketEndpoints {
 
   private def findJwtFromSubProtocol(
       upgradeToWebSocket: WebSocketUpgrade
-  ): Unauthorized \/ Jwt = {
+  ): Unauthorized \/ Jwt =
     upgradeToWebSocket.requestedProtocols
       .collectFirst {
         case p if p startsWith tokenPrefix => Jwt(p drop tokenPrefix.length)
       }
       .toRightDisjunction(Unauthorized(s"Missing required $tokenPrefix.[token] in subprotocol"))
-  }
 
   private def preconnect(
       decodeJwt: ValidateJwt,

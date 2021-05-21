@@ -69,11 +69,9 @@ class ResettableResourceOwnerSpec extends AsyncWordSpec with AsyncTimeLimitedTes
           releaseCounter.get() should be(2)
         }
         _ <- resource.release()
-      } yield {
-        withClue("after release, ") {
-          acquisitionCounter.get() should be(3)
-          releaseCounter.get() should be(3)
-        }
+      } yield withClue("after release, ") {
+        acquisitionCounter.get() should be(3)
+        releaseCounter.get() should be(3)
       }
     }
 
@@ -154,9 +152,8 @@ class ResettableResourceOwnerSpec extends AsyncWordSpec with AsyncTimeLimitedTes
         owner = reset =>
           value =>
             new AbstractResourceOwner[TestContext, (Reset, Int)] {
-              override def acquire()(implicit context: TestContext): Resource[(Reset, Int)] = {
+              override def acquire()(implicit context: TestContext): Resource[(Reset, Int)] =
                 Resource.fromFuture(Future.successful((reset, value + 1)))
-              }
             },
         resetOperation = { case (_, value) =>
           Future.successful(value + 1)

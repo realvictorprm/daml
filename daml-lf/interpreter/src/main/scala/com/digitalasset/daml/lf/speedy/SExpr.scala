@@ -37,9 +37,8 @@ object SExpr {
   sealed abstract class SExprAtomic extends SExpr {
     def lookupValue(machine: Machine): SValue
 
-    final def execute(machine: Machine): Unit = {
+    final def execute(machine: Machine): Unit =
       machine.returnValue = lookupValue(machine)
-    }
   }
 
   /** Reference to a variable. 'index' is the 1-based de Bruijn index,
@@ -49,9 +48,8 @@ object SExpr {
     * This expression form is only allowed prior to closure conversion
     */
   final case class SEVar(index: Int) extends SExprAtomic {
-    def lookupValue(machine: Machine): SValue = {
+    def lookupValue(machine: Machine): SValue =
       crash("unexpected SEVar, expected SELoc(S/A/F)")
-    }
   }
 
   /** Reference to a value. On first lookup the evaluated expression is
@@ -84,7 +82,7 @@ object SExpr {
 
   /** Reference to a builtin function */
   final case class SEBuiltin(b: SBuiltin) extends SExprAtomic {
-    def lookupValue(machine: Machine): SValue = {
+    def lookupValue(machine: Machine): SValue =
       /* special case for nullary record constructors */
       b match {
         case SBRecCon(id, fields) if b.arity == 0 =>
@@ -92,14 +90,12 @@ object SExpr {
         case _ =>
           SPAP(PBuiltin(b), new util.ArrayList(), b.arity)
       }
-    }
   }
 
   /** A pre-computed value, usually primitive literal, e.g. integer, text, boolean etc. */
   final case class SEValue(v: SValue) extends SExprAtomic {
-    def lookupValue(machine: Machine): SValue = {
+    def lookupValue(machine: Machine): SValue =
       v
-    }
   }
 
   object SEValue extends SValueContainer[SEValue]
@@ -127,9 +123,8 @@ object SExpr {
   }
 
   object SEApp {
-    def apply(fun: SExpr, args: Array[SExpr]): SExpr = {
+    def apply(fun: SExpr, args: Array[SExpr]): SExpr =
       SEAppGeneral(fun, args)
-    }
   }
 
   /** Function application: ANF case: 'fun' and 'args' are atomic expressions */
@@ -164,14 +159,13 @@ object SExpr {
 
   object SEAppAtomic {
     // smart constructor: detect special case of saturated builtin application
-    def apply(func: SExprAtomic, args: Array[SExprAtomic]): SExpr = {
+    def apply(func: SExprAtomic, args: Array[SExprAtomic]): SExpr =
       func match {
         case SEBuiltin(builtin) if builtin.arity == args.length =>
           SEAppAtomicSaturatedBuiltin(builtin, args)
         case _ =>
           SEAppAtomicGeneral(func, args) // general case
       }
-    }
   }
 
   /** Lambda abstraction. Transformed into SEMakeClo in lambda lifting.
@@ -219,23 +213,20 @@ object SExpr {
 
   // SELocS -- variable is located on the stack (SELet & binding forms of SECasePat)
   final case class SELocS(n: Int) extends SELoc {
-    def lookupValue(machine: Machine): SValue = {
+    def lookupValue(machine: Machine): SValue =
       machine.getEnvStack(n)
-    }
   }
 
   // SELocS -- variable is located in the args array of the application
   final case class SELocA(n: Int) extends SELoc {
-    def lookupValue(machine: Machine): SValue = {
+    def lookupValue(machine: Machine): SValue =
       machine.getEnvArg(n)
-    }
   }
 
   // SELocF -- variable is located in the free-vars array of the closure being applied
   final case class SELocF(n: Int) extends SELoc {
-    def lookupValue(machine: Machine): SValue = {
+    def lookupValue(machine: Machine): SValue =
       machine.getEnvFree(n)
-    }
   }
 
   /** Pattern match. */
@@ -300,13 +291,12 @@ object SExpr {
   }
 
   object SELet1 {
-    def apply(rhs: SExpr, body: SExpr): SExpr = {
+    def apply(rhs: SExpr, body: SExpr): SExpr =
       rhs match {
         case SEAppAtomicSaturatedBuiltin(builtin: SBuiltinPure, args) =>
           SELet1Builtin(builtin, args, body)
         case _ => SELet1General(rhs, body)
       }
-    }
   }
 
   /** A non-recursive, non-parallel let block.
@@ -362,15 +352,13 @@ object SExpr {
     * Rather, we set the control to this expression and then crash when executing.
     */
   final case class SEDamlException(error: SErrorDamlException) extends SExpr {
-    def execute(machine: Machine): Unit = {
+    def execute(machine: Machine): Unit =
       throw error
-    }
   }
 
   final case class SEImportValue(typ: Ast.Type, value: V[V.ContractId]) extends SExpr {
-    def execute(machine: Machine): Unit = {
+    def execute(machine: Machine): Unit =
       machine.importValue(typ, value)
-    }
   }
 
   /** Exception handler */

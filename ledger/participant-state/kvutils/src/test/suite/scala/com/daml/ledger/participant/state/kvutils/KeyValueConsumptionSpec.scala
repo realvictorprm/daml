@@ -260,7 +260,7 @@ class KeyValueConsumptionSpec extends AnyWordSpec with Matchers {
 
   private def runAll(
       table: TableFor4[TimeBounds, Timestamp, DamlLogEntry.PayloadCase, Assertions]
-  ): Unit = {
+  ): Unit =
     forAll(table) {
       (
           timeBounds: TimeBounds,
@@ -277,7 +277,6 @@ class KeyValueConsumptionSpec extends AnyWordSpec with Matchers {
           ()
         }
     }
-  }
 
   private def buildOutOfTimeBoundsEntry(
       timeBounds: TimeBounds,

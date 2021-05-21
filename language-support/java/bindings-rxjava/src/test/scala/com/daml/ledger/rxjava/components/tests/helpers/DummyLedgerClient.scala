@@ -59,10 +59,10 @@ class DummyLedgerClient(
           DummyLedgerOffsetOrdering.compareWithAbsoluteValue(begin, t.getOffset) <= 0 &&
             DummyLedgerOffsetOrdering.compareWithAbsoluteValue(end, t.getOffset) >= 0
         )
-        .map(t => {
+        .map { t =>
           logger.debug(s"DummyLedgerClient.getTransactions emit $t")
           t
-        })
+        }
 
     override def getTransactions(
         begin: LedgerOffset,

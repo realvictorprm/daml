@@ -186,7 +186,7 @@ private[sandbox] final class InMemoryLedger(
   )(implicit
       loggingContext: LoggingContext
   ): (Source[GetActiveContractsResponse, NotUsed], Offset) = {
-    val (acsNow, ledgerEndNow) = this.synchronized { (acs, ledgerEnd()) }
+    val (acsNow, ledgerEndNow) = this.synchronized((acs, ledgerEnd()))
     (
       Source
         .fromIterator[ActiveContract](() =>
@@ -265,7 +265,7 @@ private[sandbox] final class InMemoryLedger(
       )
     } else {
       Future.fromTry(Try(this.synchronized {
-        contractIds.foldLeft[Option[Instant]](Some(Instant.MIN))((acc, id) => {
+        contractIds.foldLeft[Option[Instant]](Some(Instant.MIN)) { (acc, id) =>
           val let = acs.activeContracts
             .getOrElse(
               id,
@@ -273,7 +273,7 @@ private[sandbox] final class InMemoryLedger(
             )
             .let
           acc.map(acc => if (let.isAfter(acc)) let else acc)
-        })
+        }
       }))
     }
 
@@ -290,12 +290,11 @@ private[sandbox] final class InMemoryLedger(
     )
 
   // Validates the given ledger time according to the ledger time model
-  private def checkTimeModel(ledgerTime: Instant, recordTime: Instant): Either[String, Unit] = {
+  private def checkTimeModel(ledgerTime: Instant, recordTime: Instant): Either[String, Unit] =
     ledgerConfiguration
       .fold[Either[String, Unit]](
         Left("No ledger configuration available, cannot validate ledger time")
       )(config => config.timeModel.checkTime(ledgerTime, recordTime))
-  }
 
   private def handleSuccessfulTx(
       transactionId: LedgerString,
@@ -469,11 +468,10 @@ private[sandbox] final class InMemoryLedger(
 
   override def partyEntries(startExclusive: Offset)(implicit
       loggingContext: LoggingContext
-  ): Source[(Offset, PartyLedgerEntry), NotUsed] = {
+  ): Source[(Offset, PartyLedgerEntry), NotUsed] =
     entries.getSource(Some(startExclusive), None).collect {
       case (offset, InMemoryPartyEntry(partyEntry)) => (offset, partyEntry)
     }
-  }
 
   override def listLfPackages()(implicit
       loggingContext: LoggingContext
@@ -517,7 +515,7 @@ private[sandbox] final class InMemoryLedger(
           )
           Future.successful(SubmissionResult.Acknowledged)
         },
-        newStore => {
+        newStore =>
           if (packageStoreRef.compareAndSet(oldStore, newStore)) {
             entries.publish(
               InMemoryPackageEntry(
@@ -527,8 +525,7 @@ private[sandbox] final class InMemoryLedger(
             Future.successful(SubmissionResult.Acknowledged)
           } else {
             uploadPackages(submissionId, knownSince, sourceDescription, payload)
-          }
-        },
+          },
       )
   }
 

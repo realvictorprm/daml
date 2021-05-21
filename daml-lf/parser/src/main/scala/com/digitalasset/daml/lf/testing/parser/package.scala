@@ -13,9 +13,8 @@ package object parser {
   val defaultLanguageVersion = LanguageVersion.default
 
   private def safeParse[T](p: Parsers.Parser[T], s: String): Either[String, T] =
-    try {
-      Right(Parsers.parseAll(p, s))
-    } catch {
+    try Right(Parsers.parseAll(p, s))
+    catch {
       case e: ParserError =>
         Left(e.description)
     }

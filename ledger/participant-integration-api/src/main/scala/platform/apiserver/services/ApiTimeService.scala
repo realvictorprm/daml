@@ -105,14 +105,12 @@ private[apiserver] final class ApiTimeService private (
             ) with NoStackTrace
           )
       }
-    } yield {
-      updateTime(expectedTime, requestedTime)
-        .map { _ =>
-          dispatcher.signal()
-          Empty()
-        }
-        .andThen(logger.logErrorsOnCall[Empty])
-    }
+    } yield updateTime(expectedTime, requestedTime)
+      .map { _ =>
+        dispatcher.signal()
+        Empty()
+      }
+      .andThen(logger.logErrorsOnCall[Empty])
 
     result.fold(
       { error =>

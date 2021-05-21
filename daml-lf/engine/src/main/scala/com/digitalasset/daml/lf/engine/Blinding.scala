@@ -58,7 +58,7 @@ object Blinding {
     val filteredNodes = tx.nodes.filter { case (k, _) => partyDivulgences.contains(k) }
 
     @tailrec
-    def go(filteredRoots: BackStack[Nid], remainingRoots: FrontStack[Nid]): ImmArray[Nid] = {
+    def go(filteredRoots: BackStack[Nid], remainingRoots: FrontStack[Nid]): ImmArray[Nid] =
       remainingRoots match {
         case FrontStack() => filteredRoots.toImmArray
         case FrontStackCons(root, remainingRoots) =>
@@ -75,7 +75,6 @@ object Blinding {
             }
           }
       }
-    }
 
     GenTransaction(
       roots = go(BackStack.empty, FrontStack(tx.roots)),

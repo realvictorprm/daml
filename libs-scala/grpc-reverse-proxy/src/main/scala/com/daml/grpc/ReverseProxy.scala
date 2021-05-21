@@ -19,14 +19,13 @@ object ReverseProxy {
       services: Set[ServiceDescriptorInfo],
       interceptors: Map[String, Seq[ServerInterceptor]],
   ): Unit =
-    for (service <- services) {
+    for (service <- services)
       serverBuilder.addService(
         ServerInterceptors.interceptForward(
           ForwardService(backend, service),
           interceptors.getOrElse(service.fullServiceName, Seq.empty): _*
         )
       )
-    }
 
   def owner[Context](
       backend: Channel,

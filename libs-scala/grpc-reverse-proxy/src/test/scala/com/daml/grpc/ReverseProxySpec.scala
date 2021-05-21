@@ -92,9 +92,8 @@ object ReverseProxySpec {
         call: ServerCall[ReqT, RespT],
         headers: Metadata,
         next: ServerCallHandler[ReqT, RespT],
-    ): ServerCall.Listener[ReqT] = {
+    ): ServerCall.Listener[ReqT] =
       new Callback(call, headers, next, latestRequestReference.set)
-    }
   }
 
 }

@@ -8,7 +8,7 @@ private[scenario] trait HasRandomAmount {
 
   // can be called from two different scenarios, need to synchronize access
   final def randomAmount(): Int = {
-    val x = this.synchronized { rng.nextInt(10) }
+    val x = this.synchronized(rng.nextInt(10))
     x + 5 // [5, 15)
   }
 }

@@ -77,9 +77,7 @@ class PlatformSubscriber(
       _ <- fetchPackages(ledgerClient)
       tracker <- startTrackingCommands()
       _ <- startStreamingTransactions()
-    } yield {
-      Started(tracker)
-    }
+    } yield Started(tracker)
 
     started onComplete {
       case Success(value) =>
@@ -96,9 +94,8 @@ class PlatformSubscriber(
     }
   }
 
-  override def postStop(): Unit = {
+  override def postStop(): Unit =
     log.debug("Stopped actor for '{}'", party.name)
-  }
 
   // ----------------------------------------------------------------------------------------------
   // Messages
@@ -177,15 +174,13 @@ class PlatformSubscriber(
       }
     }
 
-    try {
-      go(true).recoverWith { case e: Throwable =>
-        log.error(
-          "Error processing transaction {}: {}. Its effects will not be visible.",
-          e.getMessage,
-          id,
-        )
-        Future.failed(e)
-      }
+    try go(true).recoverWith { case e: Throwable =>
+      log.error(
+        "Error processing transaction {}: {}. Its effects will not be visible.",
+        e.getMessage,
+        id,
+      )
+      Future.failed(e)
     } catch {
       case e: Throwable =>
         log.error(
@@ -226,7 +221,7 @@ class PlatformSubscriber(
   }
 
   private def startTrackingCommands()
-      : Future[SourceQueueWithComplete[Ctx[Command, SubmitRequest]]] = {
+      : Future[SourceQueueWithComplete[Ctx[Command, SubmitRequest]]] =
     for {
       commandTracker <- ledgerClient.commandClient
         .trackCommands[Command](List(Tag.unwrap(party.name)), token)
@@ -237,7 +232,7 @@ class PlatformSubscriber(
     Source
       .queue[Ctx[Command, SubmitRequest]](1000, OverflowStrategy.dropNew)
       .via(commandTracker)
-      .map(result => {
+      .map { result =>
         val completion = converter.LedgerApiV1.readCompletion(result.value)
         val commandId = result.context.id
         completion match {
@@ -258,10 +253,9 @@ class PlatformSubscriber(
               error,
             )
         }
-      })
+      }
       .to(Sink.ignore)
       .run()
-  }
 
   /*
     Note about packages:
@@ -273,20 +267,20 @@ class PlatformSubscriber(
     Whenever the client sees a template that it does not recognize in the transaction stream,
     it can re-fetch the packages from the server to get the metadata it needs to make sense of them.
    */
-  private def fetchPackages(ledgerClient: LedgerClient): Future[Unit] = {
+  private def fetchPackages(ledgerClient: LedgerClient): Future[Unit] =
     ledgerClient.packageClient
       .listPackages(token)
-      .flatMap(response => {
-        Future.traverse(response.packageIds)(id => {
+      .flatMap { response =>
+        Future.traverse(response.packageIds) { id =>
           party.packageRegistry.pack(DamlLfRef.PackageId.assertFromString(id)) match {
             case Some(_) =>
               Future.successful(None)
             case None =>
               ledgerClient.packageClient.getPackage(id, token).map(Some(_))
           }
-        })
-      })
-      .flatMap(responses0 => {
+        }
+      }
+      .flatMap { responses0 =>
         val interfaces = responses0
           .collect { case Some(resp) => resp }
           .map(decodePackage)
@@ -297,9 +291,8 @@ class PlatformSubscriber(
           interfaces.map(_.packageId).mkString("[", ", ", "]"),
         )
         Future.unit
-      })
+      }
       .recoverWith(apiFailureF)
-  }
 
   private def decodePackage(res: GetPackageResponse) = {
     val cos = Reader.damlLfCodedInputStream(res.archivePayload.newInput)
@@ -318,15 +311,14 @@ class PlatformSubscriber(
       party: PartyState,
       command: Command,
       sender: ActorRef,
-  ): Unit = {
+  ): Unit =
     // Convert to ledger API command
     converter.LedgerApiV1
       .writeCommands(party, command, ledgerClient.ledgerId.unwrap, applicationId)
       .fold[Unit](
-        error => {
+        error =>
           // Failed to convert command. Most likely, the argument is incomplete.
-          sender ! Failure(error)
-        },
+          sender ! Failure(error),
         commands => {
           import akka.stream.{QueueOfferResult => QOR}
 
@@ -363,7 +355,6 @@ class PlatformSubscriber(
           sender ! Success(command.id)
         },
       )
-  }
 
   private def apiFailureF[T]: PartialFunction[Throwable, Future[T]] = { case exception: Exception =>
     log.error("Unable to perform API operation: {}", exception.getMessage)

@@ -498,9 +498,8 @@ private[archive] class DecodeV1(minor: LV.Minor) extends Decode.OfPackage[PLF.Pa
       val keyExpr = key.getKeyExprCase match {
         case PLF.DefTemplate.DefKey.KeyExprCase.KEY =>
           decodeKeyExpr(key.getKey, tplVar)
-        case PLF.DefTemplate.DefKey.KeyExprCase.COMPLEX_KEY => {
+        case PLF.DefTemplate.DefKey.KeyExprCase.COMPLEX_KEY =>
           decodeExpr(key.getComplexKey, s"${tpl}:key")
-        }
         case PLF.DefTemplate.DefKey.KeyExprCase.KEYEXPR_NOT_SET =>
           throw ParseError("DefKey.KEYEXPR_NOT_SET")
       }
@@ -511,7 +510,7 @@ private[archive] class DecodeV1(minor: LV.Minor) extends Decode.OfPackage[PLF.Pa
       )
     }
 
-    private[this] def decodeKeyExpr(expr: PLF.KeyExpr, tplVar: ExprVarName): Expr = {
+    private[this] def decodeKeyExpr(expr: PLF.KeyExpr, tplVar: ExprVarName): Expr =
       expr.getSumCase match {
         case PLF.KeyExpr.SumCase.RECORD =>
           val recCon = expr.getRecord
@@ -549,7 +548,6 @@ private[archive] class DecodeV1(minor: LV.Minor) extends Decode.OfPackage[PLF.Pa
         case PLF.KeyExpr.SumCase.SUM_NOT_SET =>
           throw ParseError("KeyExpr.SUM_NOT_SET")
       }
-    }
 
     private[this] def decodeTemplate(tpl: DottedName, lfTempl: PLF.DefTemplate): Template = {
       val paramName = handleInternedName(
@@ -936,9 +934,8 @@ private[archive] class DecodeV1(minor: LV.Minor) extends Decode.OfPackage[PLF.Pa
           assertNonEmpty(args, "args")
           // We use a `foreach` instead of `foldLeft` to reduce the stack size.
           var expr = decodeExpr(app.getFun, definition)
-          for (arg <- args) {
+          for (arg <- args)
             expr = EApp(expr, decodeExpr(arg, definition))
-          }
           expr
 
         case PLF.Expr.SumCase.ABS =>
@@ -970,10 +967,10 @@ private[archive] class DecodeV1(minor: LV.Minor) extends Decode.OfPackage[PLF.Pa
           val lfLet = lfExpr.getLet
           val bindings = lfLet.getBindingsList.asScala
           assertNonEmpty(bindings, "bindings")
-          (bindings foldRight decodeExpr(lfLet.getBody, definition))((binding, e) => {
+          (bindings foldRight decodeExpr(lfLet.getBody, definition)) { (binding, e) =>
             val (v, t) = decodeBinder(binding.getBinder)
             ELet(Binding(Some(v), t, decodeExpr(binding.getBound, definition)), e)
-          })
+          }
 
         case PLF.Expr.SumCase.NIL =>
           ENil(decodeType(lfExpr.getNil.getType))
@@ -1155,12 +1152,11 @@ private[archive] class DecodeV1(minor: LV.Minor) extends Decode.OfPackage[PLF.Pa
     private[this] def decodeRetrieveByKey(
         value: PLF.Update.RetrieveByKey,
         definition: String,
-    ): RetrieveByKey = {
+    ): RetrieveByKey =
       RetrieveByKey(
         decodeTypeConName(value.getTemplate),
         decodeExpr(value.getKey, definition),
       )
-    }
 
     private[this] def decodeUpdate(lfUpdate: PLF.Update, definition: String): Update =
       lfUpdate.getSumCase match {

@@ -17,7 +17,7 @@ object TransactionFilterValidator {
 
   def validate(
       txFilter: TransactionFilter
-  ): Either[StatusRuntimeException, domain.TransactionFilter] = {
+  ): Either[StatusRuntimeException, domain.TransactionFilter] =
     if (txFilter.filtersByParty.isEmpty) {
       Left(ErrorFactories.invalidArgument("filtersByParty cannot be empty"))
     } else {
@@ -30,9 +30,8 @@ object TransactionFilterValidator {
         }
       convertedFilters.map(m => domain.TransactionFilter(m.toMap))
     }
-  }
 
-  def validateFilters(filters: Filters): Either[StatusRuntimeException, domain.Filters] = {
+  def validateFilters(filters: Filters): Either[StatusRuntimeException, domain.Filters] =
     filters.inclusive
       .fold[Either[StatusRuntimeException, domain.Filters]](Right(domain.Filters.noFilter)) {
         inclusive =>
@@ -40,5 +39,4 @@ object TransactionFilterValidator {
             inclusive.templateIds.toList traverse validateIdentifier
           validatedIdents.map(ids => domain.Filters(Some(InclusiveFilters(ids.toSet))))
       }
-  }
 }

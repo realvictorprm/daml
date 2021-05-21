@@ -15,7 +15,6 @@ class BackpressuringObserver[T](limit: Int) extends StreamObserver[T] {
 
   override def onCompleted(): Unit = ()
 
-  override def onNext(value: T): Unit = {
+  override def onNext(value: T): Unit =
     if (observedElements.incrementAndGet() < limit) signalDemand.get().run()
-  }
 }

@@ -888,12 +888,11 @@ class TransactionCoderSpec
 
   private[this] def normalizeCreate(
       create: Node.NodeCreate[ContractId]
-  ): Node.NodeCreate[ContractId] = {
+  ): Node.NodeCreate[ContractId] =
     create.copy(
       arg = normalize(create.arg, create.version),
       key = create.key.map(normalizeKey(_, create.version)),
     )
-  }
 
   private[this] def normalizeFetch(fetch: Node.NodeFetch[ContractId]) =
     fetch.copy(
@@ -929,15 +928,13 @@ class TransactionCoderSpec
   private[this] def normalizeKey(
       key: KeyWithMaintainers[Value[ContractId]],
       version: TransactionVersion,
-  ) = {
+  ) =
     key.copy(key = normalize(key.key, version))
-  }
 
   private[this] def normalizeContract(
       contract: ContractInst[Value.VersionedValue[Value.ContractId]]
-  ) = {
+  ) =
     contract.copy(arg = normalizeValue(contract.arg))
-  }
 
   private[this] def normalizeValue(versionedValue: Value.VersionedValue[Value.ContractId]) = {
     val Value.VersionedValue(version, value) = versionedValue

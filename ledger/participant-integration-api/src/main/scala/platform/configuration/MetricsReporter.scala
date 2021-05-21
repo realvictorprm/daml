@@ -90,9 +90,8 @@ object MetricsReporter {
   }
 
   def parseUri(value: String): URI =
-    try {
-      new URI(value)
-    } catch {
+    try new URI(value)
+    catch {
       case NonFatal(exception) =>
         throw new InvalidConfigException(cliHint + " " + exception.getMessage)
     }

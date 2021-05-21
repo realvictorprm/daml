@@ -48,11 +48,10 @@ class AppendOnlySchemaMigrationSpec extends AsyncWordSpec with AkkaBeforeAndAfte
       for {
         error <- resource.asFuture
         _ <- resource.release()
-      } yield {
-        // safety_check is the name of a table
-        // An insert is attempted into that table which fails if the database is not empty
-        assert(error.getMessage.contains("safety_check"))
-      }
+      } yield
+      // safety_check is the name of a table
+      // An insert is attempted into that table which fails if the database is not empty
+      assert(error.getMessage.contains("safety_check"))
     }
 
   }

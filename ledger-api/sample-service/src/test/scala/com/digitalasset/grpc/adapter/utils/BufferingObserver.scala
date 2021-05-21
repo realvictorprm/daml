@@ -20,13 +20,13 @@ class BufferingObserver[T](limit: Option[Int] = None) extends StreamObserver[T] 
 
   override def onCompleted(): Unit = {
     val vec = Vector.newBuilder[T]
-    buffer.forEach((e) => vec += e)
+    buffer.forEach(e => vec += e)
     promise.trySuccess(vec.result())
     ()
   }
 
   override def onNext(value: T): Unit = {
-    size.updateAndGet(curr => {
+    size.updateAndGet { curr =>
       if (limit.fold(false)(_ <= curr)) {
         onCompleted()
         curr
@@ -34,7 +34,7 @@ class BufferingObserver[T](limit: Option[Int] = None) extends StreamObserver[T] 
         buffer.add(value)
         curr + 1
       }
-    })
+    }
     ()
   }
 }

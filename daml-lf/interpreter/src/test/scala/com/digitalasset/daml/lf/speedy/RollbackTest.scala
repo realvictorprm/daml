@@ -28,12 +28,11 @@ class ExceptionTest extends AnyWordSpec with Matchers with TableDrivenPropertyCh
 
   import ExceptionTest._
 
-  implicit val defaultParserParameters: ParserParameters[this.type] = {
+  implicit val defaultParserParameters: ParserParameters[this.type] =
     ParserParameters(
       defaultPackageId = Ref.PackageId.assertFromString("-pkgId-"),
       languageVersion = LanguageVersion.v1_dev,
     )
-  }
 
   private def typeAndCompile(pkg: Package): PureCompiledPackages = {
     val rawPkgs = Map(defaultParserParameters.defaultPackageId -> pkg)
@@ -260,7 +259,7 @@ object ExceptionTest {
   final case class R(x: List[Tree]) extends Tree //Rollback Node
 
   private def shapeOfTransaction(tx: SubmittedTransaction): List[Tree] = {
-    def trees(nid: NodeId): List[Tree] = {
+    def trees(nid: NodeId): List[Tree] =
       tx.nodes(nid) match {
         case create: NodeCreate[_] =>
           create.arg match {
@@ -276,7 +275,6 @@ object ExceptionTest {
         case node: NodeRollback[_] =>
           List(R(node.children.toList.flatMap(nid => trees(nid))))
       }
-    }
     tx.roots.toList.flatMap(nid => trees(nid))
   }
 

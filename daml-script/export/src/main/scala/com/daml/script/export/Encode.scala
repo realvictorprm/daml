@@ -19,7 +19,7 @@ import spray.json._
 
 private[export] object Encode {
 
-  def encodeArgs(export: Export): JsObject = {
+  def encodeArgs(export: Export): JsObject =
     JsObject(
       "parties" -> JsObject(export.partyMap.keys.map { case Party(party) =>
         party -> JsString(party)
@@ -28,9 +28,8 @@ private[export] object Encode {
         c -> JsString(c)
       }.toMap),
     )
-  }
 
-  def encodeExport(export: Export): Doc = {
+  def encodeExport(export: Export): Doc =
     encodeModuleHeader(export.moduleRefs) /
       Doc.hardLine +
       encodePartyType() /
@@ -48,9 +47,8 @@ private[export] object Encode {
       encodeTestExport() /
       Doc.hardLine +
       encodeExportActions(export)
-  }
 
-  private def encodeExportActions(export: Export): Doc = {
+  private def encodeExportActions(export: Export): Doc =
     Doc.text("-- | The Daml ledger export.") /
       Doc.text("export : Args -> Script ()") /
       (Doc.text("export Args{parties, contracts} = do") /
@@ -59,7 +57,6 @@ private[export] object Encode {
             encodeAction(export.partyMap, export.cidMap, export.cidRefs, _)
           ) :+ Doc.text("pure ()")
         )).hang(2)
-  }
 
   private def encodePartyBinding(party: Party, binding: String): Doc =
     s"let $binding = lookupParty" &: quotes(Doc.text(Party.unwrap(party))) :& "parties"
@@ -229,14 +226,13 @@ private[export] object Encode {
       partyMap: Map[Party, String],
       cidMap: Map[ContractId, String],
       r: Record,
-  ): Doc = {
+  ): Doc =
     if (r.fields.isEmpty) {
       qualifyId(r.getRecordId)
     } else {
       (qualifyId(r.getRecordId) + Doc.text(" with") /
         Doc.stack(r.fields.map(f => encodeField(partyMap, cidMap, f)))).nested(2)
     }
-  }
 
   private def encodeField(
       partyMap: Map[Party, String],
@@ -252,13 +248,12 @@ private[export] object Encode {
       Doc.intercalate(Doc.text(", "), ps.map(encodeParty(partyMap, _))) +
       Doc.text("]")
 
-  private def encodeCid(cidMap: Map[ContractId, String], cid: ContractId): Doc = {
+  private def encodeCid(cidMap: Map[ContractId, String], cid: ContractId): Doc =
     // LedgerStrings are strings that match the regexp ``[A-Za-z0-9#:\-_/ ]+
     cidMap.get(cid) match {
       case Some(value) => Doc.text(value)
       case None => parens("lookupContract" &: quotes(Doc.text(cid.toString)) :& "contracts")
     }
-  }
 
   private def qualifyId(id: Identifier): Doc =
     Doc.text(id.moduleName) + Doc.text(".") + Doc.text(id.entityName)
@@ -305,12 +300,11 @@ private[export] object Encode {
   ): Doc =
     Doc.text("createCmd ") + encodeRecord(partyMap, cidMap, created.getCreateArguments)
 
-  private def bindCid(cidMap: Map[ContractId, String], c: CreatedContract): Doc = {
+  private def bindCid(cidMap: Map[ContractId, String], c: CreatedContract): Doc =
     (Doc.text("let") & encodeCid(cidMap, c.cid) & Doc.text("=") & encodePath(
       Doc.text("tree"),
       c.path,
     )).nested(4)
-  }
 
   private def encodeSubmitSimple(
       partyMap: Map[Party, String],
@@ -351,21 +345,19 @@ private[export] object Encode {
     ((bind + encodeSubmitCall(partyMap, submit) :& "do") / body).hang(2)
   }
 
-  private[export] def encodeSetTime(timestamp: Timestamp): Doc = {
+  private[export] def encodeSetTime(timestamp: Timestamp): Doc =
     "setTime" &: encodeTimestamp(timestamp.toInstant.atZone(ZoneId.of("UTC")))
-  }
 
   private[export] def encodeSubmit(
       partyMap: Map[Party, String],
       cidMap: Map[ContractId, String],
       cidRefs: Set[ContractId],
       submit: Submit,
-  ): Doc = {
+  ): Doc =
     submit match {
       case simple: SubmitSimple => encodeSubmitSimple(partyMap, cidMap, cidRefs, simple)
       case tree: SubmitTree => encodeSubmitTree(partyMap, cidMap, cidRefs, tree)
     }
-  }
 
   private def encodeSubmitTree(
       partyMap: Map[Party, String],
@@ -390,23 +382,21 @@ private[export] object Encode {
       cidMap: Map[ContractId, String],
       cidRefs: Set[ContractId],
       action: Action,
-  ): Doc = {
+  ): Doc =
     action match {
       case SetTime(timestamp) => encodeSetTime(timestamp)
       case submit: Submit => encodeSubmit(partyMap, cidMap, cidRefs, submit)
     }
-  }
 
-  private def encodePath(tree: Doc, path: List[Selector]): Doc = {
+  private def encodePath(tree: Doc, path: List[Selector]): Doc =
     Doc
       .intercalate(
         " $" +: Doc.line,
         ("fromTree" &: tree) +: path.map(encodeSelector),
       )
       .nested(2)
-  }
 
-  private def encodeSelector(selector: Selector): Doc = {
+  private def encodeSelector(selector: Selector): Doc =
     selector match {
       case CreatedSelector(templateId, 0) =>
         "created @" +: encodeTemplateId(templateId)
@@ -417,7 +407,6 @@ private[export] object Encode {
       case ExercisedSelector(templateId, choice, index) =>
         "exercisedN @" +: encodeTemplateId(templateId) & encodeChoice(choice) & Doc.str(index)
     }
-  }
 
   private def encodeSubmitCall(partyMap: Map[Party, String], submit: Submit): Doc = {
     val parties = submit match {
