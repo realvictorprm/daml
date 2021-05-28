@@ -1,0 +1,51 @@
+# Copyright (c) 2021 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+steps:
+  - template: bash-lib.yml
+    parameters:
+      var_name: bash_lib
+  - bash: |
+      set -euo pipefail
+      eval "$(dev-env/bin/dade assist)"
+      source $(bash_lib)
+      jq -nc >job-md.json '{
+        timestamp: "$(pipeline_timestamp)",
+        id: "$(pipeline_id)",
+        agent_id: "$(Agent.Id)",
+        agent_job_name: "$(Agent.JobName)",
+        agent_machine_name: "$(Agent.MachineName)",
+        agent_name: "$(Agent.Name)",
+        agent_os: "$(Agent.OS)",
+        agent_os_architecture: "$(Agent.OSArchitecture)",
+        build_build_id: "$(Build.BuildId)",
+        build_build_number: "$(Build.BuildNumber)",
+        build_definition_name: "$(Build.DefinitionName)",
+        build_source_branch: "$(Build.SourceBranch)",
+        build_source_branch_name: "$(Build.SourceBranchName)",
+        build_source_version: "$(Build.SourceVersion)",
+        system_job_attempt: "$(System.JobAttempt)",
+        system_job_display_name: "$(System.JobDisplayName)",
+        system_job_id: "$(System.JobId)",
+        system_job_name: "$(System.JobName)",
+        system_pullRequest_pullRequestId: "$(system.pullRequest.pullRequestId)",
+        system_pullRequest_pullRequestNumber: "$(system.pullRequest.pullRequestNumber)",
+        system_pullRequest_mergedAt: "$(system.pullRequest.mergedAt)",
+        system_pullRequest_sourceBranch: "$(system.pullRequest.sourceBranch)",
+        system_pullRequest_targetBranch: "$(system.pullRequest.targetBranch)",
+        system_pullRequest_sourceRepositoryUri: "$(system.pullRequest.sourceRepositoryUri)",
+        system_pullRequest_sourceCommitId: "$(system.pullRequest.sourceCommitId)",
+        git_branch: "'"$(git branch --show-current)"'",
+        git_commit: "'"$(git rev-parse HEAD)"'",
+        git_tree: "'"$(git log --pretty=format:'%T' HEAD^..HEAD)"'",
+      }'
+      jq <job-md.json .
+      gcs "$GCRED" cp "job-md.json" "gs://daml-data/bazel-metrics/jobs/$(pipeline_id).json"
+      [[ -f "build-profile.json" ]] && gcs "$GCRED" cp "build-profile.json" "gs://daml-data/bazel-metrics/logs/$(pipeline_id)-build-profile.json" || echo "build-profile.json not found"
+      [[ -f "build-events.json" ]] && gcs "$GCRED" cp "build-events.json" "gs://daml-data/bazel-metrics/logs/$(pipeline_id)-build-events.json" || echo "build-events.json not found"
+      [[ -f "test-profile.json" ]] && gcs "$GCRED" cp "test-profile.json" "gs://daml-data/bazel-metrics/logs/$(pipeline_id)-test-profile.json" || echo "test-profile.json not found"
+      [[ -f "test-events.json" ]] && gcs "$GCRED" cp "test-events.json" "gs://daml-data/bazel-metrics/logs/$(pipeline_id)-test-events.json" || echo "test-events.json not found"
+    condition: succeededOrFailed()
+    displayName: 'Upload Bazel metrics'
+    env:
+      GCRED: $(GOOGLE_APPLICATION_CREDENTIALS_CONTENT)

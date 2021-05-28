@@ -65,10 +65,15 @@ jobs:
     - da_ghc_lib
     - check_for_release
   variables:
-    release_sha: $[ dependencies.check_for_release.outputs['out.release_sha'] ]
-    release_tag: $[ coalesce(dependencies.check_for_release.outputs['out.release_tag'], '0.0.0') ]
-    trigger_sha: $[ dependencies.check_for_release.outputs['out.trigger_sha'] ]
-    is_release: $[ dependencies.check_for_release.outputs['out.is_release'] ]
+    - name: release_sha
+      value: $[ dependencies.check_for_release.outputs['out.release_sha'] ]
+    - name: release_tag
+      value: $[ coalesce(dependencies.check_for_release.outputs['out.release_tag'], '0.0.0') ]
+    - name: trigger_sha
+      value: $[ dependencies.check_for_release.outputs['out.trigger_sha'] ]
+    - name: is_release
+      value: $[ dependencies.check_for_release.outputs['out.is_release'] ]
+    - template: job-variables.yml
   timeoutInMinutes: 360
   pool:
     name: 'ubuntu_20_04'
@@ -87,6 +92,7 @@ jobs:
         release_tag: $(release_tag)
         name: 'linux'
         is_release: variables.is_release
+    - template: upload-bazel-metrics.yml
     - bash: |
         set -euo pipefail
         eval "$(./dev-env/bin/dade-assist)"
