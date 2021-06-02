@@ -58,7 +58,6 @@ private[codegen] object JavaBackend extends Backend with StrictLogging {
       conf: Conf,
       packagePrefixes: Map[PackageId, String],
   )(implicit ec: ExecutionContext): Future[Unit] = {
-    val prefixes = packagePrefixes.view.mapValues(_.stripSuffix(".")).toMap
     nodeWithContext match {
       case moduleWithContext: ModuleWithContext if moduleWithContext.module.types.nonEmpty =>
         // this is a Daml module that contains type declarations => the codegen will create one file
@@ -66,7 +65,7 @@ private[codegen] object JavaBackend extends Backend with StrictLogging {
           logger.info(
             s"Generating code for module ${moduleWithContext.lineage.map(_._1).toSeq.mkString(".")}"
           )
-          for (javaFile <- createTypeDefinitionClasses(moduleWithContext, prefixes)) {
+          for (javaFile <- createTypeDefinitionClasses(moduleWithContext, packagePrefixes)) {
             logger.info(
               s"Writing ${javaFile.packageName}.${javaFile.typeSpec.name} to directory ${conf.outputDirectory}"
             )
