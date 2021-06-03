@@ -8,7 +8,6 @@ import com.daml.lf.data.Ref._
 import com.daml.lf.data._
 import com.daml.lf.ledger.FailedAuthorization
 import com.daml.lf.transaction.Node.GenNode
-import com.daml.lf.transaction.TxTree
 import com.daml.lf.value.Value
 import scalaz.Equal
 
