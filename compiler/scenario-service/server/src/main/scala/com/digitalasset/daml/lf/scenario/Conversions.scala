@@ -405,7 +405,7 @@ final class Conversions(
     val builder = proto.PartialTransaction.newBuilder
       .addAllNodes(ptx.nodes.map(convertNode).asJava)
       .addAllRoots(
-        ptx.context.children.toImmArray.toSeq.sortBy(_.index).map(convertTxNodeId).asJava
+        ptx.context.xchildren.toImmArray.toSeq.sortBy(_.index).map(convertTxNodeId).asJava
       )
 
     @tailrec

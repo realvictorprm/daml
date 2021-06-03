@@ -78,7 +78,7 @@ private[lf] object Pretty {
         text("Update failed due to fetch of an inactive contract") & prettyContractId(coid) &
           char('(') + (prettyTypeConName(tid)) + text(").") /
           text(s"The contract had been consumed in sub-transaction #$consumedBy:") +
-          (ptx.nodes.get(consumedBy) match {
+          (ptx.xnodes.get(consumedBy) match {
             // FIXME(JM): How should we show this? If the node pointed to by consumedBy
             // is not in nodes, it must not be done yet, hence the contract is recursively
             // exercised.
