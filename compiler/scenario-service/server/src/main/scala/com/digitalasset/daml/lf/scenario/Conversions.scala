@@ -104,7 +104,7 @@ final class Conversions(
             .setArg(convertValue(arg))
             .build
         )
-      case SError.DamlELocalContractNotActive(coid, tid, consumedBy) =>
+      case SError.DamlELocalContractNotActive(coid, tid, consumedBy, _) => //TODO, NICK, fix!
         builder.setUpdateLocalContractNotActive(
           proto.ScenarioError.ContractNotActive.newBuilder
             .setContractRef(mkContractRef(coid, tid))

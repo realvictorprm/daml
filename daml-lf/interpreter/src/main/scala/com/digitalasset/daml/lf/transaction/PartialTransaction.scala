@@ -33,6 +33,8 @@ private[lf] object PartialTransaction {
     final case object Duplicate extends KeyConflict
   }
 
+  type NN = (NodeId, Option[Tree]) // NICK, temp, we want to have only the Option[Tree]
+
   type NodeIdx = Value.NodeIdx
   type Node = Node.GenNode[NodeId, Value.ContractId]
   type LeafNode = Node.LeafOnlyActionNode[Value.ContractId]
@@ -174,7 +176,7 @@ private[lf] object PartialTransaction {
   }
 
   final case class ActiveLedgerState(
-      consumedBy: Map[Value.ContractId, NodeId],
+      consumedBy: Map[Value.ContractId, NN],
       keys: Map[GlobalKey, KeyMapping],
   )
 
@@ -274,7 +276,7 @@ private[lf] case class PartialTransaction(
     nextNodeIdx: Int,
     xnodes: HashMap[NodeId, PartialTransaction.Node],
     actionNodeSeeds: BackStack[(NodeId, crypto.Hash)],
-    consumedBy: Map[Value.ContractId, NodeId],
+    consumedBy: Map[Value.ContractId, PartialTransaction.NN],
     context: PartialTransaction.Context,
     aborted: Option[Tx.TransactionError],
     keys: Map[GlobalKey, PartialTransaction.KeyMapping],
@@ -574,7 +576,7 @@ private[lf] case class PartialTransaction(
             context = Context(ec),
             // important: the semantics of Daml dictate that contracts are immediately
             // inactive as soon as you exercise it. therefore, mark it as consumed now.
-            consumedBy = if (consuming) consumedBy.updated(targetId, nid) else consumedBy,
+            consumedBy = if (consuming) consumedBy.updated(targetId, (nid, None)) else consumedBy,
             keys = mbKey match {
               case Some(kWithM) if consuming =>
                 val gkey = GlobalKey(templateId, kWithM.key)
@@ -637,10 +639,13 @@ private[lf] case class PartialTransaction(
           version = version,
         )
         val nodeId = ec.nodeId
-        def tree: Tree = TxTree(exerciseNode)
+        def tree: Tree = TxTree(exerciseNode) //NICK: use val not def. here and elsewhere
         copy(
           context = ec.parent.addActionChild(tree, nodeId, version min context.minChildVersion),
           xnodes = xnodes.updated(nodeId, exerciseNodeDEP),
+          consumedBy =
+            if (ec.consuming) consumedBy.updated(ec.targetId, (ec.nodeId, Some(tree)))
+            else consumedBy,
           actionNodeSeeds = actionNodeSeeds :+ (nodeId -> ec.actionNodeSeed),
         )
       case _ => throw new RuntimeException("endExercises called in non-exercise context")
@@ -792,7 +797,7 @@ private[lf] case class PartialTransaction(
   ): PartialTransaction =
     consumedBy.get(coid) match {
       case None => f
-      case Some(nid) => noteAbort(Tx.ContractNotActive(coid, templateId, nid))
+      case Some((nid, nodeOpt)) => noteAbort(Tx.ContractNotActive(coid, templateId, nid, nodeOpt))
     }
 
   /** Insert the given `LeafNode` under a fresh node-id, and return it */

@@ -301,7 +301,7 @@ class Engine(val config: EngineConfig = new EngineConfig(LanguageVersion.StableV
         case SResultError(err) =>
           return ResultError(
             Error(
-              s"Interpretation error: ${Pretty.prettyError(err, onLedger.ptx).render(80)}",
+              s"Interpretation error: ${Pretty.prettyError(err).render(80)}",
               s"Last location: ${Pretty.prettyLoc(machine.lastLocation).render(80)}, partial transaction: ${onLedger.ptx.nodesToString}",
             )
           )

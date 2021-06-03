@@ -67,7 +67,8 @@ object SError {
   final case class DamlELocalContractNotActive(
       coid: ContractId,
       templateId: TypeConName,
-      consumedBy: NodeId,
+      xconsumedBy: NodeId, //TODO, NICK, remove
+      consumedBy: Option[PartialTransaction.Tree],
   ) extends SErrorDamlException
 
   final case class DamlELocalContractKeyNotVisible(

@@ -8,6 +8,7 @@ import com.daml.lf.data.Ref._
 import com.daml.lf.data._
 import com.daml.lf.ledger.FailedAuthorization
 import com.daml.lf.transaction.Node.GenNode
+import com.daml.lf.transaction.TxTree
 import com.daml.lf.value.Value
 import scalaz.Equal
 
@@ -897,10 +898,14 @@ object Transaction {
   /** Signals that the contract-id `coid` was expected to be active, but
     * is not.
     */
+
+  private type Tree = TxTree[Value.ContractId]
+
   final case class ContractNotActive(
       coid: Value.ContractId,
       templateId: TypeConName,
-      consumedBy: NodeId,
+      xconsumedBy: NodeId, //TODO, NICK: remove
+      consumedBy: Option[Tree],
   ) extends TransactionError
 
   /** Signals that within the transaction we got to a point where
