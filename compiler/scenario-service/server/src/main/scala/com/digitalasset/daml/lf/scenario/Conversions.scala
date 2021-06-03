@@ -30,7 +30,7 @@ final class Conversions(
 
   // The ledger data will not contain information from the partial transaction at this point.
   // We need the mapping for converting error message so we manually add it here.
-  private val ptxCoidToNodeId = ptx.nodes
+  private val ptxCoidToNodeId = ptx.xnodes
     .collect { case (nodeId, node: N.NodeCreate[V.ContractId]) =>
       node.coid -> ledger.ptxEventId(nodeId)
     }
@@ -403,7 +403,7 @@ final class Conversions(
 
   def convertPartialTransaction(ptx: SPartialTransaction): proto.PartialTransaction = {
     val builder = proto.PartialTransaction.newBuilder
-      .addAllNodes(ptx.nodes.map(convertNode).asJava)
+      .addAllNodes(ptx.xnodes.map(convertNode).asJava)
       .addAllRoots(
         ptx.context.xchildren.toImmArray.toSeq.sortBy(_.index).map(convertTxNodeId).asJava
       )
