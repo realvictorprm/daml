@@ -5,7 +5,6 @@ package com.daml.lf
 package transaction
 
 import com.daml.lf.data.Trampoline.{Bounce, Land, Trampoline}
-import com.daml.lf.transaction.{NodeId, GenTransaction}
 import com.daml.lf.data.ImmArray
 import com.daml.lf.transaction.Node.{GenNode, LeafOnlyActionNode, NodeExercises, NodeRollback}
 
