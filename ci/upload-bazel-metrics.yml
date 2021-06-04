@@ -40,11 +40,11 @@ steps:
         git_tree: "'"$(git log --pretty=format:'%T' HEAD^..HEAD)"'",
       }'
       jq <job-md.json .
-      gcs "$GCRED" cp "job-md.json" "gs://daml-data/bazel-metrics/jobs/$(pipeline_id).json"
-      [[ -f "build-profile.json" ]] && gcs "$GCRED" cp "build-profile.json" "gs://daml-data/bazel-metrics/logs/$(pipeline_id)-build-profile.json" || echo "build-profile.json not found"
-      [[ -f "build-events.json" ]] && gcs "$GCRED" cp "build-events.json" "gs://daml-data/bazel-metrics/logs/$(pipeline_id)-build-events.json" || echo "build-events.json not found"
-      [[ -f "test-profile.json" ]] && gcs "$GCRED" cp "test-profile.json" "gs://daml-data/bazel-metrics/logs/$(pipeline_id)-test-profile.json" || echo "test-profile.json not found"
-      [[ -f "test-events.json" ]] && gcs "$GCRED" cp "test-events.json" "gs://daml-data/bazel-metrics/logs/$(pipeline_id)-test-events.json" || echo "test-events.json not found"
+      gcs "$GCRED" cp "job-md.json" "gs://daml-data/bazel-metrics/$(pipeline_id)/job-md.json"
+      [[ -f "build-profile.json" ]] && gcs "$GCRED" cp "build-profile.json" "gs://daml-data/bazel-metrics/$(pipeline_id)/build-profile.json" || echo "build-profile.json not found"
+      [[ -f "build-events.json" ]] && gcs "$GCRED" cp "build-events.json" "gs://daml-data/bazel-metrics/$(pipeline_id)/build-events.json" || echo "build-events.json not found"
+      [[ -f "test-profile.json" ]] && gcs "$GCRED" cp "test-profile.json" "gs://daml-data/bazel-metrics/$(pipeline_id)/test-profile.json" || echo "test-profile.json not found"
+      [[ -f "test-events.json" ]] && gcs "$GCRED" cp "test-events.json" "gs://daml-data/bazel-metrics/$(pipeline_id)/test-events.json" || echo "test-events.json not found"
     condition: succeededOrFailed()
     displayName: 'Upload Bazel metrics'
     env:
