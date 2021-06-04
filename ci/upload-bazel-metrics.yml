@@ -37,7 +37,7 @@ steps:
         system_pullRequest_sourceCommitId: "$(system.pullRequest.sourceCommitId)",
         git_branch: "'"$(git branch --show-current)"'",
         git_commit: "'"$(git rev-parse HEAD)"'",
-        git_tree: "'"$(git log --pretty=format:'%T' HEAD^..HEAD)"'",
+        git_tree: "'"$(git rev-parse HEAD:./)"'",
       }'
       jq <job-md.json .
       gcs "$GCRED" cp "job-md.json" "gs://daml-data/bazel-metrics/$(pipeline_id)/job-md.json"
