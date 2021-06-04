@@ -139,6 +139,7 @@ jobs:
         name: 'linux-scala-2.12'
         is_release: variables.is_release
         scala_version: "2.12.13"
+    - template: upload-bazel-metrics.yml
     - template: tell-slack-failed.yml
       parameters:
         trigger_sha: '$(trigger_sha)'
@@ -172,6 +173,7 @@ jobs:
         release_tag: $(release_tag)
         name: macos
         is_release: variables.is_release
+    - template: upload-bazel-metrics.yml
     - template: tell-slack-failed.yml
       parameters:
         trigger_sha: '$(trigger_sha)'
@@ -216,6 +218,7 @@ jobs:
         # and then splice that in via a template parameter.
         skip_tests: $(skip_tests)
         is_release: variables.is_release
+    - template: upload-bazel-metrics.yml
     - task: PublishBuildArtifacts@1
       condition: succeededOrFailed()
       inputs:
