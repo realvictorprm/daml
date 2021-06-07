@@ -353,8 +353,8 @@ requestTests run _runScenarios = testGroup "requests"
               { _contents = HoverContents $ MarkupContent MkMarkdown $ T.unlines
                     [ "```daml"
                     , "1.0"
-                    , ": NumericScale n"
-                    , "=> Numeric n"
+                    , ": (Additive a, IsNumeric a)"
+                    , "=> a"
                     , "```"
                     , "* * *"
                     ]
