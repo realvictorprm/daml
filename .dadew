@@ -7,6 +7,7 @@
         "cacert",
         "curl-7.73.0",
         "java-openjdk-8u201",
+        "jq",
         "maven-3.6.1",
         "msys2",
         "nodejs-12.17.0",
