@@ -903,7 +903,6 @@ object Transaction {
   final case class ContractNotActive(
       coid: Value.ContractId,
       templateId: TypeConName,
-      xconsumedBy: NodeId, //TODO, NICK: remove
       consumedBy: Option[Tree],
   ) extends TransactionError
 

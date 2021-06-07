@@ -797,7 +797,7 @@ private[lf] case class PartialTransaction(
   ): PartialTransaction =
     consumedBy.get(coid) match {
       case None => f
-      case Some((nid, nodeOpt)) => noteAbort(Tx.ContractNotActive(coid, templateId, nid, nodeOpt))
+      case Some((nid@_, nodeOpt)) => noteAbort(Tx.ContractNotActive(coid, templateId, nodeOpt)) //NICK
     }
 
   /** Insert the given `LeafNode` under a fresh node-id, and return it */

@@ -1669,7 +1669,7 @@ private[lf] object SBuiltin {
     ptx.aborted match {
       case Some(Tx.AuthFailureDuringExecution(nid, fa)) =>
         throw DamlEFailedAuthorization(nid, fa)
-      case Some(Tx.ContractNotActive(coid, tid, _, consumedBy)) =>
+      case Some(Tx.ContractNotActive(coid, tid, consumedBy)) =>
         throw DamlELocalContractNotActive(coid, tid, consumedBy)
       case Some(Tx.DuplicateContractKey(key)) =>
         throw DamlEDuplicateContractKey(key)
