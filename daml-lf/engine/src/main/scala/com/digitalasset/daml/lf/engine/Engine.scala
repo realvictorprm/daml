@@ -13,6 +13,7 @@ import com.daml.lf.speedy.Speedy.Machine
 import com.daml.lf.speedy.SResult._
 import com.daml.lf.transaction.{SubmittedTransaction, Transaction => Tx}
 import com.daml.lf.transaction.Node._
+import com.daml.lf.transaction.NodeId
 import com.daml.lf.value.Value
 import java.nio.file.Files
 
@@ -370,7 +371,12 @@ class Engine(val config: EngineConfig = new EngineConfig(LanguageVersion.StableV
           submissionTime = onLedger.ptx.submissionTime,
           usedPackages = Set.empty,
           dependsOnTime = onLedger.dependsOnTime,
-          nodeSeeds = onLedger.ptx.actionNodeSeeds.toImmArray,
+          //nodeSeeds = onLedger.ptx.xactionNodeSeeds.toImmArray //NICK
+          nodeSeeds = ImmArray(
+            onLedger.ptx.actionNodeSeeds.toImmArray.toList.zipWithIndex.map { case (v, i) =>
+              (NodeId(i), v)
+            }
+          ),
         )
         config.profileDir.foreach { dir =>
           val desc = Engine.profileDesc(tx)

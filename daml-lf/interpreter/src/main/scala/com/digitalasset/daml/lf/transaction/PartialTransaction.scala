@@ -212,6 +212,7 @@ private[lf] object PartialTransaction {
     submissionTime = submissionTime,
     nextNodeIdx = 0, //TODO, NICK, remove if I can. and remove commented callers
     //xnodes = HashMap.empty, //TODO, NICK, remove & remove al commented callers
+    xactionNodeSeeds = BackStack.empty,
     actionNodeSeeds = BackStack.empty,
     consumedBy = Map.empty,
     context = Context(initialSeeds),
@@ -283,7 +284,8 @@ private[lf] case class PartialTransaction(
     submissionTime: Time.Timestamp,
     nextNodeIdx: Int,
     //xnodes: HashMap[NodeId, PartialTransaction.Node],
-    actionNodeSeeds: BackStack[(NodeId, crypto.Hash)],
+    xactionNodeSeeds: BackStack[(NodeId, crypto.Hash)],
+    actionNodeSeeds: BackStack[crypto.Hash],
     consumedBy: Map[Value.ContractId, Option[PartialTransaction.Tree]],
     context: PartialTransaction.Context,
     aborted: Option[Tx.TransactionError],
@@ -411,7 +413,8 @@ private[lf] case class PartialTransaction(
         nextNodeIdx = nextNodeIdx + 1,
         context = context.addActionChild(tree, version),
         //xnodes = xnodes.updated(nid, createNode),
-        actionNodeSeeds = actionNodeSeeds :+ (nid -> actionNodeSeed),
+        xactionNodeSeeds = xactionNodeSeeds :+ (nid -> actionNodeSeed),
+        actionNodeSeeds = actionNodeSeeds :+ actionNodeSeed,
         localContracts = localContracts + cid,
       ).noteAuthFails(CheckAuthorization.authorizeCreate(createNode), auth)
 
@@ -585,6 +588,9 @@ private[lf] case class PartialTransaction(
             // important: the semantics of Daml dictate that contracts are immediately
             // inactive as soon as you exercise it. therefore, mark it as consumed now.
             consumedBy = if (consuming) consumedBy.updated(targetId, None) else consumedBy,
+            //NICK, try here instead (was below in endExercises)
+            xactionNodeSeeds = xactionNodeSeeds :+ (nid -> ec.actionNodeSeed),
+            actionNodeSeeds = actionNodeSeeds :+ ec.actionNodeSeed,
             keys = mbKey match {
               case Some(kWithM) if consuming =>
                 val gkey = GlobalKey(templateId, kWithM.key)
@@ -646,7 +652,7 @@ private[lf] case class PartialTransaction(
           byKey = ec.byKey,
           version = version,
         )
-        val nodeId = ec.nodeId
+        //val nodeId = ec.nodeId //NICK
         def tree: Tree = TxTree(exerciseNode) //NICK: use val not def. here and elsewhere
         copy(
           context = ec.parent.addActionChild(tree, version min context.minChildVersion),
@@ -654,7 +660,10 @@ private[lf] case class PartialTransaction(
           consumedBy =
             if (ec.consuming) consumedBy.updated(ec.targetId, Some(tree))
             else consumedBy,
-          actionNodeSeeds = actionNodeSeeds :+ (nodeId -> ec.actionNodeSeed),
+
+          //NICK, try not here...
+          //xactionNodeSeeds = xactionNodeSeeds :+ (ec.nodeId -> ec.actionNodeSeed),
+          //actionNodeSeeds = actionNodeSeeds :+ ec.actionNodeSeed,
         )
       case _ => throw new RuntimeException("endExercises called in non-exercise context")
     }
@@ -706,7 +715,8 @@ private[lf] case class PartialTransaction(
         copy(
           context = ec.parent.addActionChild(tree, version min context.minChildVersion),
           //xnodes = xnodes.updated(nodeId, exerciseNodeDEP),
-          actionNodeSeeds = actionNodeSeeds :+ (nodeId -> actionNodeSeed),
+          xactionNodeSeeds = xactionNodeSeeds :+ (nodeId -> actionNodeSeed),
+          actionNodeSeeds = actionNodeSeeds :+ actionNodeSeed,
         )
       case _ => throw new RuntimeException("abortExercises called in non-exercise context")
     }
