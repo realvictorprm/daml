@@ -38,7 +38,7 @@ import com.daml.platform.sandbox.stores.ledger.sql.SqlLedger._
 import com.daml.platform.sandbox.stores.ledger.{Ledger, SandboxOffset}
 import com.daml.platform.store.appendonlydao.events.CompressionStrategy
 import com.daml.platform.store.cache.TranslationCacheBackedContractStore
-import com.daml.platform.store.dao.{LedgerDao, LedgerDaoTransactionsReader, LedgerWriteDao}
+import com.daml.platform.store.dao.{LedgerDao, LedgerWriteDao}
 import com.daml.platform.store.entries.{LedgerEntry, PackageLedgerEntry, PartyLedgerEntry}
 import com.daml.platform.store.{BaseLedger, FlywayMigrations, LfValueTranslationCache}
 import com.daml.resources.ProgramResource.StartupException

@@ -178,17 +178,17 @@ private[index] object ReadOnlySqlLedgerWithMutableCache {
             new ReadOnlySqlLedgerWithMutableCache(
               ledgerId,
               ledgerDao,
-              new BufferedTransactionsReader(
-                ledgerDao.transactionsReader,
-                new LfValueTranslation(
+              BufferedTransactionsReader(
+                delegate = ledgerDao.transactionsReader,
+                transactionsBuffer = transactionsBuffer,
+                lfValueTranslation = new LfValueTranslation(
                   cache = LfValueTranslationCache.Cache.none,
                   metrics = metrics,
                   enricherO = Some(enricher),
                   loadPackage =
                     (packageId, loggingContext) => ledgerDao.getLfArchive(packageId)(loggingContext),
                 ),
-                transactionsBuffer,
-                metrics,
+                metrics = metrics,
               ),
               contractStore,
               cacheUpdatesDispatcher,
