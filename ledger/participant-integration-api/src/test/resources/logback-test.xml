@@ -33,8 +33,17 @@
         <appender-ref ref="JdbcIndexerSpecAppender" />
     </logger>
 
-    <root level="DEBUG">
+    <logger name="io.netty" level="WARN" />
+    <logger name="io.grpc.netty" level="WARN" />
+    <logger name="akka.event.slf4j" level="WARN" />
+    <logger name="daml.tracelog" level="TRACE" />
+    <logger name="com.zaxxer.hikari" level="TRACE" />
+    <logger name="com.daml.platform.store.dao.DbDispatcher" level="INFO" />
+    <logger name="com.daml.platform.store.dao.JdbcLedgerDao" level="WARN" />
+    <logger name="java.util.logging" level="TRACE" />
+
+    <root level="TRACE">
         <appender-ref ref="STDOUT"/>
-        <appender-ref ref="ASYNC"/>
+<!--        <appender-ref ref="ASYNC"/>-->
     </root>
 </configuration>

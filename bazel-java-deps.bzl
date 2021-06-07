@@ -62,6 +62,8 @@ def install_java_deps():
             "com.lihaoyi:sjsonnet_{}:0.3.0".format(scala_major_version),
             "commons-io:commons-io:2.5",
             "com.oracle.database.jdbc:ojdbc8:19.8.0.0",
+            # debug version of oracle drivers for tracing and debugging
+            "com.oracle.database.jdbc.debug:ojdbc8_g:19.8.0.0",
             "com.sparkjava:spark-core:2.9.1",
             "com.squareup:javapoet:1.11.1",
             "com.storm-enroute:scalameter_{}:0.19".format(scala_major_version),
