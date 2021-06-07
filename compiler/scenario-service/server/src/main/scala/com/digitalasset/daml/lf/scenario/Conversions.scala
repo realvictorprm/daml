@@ -104,11 +104,11 @@ final class Conversions(
             .setArg(convertValue(arg))
             .build
         )
-      case SError.DamlELocalContractNotActive(coid, tid, consumedBy, _) => //TODO, NICK, fix!
+      case SError.DamlELocalContractNotActive(coid, tid, consumedBy @ _) =>
         builder.setUpdateLocalContractNotActive(
           proto.ScenarioError.ContractNotActive.newBuilder
             .setContractRef(mkContractRef(coid, tid))
-            .setConsumedBy(proto.NodeId.newBuilder.setId(consumedBy.toString).build)
+            //.setConsumedBy(proto.NodeId.newBuilder.setId(consumedBy.toString).build)
             .build
         )
       case SError.DamlEDuplicateContractKey(key) =>

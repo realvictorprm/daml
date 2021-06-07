@@ -58,7 +58,7 @@ private[lf] object Pretty {
           prettyTypeConName(tid) &
           text("with") & prettyValue(true)(arg)
 
-      case DamlELocalContractNotActive(coid, tid, _, consumedBy) =>
+      case DamlELocalContractNotActive(coid, tid, consumedBy) =>
         text("Update failed due to fetch of an inactive contract") & prettyContractId(coid) &
           char('(') + (prettyTypeConName(tid)) + text(").") /
           text(s"The contract had been consumed in sub-transaction #$consumedBy:") +
