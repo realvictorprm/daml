@@ -39,9 +39,12 @@ steps:
         system_pullRequest_targetBranch: "${SYSTEM_PULLREQUEST_TARGETBRANCH:-}",
         system_pullRequest_sourceRepositoryUri: "${SYSTEM_PULLREQUEST_SOURCEREPOSITORYURI:-}",
         system_pullRequest_sourceCommitId: "${SYSTEM_PULLREQUEST_SOURCECOMMITID:-}",
-        git_branch: "'"$(git branch --show-current)"'",
-        git_commit: "'"$(git rev-parse HEAD)"'",
-        git_tree: "'"$(git rev-parse HEAD:./)"'",
+        git_branch_sha: "$[ dependencies.git_sha.outputs['out.branch'] ]",
+        git_main_sha: "$[ dependencies.git_sha.outputs['out.main'] ]",
+        git_fork_point: "$[ dependencies.git_sha.outputs['out.fork_point'] ]",
+        git_current_branch: "'"$(git branch --show-current)"'",
+        git_current_commit: "'"$(git rev-parse HEAD)"'",
+        git_current_tree: "'"$(git rev-parse HEAD:./)"'",
       }'
       jq <job-md.json .
       gcs "$GCRED" cp "job-md.json" "gs://daml-data/bazel-metrics/$(pipeline_id)/job-md.json"
