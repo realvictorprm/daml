@@ -15,10 +15,10 @@ class JdbcLedgerDaoOracleDatabaseSpec
 //    with JdbcLedgerDaoConfigurationSpec
 //    with JdbcLedgerDaoPartiesSpec
     with JdbcLedgerDaoActiveContractsSpec
-    with JdbcLedgerDaoCompletionsSpec
-    with JdbcLedgerDaoContractsSpec
-    with JdbcLedgerDaoDivulgenceSpec
-    with JdbcLedgerDaoTransactionsSpec
-    with JdbcLedgerDaoTransactionTreesSpec
-    with JdbcLedgerDaoTransactionsWriterSpec
+//    with JdbcLedgerDaoCompletionsSpec
+//    with JdbcLedgerDaoContractsSpec
+//    with JdbcLedgerDaoDivulgenceSpec
+//    with JdbcLedgerDaoTransactionsSpec
+//    with JdbcLedgerDaoTransactionTreesSpec
+//    with JdbcLedgerDaoTransactionsWriterSpec
     with JdbcAtomicTransactionInsertion
