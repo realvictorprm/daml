@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-wi=2
-i=10
+wi=5
+i=25
 
 whatBranch() {
     git rev-parse --abbrev-ref HEAD
