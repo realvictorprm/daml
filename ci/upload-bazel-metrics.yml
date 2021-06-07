@@ -8,6 +8,7 @@ steps:
   - bash: |
       set -euo pipefail
       if [[ $os = windows ]]; then
+        :
       else
         eval "$(dev-env/bin/dade assist)"
         source $(bash_lib)
