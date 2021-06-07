@@ -22,7 +22,6 @@ import com.daml.lf.transaction.{
 }
 import com.daml.lf.value.Value
 
-//import scala.collection.immutable.HashMap //NICK
 import scala.Ordering.Implicits.infixOrderingOps
 
 private[lf] object PartialTransaction {
@@ -81,37 +80,23 @@ private[lf] object PartialTransaction {
   final case class Context(
       info: ContextInfo,
       minChildVersion: TxVersion, // tracks the minimum version of any child within `children`
-      //xchildren: BackStack[NodeId], //TODO: kill, along with all node-id tracking!
       children: BackStack[Tree],
       nextActionChildIdx: Int,
   ) {
     // when we add a child node we must pass the minimum-version contained in that child
-    //TODO, NICK - rename tree -> child, when that name is freed up by removing the current child arg
-    def addActionChild(
-        tree: Tree,
-        //child: NodeId, /NICK
-        version: TxVersion,
-    ): Context = {
+    def addActionChild(child: Tree, version: TxVersion): Context = {
       Context(
         info,
         minChildVersion min version,
-        //xchildren :+ child,
-        children :+ tree,
+        children :+ child,
         nextActionChildIdx + 1,
       )
     }
-    //TODO,NICK: merge addAction/addRollback when dont care about nodeId?
-    def addRollbackChild(
-        tree: Tree,
-        //child: NodeId, //NICK
-        version: TxVersion,
-        nextActionChildIdx: Int,
-    ): Context =
+    def addRollbackChild(child: Tree, version: TxVersion, nextActionChildIdx: Int): Context =
       Context(
         info,
         minChildVersion min version,
-        //xchildren :+ child,
-        children :+ tree,
+        children :+ child,
         nextActionChildIdx,
       )
     // This function may be costly, it must be call at most once for each node.
@@ -121,14 +106,8 @@ private[lf] object PartialTransaction {
   object Context {
 
     def apply(info: ContextInfo): Context =
-      // An empty context, with no xchildren; minChildVersion is set to the max-int.
-      Context(
-        info,
-        TxVersion.VDev,
-        //BackStack.empty,
-        BackStack.empty,
-        0, //NICK
-      )
+      // An empty context, with no children; minChildVersion is set to the max-int.
+      Context(info, TxVersion.VDev, BackStack.empty, 0)
 
     def apply(initialSeeds: InitialSeeding): Context =
       initialSeeds match {
@@ -156,8 +135,6 @@ private[lf] object PartialTransaction {
     *  @param chosenValue The chosen value.
     *  @param signatories The signatories of the contract.
     *  @param stakeholders The stakeholders of the contract.
-    *  @param nodeId The node to be inserted once we've
-    *                         finished this sub-transaction.
     *  @param parent The context in which the exercises is
     *                       happening.
     *  @param byKey True if the exercise is done "by key"
@@ -174,7 +151,6 @@ private[lf] object PartialTransaction {
       signatories: Set[Party],
       stakeholders: Set[Party],
       choiceObservers: Set[Party],
-      //nodeId: NodeId, //NICK
       parent: Context,
       byKey: Boolean,
   ) extends ContextInfo {
@@ -189,7 +165,6 @@ private[lf] object PartialTransaction {
   )
 
   final case class TryContextInfo(
-      //nodeId: NodeId,
       parent: Context,
       // beginState stores the consumed contracts at the beginning of
       // the try so that we can restore them on rollback.
@@ -210,9 +185,6 @@ private[lf] object PartialTransaction {
     pkg2TxVersion,
     contractKeyUniqueness = contractKeyUniqueness,
     submissionTime = submissionTime,
-    //nextNodeIdx = 0, //TODO, NICK, remove if I can. and remove commented callers
-    //xnodes = HashMap.empty, //TODO, NICK, remove & remove al commented callers
-    //xactionNodeSeeds = BackStack.empty,
     actionNodeSeeds = BackStack.empty,
     consumedBy = Map.empty,
     context = Context(initialSeeds),
@@ -235,7 +207,6 @@ private[lf] object PartialTransaction {
 
 /** A transaction under construction
   *
-  *  @param xnodes The nodes of the transaction graph being built up. //NICK: fix up this comment
   *  @param actionNodeSeeds The seeds of Create and Exercise nodes
   *  @param consumedBy 'ContractId's of all contracts that have
   *                    been consumed by nodes up to now.
@@ -282,9 +253,6 @@ private[lf] case class PartialTransaction(
     packageToTransactionVersion: Ref.PackageId => TxVersion,
     contractKeyUniqueness: ContractKeyUniquenessMode,
     submissionTime: Time.Timestamp,
-    //nextNodeIdx: Int,
-    //xnodes: HashMap[NodeId, PartialTransaction.Node],
-    //xactionNodeSeeds: BackStack[(NodeId, crypto.Hash)],
     actionNodeSeeds: BackStack[crypto.Hash],
     consumedBy: Map[Value.ContractId, Option[PartialTransaction.Tree]],
     context: PartialTransaction.Context,
@@ -301,51 +269,6 @@ private[lf] case class PartialTransaction(
 
   private def resetActiveState(state: ActiveLedgerState): PartialTransaction =
     copy(consumedBy = state.consumedBy, keys = state.keys)
-
-  /*def nodesToString: String = //NICK, who calls this?
-    if (xnodes.isEmpty) "<empty transaction>"
-    else {
-      val sb = new StringBuilder()
-
-      def addToStringBuilder(
-          nid: NodeId,
-          node: Node,
-          rootPrefix: String,
-      ): Unit = {
-        sb.append(rootPrefix)
-          .append("node ")
-          .append(nid)
-          .append(": ")
-          .append(node.toString)
-          .append(", ")
-        ()
-      }
-
-      def removeTrailingComma(): Unit = {
-        if (sb.length >= 2) sb.setLength(sb.length - 2) // remove trailing ", "
-      }
-
-      // roots field is not initialized when this method is executed on a failed transaction,
-      // so we need to compute them.
-      val rootNodes = {
-        val allChildNodeIds: Set[NodeId] = xnodes.values.iterator.flatMap {
-          case rb: Node.NodeRollback[NodeId] => rb.children.toSeq
-          case _: Node.LeafOnlyActionNode[_] => Nil
-          case ex: Node.NodeExercises[NodeId, _] => ex.children.toSeq
-        }.toSet
-
-        xnodes.keySet diff allChildNodeIds
-      }
-      val tx = GenTransaction(xnodes, ImmArray(rootNodes))
-
-      tx.foreach { (nid, node) =>
-        val rootPrefix = if (rootNodes.contains(nid)) "root " else ""
-        addToStringBuilder(nid, node, rootPrefix)
-      }
-      removeTrailingComma()
-
-      sb.toString
-    }*/
 
   /** Finish building a transaction; i.e., try to extract a complete
     *  transaction from the given 'PartialTransaction'. This returns:
@@ -407,13 +330,9 @@ private[lf] case class PartialTransaction(
         key,
         version,
       )
-      def tree: Tree = TxTree(createNode)
-      //val nid = NodeId(nextNodeIdx)
+      val tree: Tree = TxTree(createNode)
       val ptx = copy(
-        //nextNodeIdx = nextNodeIdx + 1,
         context = context.addActionChild(tree, version),
-        //xnodes = xnodes.updated(nid, createNode),
-        //xactionNodeSeeds = xactionNodeSeeds :+ (nid -> actionNodeSeed),
         actionNodeSeeds = actionNodeSeeds :+ actionNodeSeed,
         localContracts = localContracts + cid,
       ).noteAuthFails(CheckAuthorization.authorizeCreate(createNode), auth)
@@ -492,7 +411,6 @@ private[lf] case class PartialTransaction(
       key: Option[Node.KeyWithMaintainers[Value[Nothing]]],
       byKey: Boolean,
   ): PartialTransaction = {
-    //val nid = NodeId(nextNodeIdx)
     val version = packageToTransactionVersion(templateId.packageId)
     val node = Node.NodeFetch(
       coid,
@@ -505,11 +423,13 @@ private[lf] case class PartialTransaction(
       byKey,
       version,
     )
-    def tree: Tree = TxTree(node)
+    val tree: Tree = TxTree(node)
     mustBeActive(
       coid,
       templateId,
-      insertLeafNode(tree, node, version),
+      copy(
+        context = context.addActionChild(tree, version)
+      ),
     ).noteAuthFails(CheckAuthorization.authorizeFetch(node), auth)
   }
 
@@ -520,7 +440,6 @@ private[lf] case class PartialTransaction(
       key: Node.KeyWithMaintainers[Value[Nothing]],
       result: Option[Value.ContractId],
   ): PartialTransaction = {
-    //val nid = NodeId(nextNodeIdx)
     val version = packageToTransactionVersion(templateId.packageId)
     val node = Node.NodeLookupByKey(
       templateId,
@@ -529,8 +448,8 @@ private[lf] case class PartialTransaction(
       result,
       version,
     )
-    def tree: Tree = TxTree(node)
-    insertLeafNode(tree, node, version)
+    val tree: Tree = TxTree(node)
+    copy(context = context.addActionChild(tree, version))
       .noteAuthFails(CheckAuthorization.authorizeLookupByKey(node), auth)
   }
 
@@ -559,7 +478,6 @@ private[lf] case class PartialTransaction(
           .mkString(",")}"""
       )
     } else {
-      //val nid = NodeId(nextNodeIdx)
       val ec =
         ExercisesContextInfo(
           targetId = targetId,
@@ -573,7 +491,6 @@ private[lf] case class PartialTransaction(
           signatories = signatories,
           stakeholders = stakeholders,
           choiceObservers = choiceObservers,
-          //nodeId = nid, //NICK
           parent = context,
           byKey = byKey,
         )
@@ -583,13 +500,10 @@ private[lf] case class PartialTransaction(
           targetId,
           templateId,
           copy(
-            //nextNodeIdx = nextNodeIdx + 1,
             context = Context(ec),
             // important: the semantics of Daml dictate that contracts are immediately
             // inactive as soon as you exercise it. therefore, mark it as consumed now.
             consumedBy = if (consuming) consumedBy.updated(targetId, None) else consumedBy,
-            //NICK, try here instead (was below in endExercises)
-            //xactionNodeSeeds = xactionNodeSeeds :+ (nid -> ec.actionNodeSeed),
             actionNodeSeeds = actionNodeSeeds :+ ec.actionNodeSeed,
             keys = mbKey match {
               case Some(kWithM) if consuming =>
@@ -618,23 +532,6 @@ private[lf] case class PartialTransaction(
     context.info match {
       case ec: ExercisesContextInfo =>
         val version = packageToTransactionVersion(ec.templateId.packageId)
-        /*val exerciseNodeDEP = Node.NodeExercises( //NICK
-          targetCoid = ec.targetId,
-          templateId = ec.templateId,
-          choiceId = ec.choiceId,
-          optLocation = ec.optLocation,
-          consuming = ec.consuming,
-          actingParties = ec.actingParties,
-          chosenValue = ec.chosenValue,
-          stakeholders = ec.stakeholders,
-          signatories = ec.signatories,
-          choiceObservers = ec.choiceObservers,
-          children = context.xchildren.toImmArray, //NICK, dep because uses xchildren
-          exerciseResult = Some(value),
-          key = ec.contractKey,
-          byKey = ec.byKey,
-          version = version,
-        )*/
         val exerciseNode = Node.NodeExercises(
           targetCoid = ec.targetId,
           templateId = ec.templateId,
@@ -652,18 +549,12 @@ private[lf] case class PartialTransaction(
           byKey = ec.byKey,
           version = version,
         )
-        //val nodeId = ec.nodeId //NICK
-        def tree: Tree = TxTree(exerciseNode) //NICK: use val not def. here and elsewhere
+        val tree: Tree = TxTree(exerciseNode)
         copy(
           context = ec.parent.addActionChild(tree, version min context.minChildVersion),
-          //xnodes = xnodes.updated(nodeId, exerciseNodeDEP),
           consumedBy =
             if (ec.consuming) consumedBy.updated(ec.targetId, Some(tree))
             else consumedBy,
-
-          //NICK, try not here...
-          //xactionNodeSeeds = xactionNodeSeeds :+ (ec.nodeId -> ec.actionNodeSeed),
-          //actionNodeSeeds = actionNodeSeeds :+ ec.actionNodeSeed,
         )
       case _ => throw new RuntimeException("endExercises called in non-exercise context")
     }
@@ -675,23 +566,6 @@ private[lf] case class PartialTransaction(
     context.info match {
       case ec: ExercisesContextInfo =>
         val version = packageToTransactionVersion(ec.templateId.packageId)
-        /*val exerciseNodeDEP = Node.NodeExercises( //NICK
-          targetCoid = ec.targetId,
-          templateId = ec.templateId,
-          choiceId = ec.choiceId,
-          optLocation = ec.optLocation,
-          consuming = ec.consuming,
-          actingParties = ec.actingParties,
-          chosenValue = ec.chosenValue,
-          stakeholders = ec.stakeholders,
-          signatories = ec.signatories,
-          choiceObservers = ec.choiceObservers,
-          children = context.xchildren.toImmArray, //NICK, dep because use xchildren
-          exerciseResult = None,
-          key = ec.contractKey,
-          byKey = ec.byKey,
-          version = version,
-        )*/
         val exerciseNode = Node.NodeExercises(
           targetCoid = ec.targetId,
           templateId = ec.templateId,
@@ -709,13 +583,10 @@ private[lf] case class PartialTransaction(
           byKey = ec.byKey,
           version = version,
         )
-        //val nodeId = ec.nodeId
         val actionNodeSeed = context.nextActionChildSeed
-        def tree: Tree = TxTree(exerciseNode)
+        val tree: Tree = TxTree(exerciseNode)
         copy(
           context = ec.parent.addActionChild(tree, version min context.minChildVersion),
-          //xnodes = xnodes.updated(nodeId, exerciseNodeDEP),
-          //xactionNodeSeeds = xactionNodeSeeds :+ (nodeId -> actionNodeSeed),
           actionNodeSeeds = actionNodeSeeds :+ actionNodeSeed,
         )
       case _ => throw new RuntimeException("abortExercises called in non-exercise context")
@@ -725,10 +596,8 @@ private[lf] case class PartialTransaction(
     *  Must be closed by `endTry`, `abortTry`, or `rollbackTry`.
     */
   def beginTry: PartialTransaction = {
-    //val nid = NodeId(nextNodeIdx)
     val info = TryContextInfo(context, activeState, authorizers = context.info.authorizers)
     copy(
-      //nextNodeIdx = nextNodeIdx + 1,
       context = Context(info).copy(nextActionChildIdx = context.nextActionChildIdx)
     )
   }
@@ -741,7 +610,6 @@ private[lf] case class PartialTransaction(
       case info: TryContextInfo =>
         copy(
           context = info.parent.copy(
-            //xchildren = info.parent.xchildren :++ context.xchildren.toImmArray,
             children = info.parent.children :++ context.children.toImmArray,
             nextActionChildIdx = context.nextActionChildIdx,
           )
@@ -767,19 +635,16 @@ private[lf] case class PartialTransaction(
     }
     context.info match {
       case info: TryContextInfo =>
-        // In the case of there being no xchildren we could drop the entire rollback node.
+        // In the case of there being no children we could drop the entire rollback node.
         // But we do that in a later normalization phase, not here.
-        //val rollbackNode = Node.NodeRollback(context.xchildren.toImmArray) //NICK
-        def tree: Tree = TxTree(Node.NodeRollback(context.children.toImmArray))
+        val tree: Tree = TxTree(Node.NodeRollback(context.children.toImmArray))
         copy(
           context = info.parent
             .addRollbackChild(
               tree,
-              //info.nodeId, //NICK
               context.minChildVersion,
               context.nextActionChildIdx,
             )
-          //xnodes = xnodes.updated(info.nodeId, rollbackNode),
         ).resetActiveState(info.beginState)
       case _ => throw new RuntimeException("rollbackTry called in non-catch context")
     }
@@ -787,11 +652,9 @@ private[lf] case class PartialTransaction(
 
   /** Note that the transaction building failed due to an authorization failure */
   private def noteAuthFails(
-      //nid: NodeId,
       f: Authorize => List[FailedAuthorization],
       auth: Authorize,
   ): PartialTransaction = {
-    //val _ = nid //NICK, dont pass
     f(auth) match {
       case Nil => this
       case fa :: _ => // take just the first failure //TODO: dont compute all!
@@ -818,22 +681,6 @@ private[lf] case class PartialTransaction(
       case None => f
       case Some(nodeOpt) => noteAbort(Tx.ContractNotActive(coid, templateId, nodeOpt))
     }
-
-  /** Insert the given `LeafNode` under a fresh node-id, and return it */
-  def insertLeafNode(
-      tree: Tree,
-      node: LeafNode,
-      version: TxVersion,
-  ): PartialTransaction = {
-    //val _ = version
-    val _ = node //NICK, dont pass to this function
-    //val nid = NodeId(nextNodeIdx)
-    copy(
-      //nextNodeIdx = nextNodeIdx + 1,
-      context = context.addActionChild(tree, version)
-      //xnodes = xnodes.updated(nid, node),
-    )
-  }
 
 }
 
