@@ -106,6 +106,7 @@ conformance_test(
     lf_versions = [
         # FIXME: replace "legacy" by "stable", "latest" once canton-test-runner supports LF 1.13
         # "stable", "latest",
+        "legacy",
     ],
     ports = [
         5011,
