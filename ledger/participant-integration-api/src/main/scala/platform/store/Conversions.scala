@@ -21,7 +21,6 @@ import com.zaxxer.hikari.pool.HikariProxyConnection
 import io.grpc.Status.Code
 
 import scala.language.implicitConversions
-
 private[platform] object OracleArrayConversions {
   import oracle.jdbc.OracleConnection
 

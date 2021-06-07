@@ -120,6 +120,7 @@ private[dao] trait JdbcLedgerDaoActiveContractsSpec
       val create = result.loneElement
       create.witnessParties.loneElement shouldBe party1
       create.templateId.value shouldBe LfEngineToApi.toApiIdentifier(otherTemplateId)
+      true shouldBe false
     }
   }
 
