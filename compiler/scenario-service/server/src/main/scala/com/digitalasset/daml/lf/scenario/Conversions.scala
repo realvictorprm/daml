@@ -28,14 +28,15 @@ final class Conversions(
   private val packageIdSelf: proto.PackageIdentifier =
     proto.PackageIdentifier.newBuilder.setSelf(empty).build
 
+  //TODO: How can we get this information from the tree-rep tx?
   // The ledger data will not contain information from the partial transaction at this point.
   // We need the mapping for converting error message so we manually add it here.
-  private val ptxCoidToNodeId = ptx.xnodes
+  /*private val ptxCoidToNodeId = ptx.nodes
     .collect { case (nodeId, node: N.NodeCreate[V.ContractId]) =>
       node.coid -> ledger.ptxEventId(nodeId)
-    }
+    }*/
 
-  private val coidToEventId = ledger.ledgerData.coidToNodeId ++ ptxCoidToNodeId
+  private val coidToEventId = ledger.ledgerData.coidToNodeId //++ ptxCoidToNodeId
 
   private val nodes =
     ledger.ledgerData.nodeInfos.map(Function.tupled(convertNode))
@@ -403,10 +404,9 @@ final class Conversions(
 
   def convertPartialTransaction(ptx: SPartialTransaction): proto.PartialTransaction = {
     val builder = proto.PartialTransaction.newBuilder
-      .addAllNodes(ptx.xnodes.map(convertNode).asJava)
-      .addAllRoots(
-        ptx.context.xchildren.toImmArray.toSeq.sortBy(_.index).map(convertTxNodeId).asJava
-      )
+    //TODO: How can we get this information from the tree-rep tx?
+    //.addAllNodes(ptx.nodes.map(convertNode).asJava)
+    //.addAllRoots(ptx.context.children.toImmArray.toSeq.sortBy(_.index).map(convertTxNodeId).asJava)
 
     @tailrec
     def unwindToExercise(
