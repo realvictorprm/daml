@@ -927,8 +927,8 @@ object Transaction {
   ) extends TransactionError
 
   final case class AuthFailureDuringExecution(
-      nid: NodeId,
-      fa: FailedAuthorization,
+      //nid: NodeId, //NICK
+      fa: FailedAuthorization
   ) extends TransactionError
 
   @deprecated("use Validation.isRepledBy", since = "1.10.0")

@@ -43,8 +43,8 @@ private[lf] object Pretty {
 
   def prettyDamlException(ex: SErrorDamlException): Doc =
     ex match {
-      case DamlEFailedAuthorization(nid, fa) =>
-        text(prettyFailedAuthorization(nid, fa))
+      case DamlEFailedAuthorization(fa) =>
+        text(prettyFailedAuthorization(NodeId(999), fa)) //NICK
       case DamlEUnhandledException(SAny(_, value)) =>
         text(s"Unhandled exception:") & prettyValue(true)(value.toValue)
       case DamlEUserError(message) =>

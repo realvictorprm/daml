@@ -116,10 +116,10 @@ final class Conversions(
         builder.setScenarioCommitError(
           proto.CommitError.newBuilder.setUniqueKeyViolation(convertGlobalKey(key)).build
         )
-      case SError.DamlEFailedAuthorization(nid, fa) =>
+      case SError.DamlEFailedAuthorization(fa) =>
         builder.setScenarioCommitError(
           proto.CommitError.newBuilder
-            .setFailedAuthorizations(convertFailedAuthorization(nid, fa))
+            .setFailedAuthorizations(convertFailedAuthorization(NodeId(999), fa)) //NICK
             .build
         )
 
