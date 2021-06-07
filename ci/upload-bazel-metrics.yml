@@ -7,7 +7,7 @@ steps:
       var_name: bash_lib
   - bash: |
       set -euo pipefail
-      if [[ $os = windows ]]; then
+      if [[ $(Agent.OS) = windows* ]]; then
         :
       else
         eval "$(dev-env/bin/dade assist)"
