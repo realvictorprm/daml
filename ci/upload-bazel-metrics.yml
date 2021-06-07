@@ -7,8 +7,9 @@ steps:
       var_name: bash_lib
   - bash: |
       set -euo pipefail
-      if [[ $(Agent.OS) = windows* ]]; then
-        :
+      set -x
+      if [[ $(Agent.OS) = Windows* ]]; then
+        powershell .\dev-env\windows\bin\dadew.ps1 enable
       else
         eval "$(dev-env/bin/dade assist)"
         source $(bash_lib)
