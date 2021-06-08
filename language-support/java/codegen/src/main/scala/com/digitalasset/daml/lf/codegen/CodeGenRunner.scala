@@ -109,11 +109,11 @@ object CodeGenRunner extends StrictLogging {
     logger.warn(s"Finish writing file '$outputFile'")
   }
 
-  private def validatePackagePrefixes(
+  def resolvePackagePrefixes(
       pkgPrefixes: Map[PackageId, String],
       modulePrefixes: Map[PackageReference, String],
       interfaces: Seq[Interface],
-  ) = {
+  ): Map[PackageId, String] = {
     val metadata: Map[PackageReference.NameVersion, PackageId] = interfaces.view
       .flatMap(iface =>
         iface.metadata.iterator.map(metadata =>
@@ -149,7 +149,7 @@ object CodeGenRunner extends StrictLogging {
     resolvedPrefixes
   }
 
-  private def detectModuleCollisions(
+  def detectModuleCollisions(
       pkgPrefixes: Map[PackageId, String],
       interfaces: Seq[Interface],
   ): Unit = {
@@ -182,7 +182,7 @@ object CodeGenRunner extends StrictLogging {
       s"Start processing packageIds '${interfaces.map(_.packageId).mkString(", ")}' in directory '${conf.outputDirectory}'"
     )
 
-    val prefixes = validatePackagePrefixes(pkgPrefixes, conf.modulePrefixes, interfaces)
+    val prefixes = resolvePackagePrefixes(pkgPrefixes, conf.modulePrefixes, interfaces)
     detectModuleCollisions(prefixes, interfaces)
 
     // TODO (mp): pre-processing and escaping
