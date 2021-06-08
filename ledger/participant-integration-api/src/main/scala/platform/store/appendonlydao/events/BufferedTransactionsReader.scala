@@ -8,6 +8,7 @@ import java.time.Instant
 import akka.NotUsed
 import akka.stream.scaladsl.Source
 import com.codahale.metrics.{Counter, Timer}
+import com.daml.ledger.api.v1
 import com.daml.ledger.api.v1.active_contracts_service.GetActiveContractsResponse
 import com.daml.ledger.api.v1.transaction.{
   TransactionTree,
@@ -33,19 +34,23 @@ import com.daml.platform.store.cache.{BufferSlice, EventsBuffer}
 import com.daml.platform.store.dao.LedgerDaoTransactionsReader
 import com.daml.platform.store.dao.events.ContractStateEvent
 import com.daml.platform.store.interfaces.TransactionLogUpdate
-import com.daml.platform.store.interfaces.TransactionLogUpdate.{Transaction => TxUpdate}
+import com.daml.platform.store.interfaces.TransactionLogUpdate.{
+  CreatedEvent,
+  ExercisedEvent,
+  Transaction => TxUpdate,
+}
 import com.google.protobuf.timestamp.Timestamp
 
-import scala.concurrent.duration.DurationInt
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext, Future}
 
 private[events] class BufferedTransactionsReader(
     protected val delegate: LedgerDaoTransactionsReader,
     val transactionsBuffer: EventsBuffer[Offset, TransactionLogUpdate],
-    toFlatTransaction: (TxUpdate, FilterRelation, Boolean) => Option[FlatTransaction],
-    toTransactionTree: (TxUpdate, Set[Party], Boolean) => Option[TransactionTree],
+    toFlatTransaction: (TxUpdate, FilterRelation, Boolean) => Future[Option[FlatTransaction]],
+    toTransactionTree: (TxUpdate, Set[Party], Boolean) => Future[Option[TransactionTree]],
     metrics: Metrics,
-) extends LedgerDaoTransactionsReader {
+)(implicit executionContext: ExecutionContext)
+    extends LedgerDaoTransactionsReader {
 
   private val outputStreamBufferSize = 128
 
@@ -125,6 +130,7 @@ private[events] class BufferedTransactionsReader(
 private[platform] object BufferedTransactionsReader {
   type FetchTransactions[FILTER, API_RESPONSE] =
     (Offset, Offset, FILTER, Boolean) => Source[(Offset, API_RESPONSE), NotUsed]
+
   def apply(
       delegate: LedgerDaoTransactionsReader,
       transactionsBuffer: EventsBuffer[Offset, TransactionLogUpdate],
@@ -150,7 +156,7 @@ private[platform] object BufferedTransactionsReader {
       filter: FILTER,
       verbose: Boolean,
   )(
-      toApiTx: (TxUpdate, FILTER, Boolean) => Option[API_TX],
+      toApiTx: (TxUpdate, FILTER, Boolean) => Future[Option[API_TX]],
       apiResponseCtor: Seq[API_TX] => API_RESPONSE,
       fetchTransactions: FetchTransactions[FILTER, API_RESPONSE],
       sourceTimer: Timer,
@@ -158,18 +164,21 @@ private[platform] object BufferedTransactionsReader {
       totalRetrievedCounter: Counter,
       outputStreamBufferSize: Int,
       bufferSizeCounter: Counter,
-  ): Source[(Offset, API_RESPONSE), NotUsed] = {
+  )(implicit executionContext: ExecutionContext): Source[(Offset, API_RESPONSE), NotUsed] = {
     def filterBuffered(
         slice: Vector[(Offset, TransactionLogUpdate)]
-    ): Iterator[(Offset, API_RESPONSE)] =
-      slice.iterator
-        .collect { case (offset, tx: TxUpdate) =>
-          offset -> toApiTx(tx, filter, verbose)
-        }
-        .collect { case (offset, Some(tx)) =>
+    ): Future[Iterator[(Offset, API_RESPONSE)]] =
+      Future
+        .traverse(
+          slice.iterator
+            .collect { case (offset, tx: TxUpdate) =>
+              toApiTx(tx, filter, verbose).map(offset -> _)
+            }
+        )(identity)
+        .map(_.collect { case (offset, Some(tx)) =>
           resolvedFromBufferCounter.inc()
           offset -> apiResponseCtor(Seq(tx))
-        }
+        })
 
     val transactionsSource = Timed.source(
       sourceTimer, {
@@ -184,10 +193,15 @@ private[platform] object BufferedTransactionsReader {
           // TODO: Implement and use Offset.predecessor
           case BufferSlice.Prefix((firstOffset: Offset, _) +: tl) =>
             fetchTransactions(startExclusive, firstOffset, filter, verbose)
-              .concat(Source.fromIterator(() => filterBuffered(tl)))
+              .concat(
+                Source.futureSource(filterBuffered(tl).map(it => Source.fromIterator(() => it)))
+              )
+              .mapMaterializedValue(_ => NotUsed)
 
           case BufferSlice.Inclusive(slice) =>
-            Source.fromIterator(() => filterBuffered(slice))
+            Source
+              .futureSource(filterBuffered(slice).map(it => Source.fromIterator(() => it)))
+              .mapMaterializedValue(_ => NotUsed)
         }
       }.map(tx => {
         totalRetrievedCounter.inc()
@@ -211,35 +225,34 @@ private[platform] object BufferedTransactionsReader {
     )(implicit
         loggingContext: LoggingContext,
         executionContext: ExecutionContext,
-    ): Option[FlatTransaction] = {
+    ): Future[Option[FlatTransaction]] = {
       val aux = tx.events.filter(FlatTransactionPredicate(_, filter))
       val nonTransientIds = permanent(aux)
-      val events = aux
-        .filter(ev => nonTransientIds(ev.contractId))
+      val events = aux.filter(ev => nonTransientIds(ev.contractId))
 
-      events.headOption.flatMap { first =>
-        if (first.commandId.nonEmpty || events.nonEmpty) {
-          val flatEvents =
-            events.map(toFlatEvent(_, filter.keySet, verbose, lfValueTranslation)).collect {
-              case Some(ev) =>
-                ev
-            }
-          if (flatEvents.isEmpty)
-            None
-          else
-            Some(
-              FlatTransaction(
-                transactionId = first.transactionId,
-                commandId = first.commandId,
-                workflowId = first.workflowId,
-                effectiveAt = Some(instantToTimestamp(first.ledgerEffectiveTime)),
-                events = flatEvents,
-                offset = ApiOffset.toApiString(tx.offset),
-                traceContext = None,
-              )
-            )
-        } else None
-      }
+      events.headOption
+        .collect {
+          case first if first.commandId.nonEmpty || events.nonEmpty =>
+            Future
+              .traverse(events)(toFlatEvent(_, filter.keySet, verbose, lfValueTranslation))
+              .map(_.flatten)
+              .map {
+                case Vector() => None
+                case flatEvents =>
+                  Some(
+                    FlatTransaction(
+                      transactionId = first.transactionId,
+                      commandId = first.commandId,
+                      workflowId = first.workflowId,
+                      effectiveAt = Some(instantToTimestamp(first.ledgerEffectiveTime)),
+                      events = flatEvents,
+                      offset = ApiOffset.toApiString(tx.offset),
+                      traceContext = None,
+                    )
+                  )
+              }
+        }
+        .getOrElse(Future.successful(None))
     }
 
     private val FlatTransactionPredicate =
@@ -298,69 +311,91 @@ private[platform] object BufferedTransactionsReader {
     )(implicit
         loggingContext: LoggingContext,
         executionContext: ExecutionContext,
-    ): Option[com.daml.ledger.api.v1.event.Event] =
+    ): Future[Option[com.daml.ledger.api.v1.event.Event]] =
       event match {
         case createdEvent: TransactionLogUpdate.CreatedEvent =>
-          Some(
-            com.daml.ledger.api.v1.event.Event(
-              event = com.daml.ledger.api.v1.event.Event.Event.Created(
-                value = com.daml.ledger.api.v1.event.CreatedEvent(
-                  eventId = createdEvent.eventId.toLedgerString,
-                  contractId = createdEvent.contractId.coid,
-                  templateId = Some(LfEngineToApi.toApiIdentifier(createdEvent.templateId)),
-                  contractKey = createdEvent.contractKey
-                    .map(
-                      lfValueTranslation.toApiValue(
-                        _,
-                        verbose,
-                        "create key",
-                        value =>
-                          lfValueTranslation.enricher
-                            .enrichContractKey(createdEvent.templateId, value.value),
-                      )
-                    )
-                    .map(Await.result(_, 1.second)),
-                  createArguments = Some(
-                    Await.result(
-                      lfValueTranslation.toApiRecord(
-                        createdEvent.createArgument,
-                        verbose,
-                        "create argument",
-                        value =>
-                          lfValueTranslation.enricher
-                            .enrichContract(createdEvent.templateId, value.value),
-                      ),
-                      1.second,
-                    )
-                  ),
-                  witnessParties = createdEvent.flatEventWitnesses
-                    .intersect(requestingParties.map(_.toString))
-                    .toSeq,
-                  signatories = createdEvent.createSignatories.toSeq,
-                  observers = createdEvent.createObservers.toSeq,
-                  agreementText = createdEvent.createAgreementText.orElse(Some("")),
-                )
-              )
-            )
-          )
+          createdToFlatEvent(requestingParties, verbose, lfValueTranslation, createdEvent)
+
         case exercisedEvent: TransactionLogUpdate.ExercisedEvent if exercisedEvent.consuming =>
-          Some(
-            com.daml.ledger.api.v1.event.Event(
-              event = com.daml.ledger.api.v1.event.Event.Event.Archived(
-                value = com.daml.ledger.api.v1.event.ArchivedEvent(
-                  eventId = exercisedEvent.eventId.toLedgerString,
-                  contractId = exercisedEvent.contractId.coid,
-                  templateId = Some(LfEngineToApi.toApiIdentifier(exercisedEvent.templateId)),
-                  witnessParties = exercisedEvent.flatEventWitnesses
-                    .intersect(requestingParties.map(_.toString))
-                    .toSeq,
-                )
-              )
+          Future.successful(Some(exercisedToFlatEvent(requestingParties, exercisedEvent)))
+
+        case _ => Future.successful(None)
+      }
+
+    private def createdToFlatEvent(
+        requestingParties: Set[Party],
+        verbose: Boolean,
+        lfValueTranslation: LfValueTranslation,
+        createdEvent: CreatedEvent,
+    )(implicit
+        loggingContext: LoggingContext,
+        executionContext: ExecutionContext,
+    ) = {
+      val eventualContractKey = createdEvent.contractKey
+        .map(
+          lfValueTranslation
+            .toApiValue(
+              _,
+              verbose,
+              "create key",
+              value =>
+                lfValueTranslation.enricher
+                  .enrichContractKey(createdEvent.templateId, value.value),
+            )
+            .map(Some(_))
+        )
+        .getOrElse(Future.successful(None))
+
+      val eventualCreateArguments = lfValueTranslation.toApiRecord(
+        createdEvent.createArgument,
+        verbose,
+        "create argument",
+        value =>
+          lfValueTranslation.enricher
+            .enrichContract(createdEvent.templateId, value.value),
+      )
+
+      for {
+        maybeContractKey <- eventualContractKey
+        createArguments <- eventualCreateArguments
+      } yield Some(
+        com.daml.ledger.api.v1.event.Event(
+          com.daml.ledger.api.v1.event.Event.Event.Created(
+            com.daml.ledger.api.v1.event.CreatedEvent(
+              eventId = createdEvent.eventId.toLedgerString,
+              contractId = createdEvent.contractId.coid,
+              templateId = Some(LfEngineToApi.toApiIdentifier(createdEvent.templateId)),
+              contractKey = maybeContractKey,
+              createArguments = Some(createArguments),
+              witnessParties = createdEvent.flatEventWitnesses
+                .intersect(requestingParties.map(_.toString))
+                .toSeq,
+              signatories = createdEvent.createSignatories.toSeq,
+              observers = createdEvent.createObservers.toSeq,
+              agreementText = createdEvent.createAgreementText.orElse(Some("")),
             )
           )
-        case _ => None
-      }
+        )
+      )
+    }
   }
+
+  private def exercisedToFlatEvent(
+      requestingParties: Set[Party],
+      exercisedEvent: ExercisedEvent,
+  ) =
+    v1.event.Event(
+      v1.event.Event.Event.Archived(
+        v1.event.ArchivedEvent(
+          eventId = exercisedEvent.eventId.toLedgerString,
+          contractId = exercisedEvent.contractId.coid,
+          templateId = Some(LfEngineToApi.toApiIdentifier(exercisedEvent.templateId)),
+          witnessParties = exercisedEvent.flatEventWitnesses
+            .intersect(requestingParties.map(_.toString))
+            .toSeq,
+        )
+      )
+    )
 
   private object ToTransactionTree {
     def apply(
@@ -371,139 +406,188 @@ private[platform] object BufferedTransactionsReader {
     )(implicit
         loggingContext: LoggingContext,
         executionContext: ExecutionContext,
-    ): Option[TransactionTree] = {
+    ): Future[Option[TransactionTree]] = {
       val treeEvents = tx.events
+        .filter(TransactionTreePredicate(requestingParties))
         .collect {
           // TDT handle multi-party submissions
-          case createdEvent: TransactionLogUpdate.CreatedEvent
-              if createdEvent.treeEventWitnesses
-                .intersect(requestingParties.asInstanceOf[Set[String]])
-                .nonEmpty =>
-            TreeEvent(
-              TreeEvent.Kind.Created(
-                com.daml.ledger.api.v1.event.CreatedEvent(
-                  eventId = createdEvent.eventId.toLedgerString,
-                  contractId = createdEvent.contractId.coid,
-                  templateId = Some(LfEngineToApi.toApiIdentifier(createdEvent.templateId)),
-                  contractKey = createdEvent.contractKey
-                    .map(
-                      lfValueTranslation.toApiValue(
-                        _,
-                        verbose,
-                        "create key",
-                        value =>
-                          lfValueTranslation.enricher
-                            .enrichContractKey(createdEvent.templateId, value.value),
-                      )
-                    )
-                    .map(Await.result(_, 1.second)),
-                  createArguments = Some(
-                    Await.result(
-                      lfValueTranslation.toApiRecord(
-                        createdEvent.createArgument,
-                        verbose,
-                        "create argument",
-                        value =>
-                          lfValueTranslation.enricher
-                            .enrichContract(createdEvent.templateId, value.value),
-                      ),
-                      1.second,
-                    )
-                  ),
-                  witnessParties = createdEvent.treeEventWitnesses
-                    .intersect(requestingParties.map(_.toString))
-                    .toSeq,
-                  signatories = createdEvent.createSignatories.toSeq,
-                  observers = createdEvent.createObservers.toSeq,
-                  agreementText = createdEvent.createAgreementText.orElse(Some("")),
-                )
-              )
+          case createdEvent: TransactionLogUpdate.CreatedEvent =>
+            createdToTransactionTreeEvent(
+              requestingParties,
+              verbose,
+              lfValueTranslation,
+              createdEvent,
             )
-          case exercisedEvent: TransactionLogUpdate.ExercisedEvent
-              if exercisedEvent.treeEventWitnesses
-                .intersect(requestingParties.asInstanceOf[Set[String]])
-                .nonEmpty =>
-            TreeEvent(
-              TreeEvent.Kind.Exercised(
-                com.daml.ledger.api.v1.event.ExercisedEvent(
-                  eventId = exercisedEvent.eventId.toLedgerString,
-                  contractId = exercisedEvent.contractId.coid,
-                  templateId = Some(LfEngineToApi.toApiIdentifier(exercisedEvent.templateId)),
-                  choice = exercisedEvent.choice,
-                  choiceArgument = Some(
-                    Await.result(
-                      lfValueTranslation.toApiValue(
-                        exercisedEvent.exerciseArgument,
-                        verbose,
-                        "exercise argument",
-                        value =>
-                          lfValueTranslation.enricher
-                            .enrichChoiceArgument(
-                              exercisedEvent.templateId,
-                              Ref.Name.assertFromString(exercisedEvent.choice),
-                              value.value,
-                            ),
-                      ),
-                      1.second,
-                    )
-                  ),
-                  actingParties = exercisedEvent.actingParties.toSeq,
-                  consuming = exercisedEvent.consuming,
-                  witnessParties = exercisedEvent.treeEventWitnesses
-                    .intersect(requestingParties.map(_.toString))
-                    .toSeq,
-                  childEventIds = exercisedEvent.children,
-                  exerciseResult = exercisedEvent.exerciseResult
-                    .map(
-                      lfValueTranslation.toApiValue(
-                        _,
-                        verbose,
-                        "exercise result",
-                        value =>
-                          lfValueTranslation.enricher.enrichChoiceResult(
-                            exercisedEvent.templateId,
-                            Ref.Name.assertFromString(exercisedEvent.choice),
-                            value.value,
-                          ),
-                      )
-                    )
-                    .map(Await.result(_, 1.second)),
-                )
-              )
+          case exercisedEvent: TransactionLogUpdate.ExercisedEvent =>
+            exercisedToTransactionTreeEvent(
+              requestingParties,
+              verbose,
+              lfValueTranslation,
+              exercisedEvent,
             )
         }
 
       if (treeEvents.isEmpty)
-        Option.empty
-      else {
+        Future.successful(Option.empty)
+      else
+        Future.traverse(treeEvents)(identity).map { treeEvents =>
+          val visible = treeEvents.map(_.eventId)
+          val visibleSet = visible.toSet
+          val eventsById = treeEvents.iterator
+            .map(e => e.eventId -> e.filterChildEventIds(visibleSet))
+            .toMap
 
-        val visible = treeEvents.map(_.eventId)
-        val visibleSet = visible.toSet
-        val eventsById = treeEvents.iterator
-          .map(e => e.eventId -> e.filterChildEventIds(visibleSet))
-          .toMap
+          // All event identifiers that appear as a child of another item in this response
+          val children = eventsById.valuesIterator.flatMap(_.childEventIds).toSet
 
-        // All event identifiers that appear as a child of another item in this response
-        val children = eventsById.valuesIterator.flatMap(_.childEventIds).toSet
+          // The roots for this request are all visible items
+          // that are not a child of some other visible item
+          val rootEventIds = visible.filterNot(children)
 
-        // The roots for this request are all visible items
-        // that are not a child of some other visible item
-        val rootEventIds = visible.filterNot(children)
+          Some(
+            TransactionTree(
+              transactionId = tx.transactionId,
+              commandId = tx.commandId, // TDT use submitters predicate to set commandId
+              workflowId = tx.workflowId,
+              effectiveAt = Some(instantToTimestamp(tx.effectiveAt)),
+              offset = ApiOffset.toApiString(tx.offset),
+              eventsById = eventsById,
+              rootEventIds = rootEventIds,
+              traceContext = None,
+            )
+          )
+        }
+    }
 
-        Some(
-          TransactionTree(
-            transactionId = tx.transactionId,
-            commandId = tx.commandId, // TDT use submitters predicate to set commandId
-            workflowId = tx.workflowId,
-            effectiveAt = Some(instantToTimestamp(tx.effectiveAt)),
-            offset = ApiOffset.toApiString(tx.offset),
-            eventsById = eventsById,
-            rootEventIds = rootEventIds,
-            traceContext = None,
+    private def exercisedToTransactionTreeEvent(
+        requestingParties: Set[Party],
+        verbose: Boolean,
+        lfValueTranslation: LfValueTranslation,
+        exercisedEvent: ExercisedEvent,
+    )(implicit
+        loggingContext: LoggingContext,
+        executionContext: ExecutionContext,
+    ) = {
+      val eventualChoiceArgument = lfValueTranslation.toApiValue(
+        exercisedEvent.exerciseArgument,
+        verbose,
+        "exercise argument",
+        value =>
+          lfValueTranslation.enricher
+            .enrichChoiceArgument(
+              exercisedEvent.templateId,
+              Ref.Name.assertFromString(exercisedEvent.choice),
+              value.value,
+            ),
+      )
+
+      val eventualExerciseResult = exercisedEvent.exerciseResult
+        .map(
+          lfValueTranslation
+            .toApiValue(
+              _,
+              verbose,
+              "exercise result",
+              value =>
+                lfValueTranslation.enricher.enrichChoiceResult(
+                  exercisedEvent.templateId,
+                  Ref.Name.assertFromString(exercisedEvent.choice),
+                  value.value,
+                ),
+            )
+            .map(Some(_))
+        )
+        .getOrElse(Future.successful(None))
+
+      for {
+        choiceArgument <- eventualChoiceArgument
+        maybeExerciseResult <- eventualExerciseResult
+      } yield TreeEvent(
+        TreeEvent.Kind.Exercised(
+          v1.event.ExercisedEvent(
+            eventId = exercisedEvent.eventId.toLedgerString,
+            contractId = exercisedEvent.contractId.coid,
+            templateId = Some(LfEngineToApi.toApiIdentifier(exercisedEvent.templateId)),
+            choice = exercisedEvent.choice,
+            choiceArgument = Some(choiceArgument),
+            actingParties = exercisedEvent.actingParties.toSeq,
+            consuming = exercisedEvent.consuming,
+            witnessParties = exercisedEvent.treeEventWitnesses
+              .intersect(requestingParties.map(_.toString))
+              .toSeq,
+            childEventIds = exercisedEvent.children,
+            exerciseResult = maybeExerciseResult,
           )
         )
-      }
+      )
     }
+
+    private def createdToTransactionTreeEvent(
+        requestingParties: Set[Party],
+        verbose: Boolean,
+        lfValueTranslation: LfValueTranslation,
+        createdEvent: CreatedEvent,
+    )(implicit
+        loggingContext: LoggingContext,
+        executionContext: ExecutionContext,
+    ) = {
+      val eventualContractKey = createdEvent.contractKey
+        .map(
+          lfValueTranslation
+            .toApiValue(
+              _,
+              verbose,
+              "create key",
+              value =>
+                lfValueTranslation.enricher
+                  .enrichContractKey(createdEvent.templateId, value.value),
+            )
+            .map(Some(_))
+        )
+        .getOrElse(Future.successful(None))
+
+      val eventualCreateArguments = lfValueTranslation.toApiRecord(
+        createdEvent.createArgument,
+        verbose,
+        "create argument",
+        value =>
+          lfValueTranslation.enricher
+            .enrichContract(createdEvent.templateId, value.value),
+      )
+
+      for {
+        maybeContractKey <- eventualContractKey
+        createArguments <- eventualCreateArguments
+      } yield TreeEvent(
+        TreeEvent.Kind.Created(
+          com.daml.ledger.api.v1.event.CreatedEvent(
+            eventId = createdEvent.eventId.toLedgerString,
+            contractId = createdEvent.contractId.coid,
+            templateId = Some(LfEngineToApi.toApiIdentifier(createdEvent.templateId)),
+            contractKey = maybeContractKey,
+            createArguments = Some(createArguments),
+            witnessParties = createdEvent.treeEventWitnesses
+              .intersect(requestingParties.map(_.toString))
+              .toSeq,
+            signatories = createdEvent.createSignatories.toSeq,
+            observers = createdEvent.createObservers.toSeq,
+            agreementText = createdEvent.createAgreementText.orElse(Some("")),
+          )
+        )
+      )
+    }
+
+    private val TransactionTreePredicate: Set[Party] => TransactionLogUpdate.Event => Boolean =
+      requestingParties => {
+        case createdEvent: CreatedEvent =>
+          createdEvent.treeEventWitnesses
+            .intersect(requestingParties.map(_.toString))
+            .nonEmpty
+        case exercised: ExercisedEvent =>
+          exercised.treeEventWitnesses
+            .intersect(requestingParties.map(_.toString))
+            .nonEmpty
+      }
   }
 
   private def instantToTimestamp(t: Instant): Timestamp =

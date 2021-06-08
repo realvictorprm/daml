@@ -20,6 +20,8 @@ import org.scalatest.BeforeAndAfterAll
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AsyncWordSpec
 
+import scala.concurrent.Future
+
 class BufferedTransactionsReaderSpec
     extends AsyncWordSpec
     with MockitoSugar
@@ -51,12 +53,12 @@ class BufferedTransactionsReaderSpec
       (apiTx4, apiResponse4),
     ) = (1 to 4).map(idx => s"Some API TX $idx" -> s"Some API response $idx")
 
-    val toApiTx: (TransactionLogUpdate, Object, Boolean) => Option[String] = {
-      case (`update1`, `otherFilter`, false) => None
-      case (`update1`, `filter`, false) => Some(apiTx1)
-      case (`update2`, `filter`, false) => Some(apiTx2)
-      case (`update3`, `filter`, false) => Some(apiTx3)
-      case (`update4`, `filter`, false) => Some(apiTx4)
+    val toApiTx: (TransactionLogUpdate, Object, Boolean) => Future[Option[String]] = {
+      case (`update1`, `otherFilter`, false) => Future.successful(None)
+      case (`update1`, `filter`, false) => Future.successful(Some(apiTx1))
+      case (`update2`, `filter`, false) => Future.successful(Some(apiTx2))
+      case (`update3`, `filter`, false) => Future.successful(Some(apiTx3))
+      case (`update4`, `filter`, false) => Future.successful(Some(apiTx4))
       case unexpected => fail(s"Unexpected $unexpected")
     }
 
@@ -179,4 +181,3 @@ object BufferedTransactionsReaderSpec {
       events = Vector(null),
     )
 }
-
