@@ -7,7 +7,7 @@ import java.time.Instant
 
 import brave.propagation.TraceContext
 import com.daml.ledger.api.domain.Event.{CreateOrArchiveEvent, CreateOrExerciseEvent}
-import com.daml.ledger.participant.state.v1.Configuration
+import com.daml.ledger.participant.state.v1.{Configuration, Offset}
 import com.daml.lf.command.{Commands => LfCommands}
 import com.daml.lf.data.Ref
 import com.daml.lf.data.Ref.LedgerString.ordering
@@ -18,6 +18,7 @@ import scalaz.{@@, Tag}
 import scala.collection.immutable
 
 object domain {
+  type PruneBuffers = Offset => Unit
 
   final case class TransactionFilter(filtersByParty: immutable.Map[Ref.Party, Filters]) {
     def apply(party: Ref.Party, template: Ref.Identifier): Boolean =

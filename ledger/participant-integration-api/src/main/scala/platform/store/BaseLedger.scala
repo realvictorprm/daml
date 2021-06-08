@@ -11,16 +11,11 @@ import com.daml.daml_lf_dev.DamlLf
 import com.daml.dec.DirectExecutionContext
 import com.daml.ledger.TransactionId
 import com.daml.ledger.api.domain
-import com.daml.ledger.api.domain.{ApplicationId, CommandId, LedgerId}
+import com.daml.ledger.api.domain.{ApplicationId, CommandId, LedgerId, PruneBuffers}
 import com.daml.ledger.api.health.HealthStatus
 import com.daml.ledger.api.v1.active_contracts_service.GetActiveContractsResponse
 import com.daml.ledger.api.v1.command_completion_service.CompletionStreamResponse
-import com.daml.ledger.api.v1.transaction_service.{
-  GetFlatTransactionResponse,
-  GetTransactionResponse,
-  GetTransactionTreesResponse,
-  GetTransactionsResponse,
-}
+import com.daml.ledger.api.v1.transaction_service.{GetFlatTransactionResponse, GetTransactionResponse, GetTransactionTreesResponse, GetTransactionsResponse}
 import com.daml.ledger.participant.state.index.v2
 import com.daml.ledger.participant.state.index.v2.{CommandDeduplicationResult, ContractStore}
 import com.daml.ledger.participant.state.v1.{Configuration, Offset}
@@ -45,6 +40,7 @@ private[platform] abstract class BaseLedger(
     val ledgerId: LedgerId,
     ledgerDao: LedgerReadDao,
     transactionsReader: LedgerDaoTransactionsReader,
+    pruneBuffers: PruneBuffers,
     contractStore: ContractStore,
     dispatcher: Dispatcher[Offset],
 ) extends ReadOnlyLedger {
@@ -204,8 +200,10 @@ private[platform] abstract class BaseLedger(
 
   override def prune(pruneUpToInclusive: Offset)(implicit
       loggingContext: LoggingContext
-  ): Future[Unit] =
+  ): Future[Unit] = {
+    pruneBuffers(pruneUpToInclusive)
     ledgerDao.prune(pruneUpToInclusive)
+  }
 
   override def close(): Unit = ()
 }

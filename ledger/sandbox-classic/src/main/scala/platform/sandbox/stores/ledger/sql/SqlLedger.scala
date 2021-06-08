@@ -360,7 +360,14 @@ private final class SqlLedger(
     timeProvider: TimeProvider,
     persistenceQueue: PersistenceQueue,
     transactionCommitter: TransactionCommitter,
-) extends BaseLedger(ledgerId, ledgerDao, ledgerDao.transactionsReader, contractStore, dispatcher)
+) extends BaseLedger(
+      ledgerId,
+      ledgerDao,
+      ledgerDao.transactionsReader,
+      _ => (),
+      contractStore,
+      dispatcher,
+    )
     with Ledger {
 
   private val logger = ContextualizedLogger.get(this.getClass)

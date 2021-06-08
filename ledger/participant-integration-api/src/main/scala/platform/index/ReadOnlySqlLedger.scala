@@ -10,7 +10,7 @@ import akka.Done
 import akka.actor.Cancellable
 import akka.stream._
 import akka.stream.scaladsl.{Keep, Sink, Source}
-import com.daml.ledger.api.domain.LedgerId
+import com.daml.ledger.api.domain.{LedgerId, PruneBuffers}
 import com.daml.ledger.api.health.HealthStatus
 import com.daml.ledger.participant.state.index.v2.ContractStore
 import com.daml.ledger.participant.state.v1
@@ -158,6 +158,7 @@ private[index] abstract class ReadOnlySqlLedger(
     ledgerId: LedgerId,
     ledgerDao: LedgerReadDao,
     ledgerDaoTransactionsReader: LedgerDaoTransactionsReader,
+    pruneBuffers: PruneBuffers,
     contractStore: ContractStore,
     dispatcher: Dispatcher[Offset],
 )(implicit mat: Materializer, loggingContext: LoggingContext)
@@ -165,6 +166,7 @@ private[index] abstract class ReadOnlySqlLedger(
       ledgerId,
       ledgerDao,
       ledgerDaoTransactionsReader,
+      pruneBuffers,
       contractStore,
       dispatcher,
     ) {

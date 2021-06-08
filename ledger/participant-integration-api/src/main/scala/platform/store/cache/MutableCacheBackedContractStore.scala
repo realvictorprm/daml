@@ -303,7 +303,7 @@ object MutableCacheBackedContractStore {
 
   def owner(
       contractsReader: LedgerDaoContractsReader,
-      signalNewLedgerHead: Offset => Unit,
+      signalNewLedgerHead: SignalNewLedgerHead,
       metrics: Metrics,
       maxContractsCacheSize: Long,
       maxKeyCacheSize: Long,
@@ -324,7 +324,7 @@ object MutableCacheBackedContractStore {
   def ownerWithSubscription(
       subscribeToContractStateEvents: SubscribeToContractStateEvents,
       contractsReader: LedgerDaoContractsReader,
-      signalNewLedgerHead: Offset => Unit,
+      signalNewLedgerHead: SignalNewLedgerHead,
       metrics: Metrics,
       maxContractsCacheSize: Long,
       maxKeyCacheSize: Long,

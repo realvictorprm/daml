@@ -12,6 +12,7 @@ import akka.stream.QueueOfferResult.Enqueued
 import akka.stream.scaladsl.Source
 import akka.stream.{BoundedSourceQueue, Materializer}
 import com.codahale.metrics.MetricRegistry
+import com.daml.ledger.api.domain.PruneBuffers
 import com.daml.ledger.participant.state.v1.Offset
 import com.daml.ledger.resources.ResourceContext
 import com.daml.lf.data.ImmArray
@@ -23,16 +24,8 @@ import com.daml.metrics.Metrics
 import com.daml.platform.store.appendonlydao.EventSequentialId
 import com.daml.platform.store.cache.ContractKeyStateValue.{Assigned, Unassigned}
 import com.daml.platform.store.cache.ContractStateValue.{Active, Archived}
-import com.daml.platform.store.cache.MutableCacheBackedContractStore.{
-  ContractNotFound,
-  EmptyContractIds,
-  EventSequentialId,
-}
-import com.daml.platform.store.cache.MutableCacheBackedContractStoreSpec.{
-  ContractsReaderFixture,
-  contractStore,
-  _,
-}
+import com.daml.platform.store.cache.MutableCacheBackedContractStore.{ContractNotFound, EmptyContractIds, EventSequentialId}
+import com.daml.platform.store.cache.MutableCacheBackedContractStoreSpec.{ContractsReaderFixture, contractStore, _}
 import com.daml.platform.store.dao.events.ContractStateEvent
 import com.daml.platform.store.interfaces.LedgerDaoContractsReader
 import com.daml.platform.store.interfaces.LedgerDaoContractsReader.{KeyAssigned, KeyUnassigned}
@@ -386,7 +379,7 @@ object MutableCacheBackedContractStoreSpec {
   private def contractStore(
       cachesSize: Long,
       readerFixture: LedgerDaoContractsReader = ContractsReaderFixture(),
-      signalNewLedgerHead: Offset => Unit = _ => (),
+      signalNewLedgerHead: PruneBuffers = _ => (),
       sourceSubscriber: (Offset, EventSequentialId) => Source[ContractStateEvent, NotUsed] =
         (_: Offset, _: EventSequentialId) => Source.empty,
   )(implicit loggingContext: LoggingContext, materializer: Materializer) = {
