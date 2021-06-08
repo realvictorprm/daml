@@ -367,26 +367,6 @@ final class Metrics(val registry: MetricRegistry) {
       val transactionLogUpdatesBufferSize: Counter =
         registry.counter(Prefix :+ "transaction_log_updates_buffer_size")
 
-      val totalTransactionTreesRetrieved: Counter =
-        registry.counter(Prefix :+ "total_transactions_trees_retrieved")
-      val transactionTreeEventsResolvedFromBuffer: Counter =
-        registry.counter(Prefix :+ "transaction_tree_events_from_buffer")
-
-      val totalFlatTransactionsRetrieved: Counter =
-        registry.counter(Prefix :+ "total_flat_transactions_retrieved")
-      val flatTransactionEventsResolvedFromBuffer: Counter =
-        registry.counter(Prefix :+ "flat_transaction_events_from_buffer")
-
-      val getTransactionTreesSource: Timer =
-        registry.timer(Prefix :+ "get_transaction_trees_source")
-      val getFlatTransactionsSource: Timer =
-        registry.timer(Prefix :+ "get_flat_transactions_source")
-
-      val transactionTreesBufferSize: Counter =
-        registry.counter(Prefix :+ "transaction_trees_output_buffer_size")
-      val flatTransactionsBufferSize: Counter =
-        registry.counter(Prefix :+ "flat_transactions_output_buffer_size")
-
       // FIXME Name mushing and inconsistencies here, tracked by https://github.com/digital-asset/daml/issues/5926
       object db {
         private val Prefix: MetricName = index.Prefix :+ "db"
@@ -680,7 +660,27 @@ final class Metrics(val registry: MetricRegistry) {
           def push(qualifier: String): Timer = registry.timer(Prefix :+ qualifier :+ "push")
           def slice(qualifier: String): Timer = registry.timer(Prefix :+ qualifier :+ "slice")
           def prune(qualifier: String): Timer = registry.timer(Prefix :+ qualifier :+ "prune")
+
+          val totalTransactionTreesRetrieved: Counter =
+            registry.counter(Prefix :+ "total_transactions_trees_retrieved")
+          val transactionTreeEventsResolvedFromBuffer: Counter =
+            registry.counter(Prefix :+ "transaction_tree_events_from_buffer")
+
+          val totalFlatTransactionsRetrieved: Counter =
+            registry.counter(Prefix :+ "total_flat_transactions_retrieved")
+          val flatTransactionEventsResolvedFromBuffer: Counter =
+            registry.counter(Prefix :+ "flat_transaction_events_from_buffer")
         }
+
+        val getTransactionTreesSource: Timer =
+          registry.timer(Prefix :+ "get_transaction_trees_source")
+        val getFlatTransactionsSource: Timer =
+          registry.timer(Prefix :+ "get_flat_transactions_source")
+
+        val transactionTreesBufferSize: Counter =
+          registry.counter(Prefix :+ "transaction_trees_output_buffer_size")
+        val flatTransactionsBufferSize: Counter =
+          registry.counter(Prefix :+ "flat_transactions_output_buffer_size")
       }
 
       object read {

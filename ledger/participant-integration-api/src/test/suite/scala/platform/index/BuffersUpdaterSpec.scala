@@ -229,6 +229,7 @@ final class BuffersUpdaterSpec
         commandId = null,
         workflowId = null,
         treeEventWitnesses = null,
+        submitters = null,
         choice = null,
         actingParties = null,
         children = null,
@@ -249,6 +250,7 @@ final class BuffersUpdaterSpec
         contractKey = Some(createdContractKey),
         treeEventWitnesses = Set("bob"), // Unused in ContractStateEvent
         flatEventWitnesses = createdFlatEventWitnesses,
+        submitters = null,
         createArgument = createArgument,
         createSignatories = null,
         createObservers = null,

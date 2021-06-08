@@ -40,6 +40,7 @@ object TransactionLogUpdatesReader {
                                              create_argument_compression,
                                              tree_event_witnesses,
                                              flat_event_witnesses,
+                                             submitters,
                                              exercise_choice,
                                              exercise_argument,
                                              exercise_argument_compression,
@@ -77,6 +78,7 @@ object TransactionLogUpdatesReader {
       int("create_argument_compression").? ~
       array[String]("tree_event_witnesses") ~
       array[String]("flat_event_witnesses") ~
+      array[String]("submitters") ~
       str("exercise_choice").? ~
       binaryStream("exercise_argument").? ~
       int("exercise_argument_compression").? ~
@@ -88,7 +90,7 @@ object TransactionLogUpdatesReader {
       offset("event_offset")).map {
       case eventKind ~ transactionId ~ nodeIndex ~ commandId ~ workflowId ~ eventId ~ contractId ~ templateId ~ ledgerEffectiveTime ~ createSignatories ~
           createObservers ~ createAgreementText ~ createKeyValue ~ createKeyCompression ~
-          createArgument ~ createArgumentCompression ~ treeEventWitnesses ~ flatEventWitnesses ~ exerciseChoice ~
+          createArgument ~ createArgumentCompression ~ treeEventWitnesses ~ flatEventWitnesses ~ submitters ~ exerciseChoice ~
           exerciseArgument ~ exerciseArgumentCompression ~ exerciseResult ~ exerciseResultCompression ~ exerciseActors ~
           exerciseChildEventIds ~ eventSequentialId ~ offset =>
         new RawTransactionEvent(
@@ -110,6 +112,7 @@ object TransactionLogUpdatesReader {
           createArgumentCompression,
           treeEventWitnesses.toSet,
           flatEventWitnesses.toSet,
+          submitters.toSet,
           exerciseChoice,
           exerciseArgument,
           exerciseArgumentCompression,
@@ -156,6 +159,7 @@ object TransactionLogUpdatesReader {
           ),
           treeEventWitnesses = raw.treeEventWitnesses,
           flatEventWitnesses = raw.flatEventWitnesses,
+          submitters = raw.submitters,
           choice = raw.exerciseChoice.mandatory("exercise_choice"),
           actingParties = raw.exerciseActors
             .mandatory("exercise_actors")
@@ -211,6 +215,7 @@ object TransactionLogUpdatesReader {
           contractKey = maybeGlobalKey,
           treeEventWitnesses = raw.treeEventWitnesses,
           flatEventWitnesses = raw.flatEventWitnesses,
+          submitters = raw.submitters,
           createArgument = createArgumentDecompressed,
           createSignatories = raw.createSignatories.mandatory("create_signatories").toSet,
           createObservers = raw.createObservers.mandatory("create_observers").toSet,
@@ -257,6 +262,7 @@ object TransactionLogUpdatesReader {
       val createArgumentCompression: Option[Int],
       val treeEventWitnesses: Set[String],
       val flatEventWitnesses: Set[String],
+      val submitters: Set[String],
       val exerciseChoice: Option[String],
       val exerciseArgument: Option[InputStream],
       val exerciseArgumentCompression: Option[Int],
